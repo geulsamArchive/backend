@@ -31,7 +31,6 @@ public class ContentAward {
     private Content content;
 
     /**상 아이디
-     * 확인이 필요합니다(노션 TASK 참고)
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "award_id")
