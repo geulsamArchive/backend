@@ -6,11 +6,13 @@ import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter(AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CriticismAuthor {
 
     /**기본키
@@ -51,4 +53,12 @@ public class CriticismAuthor {
      */
     @Column(name = "criticism_author_colvernote_URL")
     private String colvernote_URL;
+
+    /**생성자
+     */
+    public CriticismAuthor(User author, Criticism criticism) {
+        this.author = author;
+        this.criticism = criticism;
+    }
+
 }

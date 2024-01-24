@@ -6,6 +6,7 @@ import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter(AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ContentAward {
 
     /**기본키
@@ -48,4 +50,13 @@ public class ContentAward {
      */
     @Column(name = "content_award_at")
     private LocalDate contentAwardAt;
+
+    /** 생성자
+     */
+    public ContentAward(Content content, Award award, User recipient, LocalDate contentAwardAt) {
+        this.content = content;
+        this.award = award;
+        this.recipient = recipient;
+        this.contentAwardAt = contentAwardAt;
+    }
 }
