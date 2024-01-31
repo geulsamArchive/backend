@@ -38,12 +38,11 @@ public class ContentAward {
     @JoinColumn(name = "award_id")
     private Award award;
 
-    /**상 수여자
-     * 확인이 필요합니다(노션 TASK 참고).
+    /**상 시상자
      */
     @OneToOne
     @JoinColumn(name = "user_id")
-    private User recipient;
+    private User presenter;
 
     /**상 수상연도
      * 타입: date
@@ -56,7 +55,7 @@ public class ContentAward {
     public ContentAward(Content content, Award award, User recipient, LocalDate contentAwardAt) {
         this.content = content;
         this.award = award;
-        this.recipient = recipient;
+        this.presenter = recipient;
         this.contentAwardAt = contentAwardAt;
     }
 }
