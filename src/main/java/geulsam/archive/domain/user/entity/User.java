@@ -102,4 +102,9 @@ public class User {
     }
 
     //이 밑에 앞으로 필요한 비즈니스 로직 작성
+
+    /**전화번호 변경 메서드*/
+    public void changePhone(String phone){
+        this.phone = phone;
+    }
 }
