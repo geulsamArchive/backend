@@ -74,7 +74,7 @@ public class Content {
     @Column(name = "content_view_count")
     private Integer viewCount;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
+//    @OneToOne
 //    @JoinColumn(name = "book_id")
 //    private Book book;
 
