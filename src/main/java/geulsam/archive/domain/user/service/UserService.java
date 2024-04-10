@@ -6,11 +6,10 @@ import geulsam.archive.domain.user.dto.res.LoginRes;
 import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
-import geulsam.archive.global.exception.RestException;
+import geulsam.archive.global.exception.ArchiveException;
+import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +32,12 @@ public class UserService {
      * @param phone(전화번호) : String
      */
     @Transactional
-    public void signup(String name, String schoolNum, String phone){
+    public void signup(String name, String schoolNum, String phone) {
 
         /*존재하는 사용자이면 exception return*/
         if(userRepository.findBySchoolNum(schoolNum).isPresent()){
-            throw new RestException("이미 존재하는 사용자입니다.");
+//            throw new RuntimeException("이미 존재하는 사용자입니다.");
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "이미 존재하는 사용자입니다.");
         }
 
         /*user 생성자로 신규 유저 생성
@@ -57,11 +57,18 @@ public class UserService {
         userRepository.save(user);
     }
 
+
+    /**
+     * User Login 트랜잭션
+     * @param schoolNum: 유저 학번(String)
+     * @param password: 유저 비밀번호(String)
+     * @return: AccessToken, RefreshToken 이 있는 LoginRes 객체
+     */
     @Transactional
     public LoginRes login(String schoolNum, String password){
 
         /* 학번으로 유저 탐색*/
-        User user = userRepository.findBySchoolNum(schoolNum).orElseThrow(() -> new RestException("존재하지 않는 사용자"));
+        User user = userRepository.findBySchoolNum(schoolNum).orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR,"존재하지 않는 사용자"));
 
         /* 유저 객체가 존재한다면 비밀번호가 맞는지 확인*/
         if(passwordEncoder.matches(password, user.getPassword())){
@@ -77,7 +84,7 @@ public class UserService {
             return new LoginRes(accessToken, refreshToken);
         } else {
             /* 비밀번호가 맞지 않으면 비밀번호 불일치 예외 생성 후 전달*/
-            throw new RestException("비밀번호 불일치");
+            throw new RuntimeException("비밀번호 불일치");
         }
     }
 

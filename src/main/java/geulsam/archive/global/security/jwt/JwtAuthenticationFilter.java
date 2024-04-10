@@ -1,21 +1,25 @@
 package geulsam.archive.global.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
-import geulsam.archive.global.exception.RestException;
-import jakarta.persistence.Cacheable;
+import geulsam.archive.global.common.dto.ErrorResponse;
+import geulsam.archive.global.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Objects;
 
 /** jwt 를 사용해서 사용자를 식별하는 필터 */
 @Component
@@ -29,29 +33,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@org.jetbrains.annotations.NotNull HttpServletRequest request,
                                     @org.jetbrains.annotations.NotNull HttpServletResponse response,
                                     @org.jetbrains.annotations.NotNull FilterChain filterChain) throws ServletException, IOException {
-
         /* 토큰 추출 */
         String accessToken = extractToken(request, "accessToken");
         String refreshToken = extractToken(request, "refreshToken");
 
-        /* 만약 accessToken 이 유효하다면 */
-        if(jwtProvider.validateToken(accessToken)){
-            /* accessToken 을 사용하여 인증 객체 생성 후 저장*/
-            Authentication authentication = jwtProvider.getAuthentication(accessToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            /* accessToken 의 id 를 사용하여 새로운 accessToken 생성*/
-            String id = jwtProvider.getID(accessToken);
-            String newAccessToken = jwtProvider.createAccessToken(Integer.valueOf(id));
-            response.setHeader("accessToken", "Bearer " + newAccessToken);
+        /* 만약 accessToken 이 존재한다면 */
+        if(!(Objects.equals(accessToken, null))){
+                /* accessToken 을 사용하여 인증 객체 생성 후 저장*/
+                Authentication authentication = jwtProvider.getAuthentication(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                /* accessToken 의 id 를 사용하여 새로운 accessToken 생성*/
+                String id = jwtProvider.getID(accessToken);
+                String newAccessToken = jwtProvider.createAccessToken(Integer.valueOf(id));
+                response.setHeader("accessToken", "Bearer " + newAccessToken);
 
             /* filter chain 계속 */
             filterChain.doFilter(request,response);
 
-            /* 만약 refreshToken 이 유효하다면 */
-        } else if (jwtProvider.validateToken(refreshToken)){
+            /* 만약 refreshToken 이 존재한다면 */
+        } else if (!(Objects.equals(refreshToken, null))){
             /* refreshToken 을 사용하여 RefresToken 객체 탐색 */
-            RefreshToken refreshTokenInRepo = refreshTokenRepository.findByToken(refreshToken).orElseThrow(() -> new RestException("재로그인 필요."));
+            RefreshToken refreshTokenInRepo = refreshTokenRepository.findByToken(refreshToken).orElseThrow(() -> new RuntimeException("재로그인 필요."));
 
             /* 새로운 RefreshToken 생성, 탐색한 RefreshToken 객체의 기본키 Id 를 사용하여 새로운 accessToken 생성 */
             String newRefreshToken = jwtProvider.createRefreshToken();
@@ -85,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param tokenName
      * @return
      */
-    public String extractToken(@NotNull HttpServletRequest httpServletRequest, @NotNull String tokenName){
+    public String extractToken(@NotNull HttpServletRequest httpServletRequest, String tokenName){
         return httpServletRequest.getHeader(tokenName);
     }
 }
