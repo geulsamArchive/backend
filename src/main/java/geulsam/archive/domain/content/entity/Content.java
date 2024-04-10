@@ -1,5 +1,6 @@
 package geulsam.archive.domain.content.entity;
 
+import geulsam.archive.domain.book.entity.Book;
 import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -72,6 +73,16 @@ public class Content {
      */
     @Column(name = "content_view_count")
     private Integer viewCount;
+
+//    @OneToOne
+//    @JoinColumn(name = "book_id")
+//    private Book book;
+
+    /**문집에 속한 페이지
+     * 타입: Integer
+     */
+    @Column(name = "content_book_page")
+    private Integer bookPage;
 
     /**Content-Comment 양방향 매핑
      * 콘텐츠에 작성된 코멘트 list

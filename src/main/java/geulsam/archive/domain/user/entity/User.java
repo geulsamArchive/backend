@@ -78,6 +78,18 @@ public class User {
     @Column(name = "user_introduce", length = 128)
     private String introduce;
 
+    /**유저 이메일
+     * 타입: varchar(100)
+     */
+    @Column(name = "user_email", length = 100)
+    private String email;
+
+    /**유저 키워드
+     * 타입: varchar(100)
+     */
+    @Column(name = "user_keyword", length = 100)
+    private String keyword;
+
     /**User-Content 양방향 매핑
      * 유저가 작성한 content list
      */
@@ -99,6 +111,7 @@ public class User {
         this.schoolNum = schoolNum;
         this.level = level;
         this.createdAt = createdAt;
+        this.email = email;
     }
 
     //이 밑에 앞으로 필요한 비즈니스 로직 작성
