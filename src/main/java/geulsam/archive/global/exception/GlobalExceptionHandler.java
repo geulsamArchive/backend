@@ -1,0 +1,63 @@
+package geulsam.archive.global.exception;
+
+import geulsam.archive.global.common.dto.ErrorResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    /**
+     * 유효성 관련 에러 처리 핸들러
+     * @param ex: @VALUED 에서 발생한 에러
+     * @param request: 에러가 발생한 http request
+     * @return VALUE_ERROR 에러 객체 응답
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                        ErrorResponse
+                        .builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error("VALUE_ERROR")
+                        .message(errors.toString())
+                        .build()
+                );
+    }
+
+    /**
+     * ArchiveException 으로 커스텀한 에러 핸들러
+     * @param e: 발생한 ArchiveException
+     * @return: API_ERROR 에러 객체 응답
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handler(RuntimeException e){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                        ErrorResponse
+                        .builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error("API_ERROR")
+                        .message(e.getMessage())
+                        .build()
+                );
+    }
+}
