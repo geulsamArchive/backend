@@ -2,9 +2,14 @@ package geulsam.archive.domain.user.dto.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Year;
 
 @Data
 @AllArgsConstructor
@@ -25,4 +30,25 @@ public class SignupReq {
     @NotBlank
     @Schema(example = "000-0000-0000")
     private String phone;
+
+    /**이메일*/
+    @NotBlank
+    @Schema(example = "example@gmail.com")
+    private String email;
+
+    @NotNull
+    @Schema(example = "2021")
+    private Year joinedAt;
+
+    @NotBlank
+    @Schema(example = "자기소개입니다")
+    private String introduce;
+
+    @NotBlank
+    @Schema(example = "가나,다라,마바")
+    private String keyword;
+
+    @NotNull
+    @Schema(example = "2024-05-01")
+    private LocalDate birthDay;
 }

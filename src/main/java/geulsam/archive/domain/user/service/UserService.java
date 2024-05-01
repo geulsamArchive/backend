@@ -10,11 +10,14 @@ import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class UserService {
      * @param phone(전화번호) : String
      */
     @Transactional
-    public void signup(String name, String schoolNum, String phone) {
+    public void signup(String name, String schoolNum, String phone, String email, Year joinedAt, String introduce, String keyword, LocalDate birthDay) {
 
         /*존재하는 사용자이면 exception return*/
         if(userRepository.findBySchoolNum(schoolNum).isPresent()){
@@ -47,12 +50,14 @@ public class UserService {
                 passwordEncoder.encode(schoolNum),
                 schoolNum,
                 Level.NORMAL,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                email,
+                phone,
+                joinedAt,
+                introduce,
+                keyword,
+                birthDay
         );
-
-        /*유저 전화번호 변경*/
-        user.changePhone(phone);
-
         /*유저 저장*/
         userRepository.save(user);
     }

@@ -8,7 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +80,12 @@ public class User {
     @Column(name = "user_introduce", length = 128)
     private String introduce;
 
+    /** 유저 동아리 가입 연도
+     * 타입: Year
+     */
+    @Column(name = "user_joined_at")
+    private Year joinedAt;
+
     /**유저 이메일
      * 타입: varchar(100)
      */
@@ -90,34 +98,50 @@ public class User {
     @Column(name = "user_keyword", length = 100)
     private String keyword;
 
+    /** 유저 생일
+     * 타입: datetime(6)
+     */
+    @Column(name = "user_birth_day")
+    private LocalDate birthDay;
+
     /**User-Content 양방향 매핑
      * 유저가 작성한 content list
      */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Content> contents = new ArrayList<>();
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    private List<Content> contents = new ArrayList<>();
 
     /**User-Comment 양방향 매핑
      * 유저가 작성한 comment list
      */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Comment> comments = new ArrayList<>();
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    private List<Comment> comments = new ArrayList<>();
 
     /**생성자
      * NOT NULL 이어야 하는 값들을 인자로 받음
      */
-    public User(String name, String password, String schoolNum, Level level, LocalDateTime createdAt){
+    public User(String name,
+                String password,
+                String schoolNum,
+                Level level,
+                LocalDateTime createdAt,
+                String email,
+                String phone,
+                Year joinedAt,
+                String introduce,
+                String keyword,
+                LocalDate birthDay){
         this.name = name;
         this.password = password;
         this.schoolNum = schoolNum;
         this.level = level;
         this.createdAt = createdAt;
         this.email = email;
+        this.phone = phone;
+        this.joinedAt = joinedAt;
+        this.introduce = introduce;
+        this.keyword = keyword;
+        this.birthDay = birthDay;
     }
 
     //이 밑에 앞으로 필요한 비즈니스 로직 작성
-
-    /**전화번호 변경 메서드*/
-    public void changePhone(String phone){
-        this.phone = phone;
-    }
 }

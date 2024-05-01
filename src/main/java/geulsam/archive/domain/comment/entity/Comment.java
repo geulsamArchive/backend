@@ -61,10 +61,10 @@ public class Comment {
 
         /*user-comment 연관관계 설정*/
         this.user = user;
-        user.getComments().add(this);
+//        user.getComments().add(this);
 
         /*content-comment 연관관계 설정*/
         this.content = content;
-        content.getComments().add(this);
+//        content.getComments().add(this);
     }
 }

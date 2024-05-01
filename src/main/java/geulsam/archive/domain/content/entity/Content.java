@@ -87,8 +87,8 @@ public class Content {
     /**Content-Comment 양방향 매핑
      * 콘텐츠에 작성된 코멘트 list
      */
-    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
-    private List<Comment> comments = new ArrayList<>();
+//    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
+//    private List<Comment> comments = new ArrayList<>();
 
     /**생성자
      * NOT NULL 이어야 하는 값들을 인자로 받음
@@ -96,7 +96,7 @@ public class Content {
     public Content(User user, String name, Genre genre, LocalDateTime createdAt, IsVisible isVisible){
         /*user-content 연관관계 설정*/
         this.user = user;
-        user.getContents().add(this);
+//        user.getContents().add(this);
 
         this.name = name;
         this.genre = genre;
