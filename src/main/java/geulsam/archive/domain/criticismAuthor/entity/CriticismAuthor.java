@@ -1,7 +1,7 @@
 package geulsam.archive.domain.criticismAuthor.entity;
 
+import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.content.entity.Content;
-import geulsam.archive.domain.criticism.entity.Criticism;
 import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -51,8 +51,8 @@ public class CriticismAuthor {
     /**클로버노트 주소
      * 타입: varchar(100)
      */
-    @Column(name = "criticism_author_colvernote_URL")
-    private String colvernote_URL;
+    @Column(name = "criticism_author_cloverNoteURL")
+    private String cloverNoteURL;
 
     /**생성자
      */
