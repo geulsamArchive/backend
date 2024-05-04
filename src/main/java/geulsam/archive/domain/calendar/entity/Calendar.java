@@ -35,8 +35,15 @@ public class Calendar {
     @Column(name = "calendar_date")
     private LocalDate date;
 
-    public Calendar(String title, LocalDate date) {
+    /**소개
+     * 타입: varchar(100)
+     */
+    @Column(name = "calendar_introduce", length =100)
+    private String introduce;
+
+    public Calendar(String title, LocalDate date, String introduce) {
         this.title = title;
         this.date = date;
+        this.introduce = introduce;
     }
 }

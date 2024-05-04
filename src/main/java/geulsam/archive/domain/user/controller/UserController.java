@@ -46,7 +46,12 @@ public class UserController {
         userService.signup(
                 signupReq.getName(),
                 signupReq.getSchoolNum(),
-                signupReq.getPhone()
+                signupReq.getPhone(),
+                signupReq.getEmail(),
+                signupReq.getJoinedAt(),
+                signupReq.getIntroduce(),
+                signupReq.getKeyword(),
+                signupReq.getBirthDay()
         );
 
         return ResponseEntity.ok().body(
