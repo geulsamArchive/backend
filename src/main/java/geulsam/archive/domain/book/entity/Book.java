@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -19,9 +22,9 @@ public class Book {
      * 타입: Integer
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "book_id")
-    private Integer id;
+    private UUID id;
 
     /**표지 이미지 저장주소
      * 타입: varchar(256)
@@ -33,7 +36,7 @@ public class Book {
      * 타입: varchar(10)
      */
     @Column(name = "book_designer", length = 10)
-    private String desinger;
+    private String designer;
 
     /**판형
      * 타입: varchar(10)
@@ -53,18 +56,28 @@ public class Book {
     @Column(name = "book_url", length = 256)
     private String url;
 
+    /**문집 연도
+     * 타입: Year
+     */
+    @Column(name = "book_year")
+    private Year year;
+
     /**문집게시일
      * 타입: date
      */
-    @Column(name = "book_date")
-    private LocalDate date;
+    @Column(name = "book_created_at")
+    private LocalDateTime createdAt;
 
-    public Book(String coverUrl, String desinger, String plate, Integer pageNumber, LocalDate date) {
+
+
+
+    public Book(String coverUrl, String designer, String plate, Integer pageNumber, Year year, String url, LocalDateTime createdAt) {
         this.coverUrl = coverUrl;
-        this.desinger = desinger;
+        this.designer = designer;
         this.plate = plate;
         this.pageNumber = pageNumber;
         this.url = url;
-        this.date = date;
+        this.year = year;
+        this.createdAt = createdAt;
     }
 }
