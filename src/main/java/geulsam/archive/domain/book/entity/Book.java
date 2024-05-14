@@ -62,6 +62,12 @@ public class Book {
     @Column(name = "book_year")
     private Year year;
 
+    /**문집 발행일
+     * 타입: LocalDate
+     */
+    @Column(name ="book_release")
+    private LocalDate release;
+
     /**문집게시일
      * 타입: date
      */
@@ -71,13 +77,14 @@ public class Book {
 
 
 
-    public Book(String coverUrl, String designer, String plate, Integer pageNumber, Year year, String url, LocalDateTime createdAt) {
+    public Book(String coverUrl, String designer, String plate, Integer pageNumber, Year year, String url, LocalDate release, LocalDateTime createdAt) {
         this.coverUrl = coverUrl;
         this.designer = designer;
         this.plate = plate;
         this.pageNumber = pageNumber;
         this.url = url;
         this.year = year;
+        this.release = release;
         this.createdAt = createdAt;
     }
 }

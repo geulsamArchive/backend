@@ -5,6 +5,8 @@ import geulsam.archive.domain.poster.entity.Poster;
 import geulsam.archive.domain.poster.repository.PosterRepository;
 import geulsam.archive.global.s3.PreSignedUrlManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +26,10 @@ public class PosterService {
      * @return List
      */
     @Transactional(readOnly = true)
-    public List<PosterRes> poster() {
-        List<Poster> posterList = posterRepository.findAll();
+    public List<PosterRes> poster(Pageable pageable) {
+        List<Poster> posterList = posterRepository.findAll(pageable).getContent();
 
+        //Poster 객체를 PosterRes 객체로 mapping
         return IntStream.range(0, posterList.size())
                 .mapToObj(i -> {
                     Poster poster = posterList.get(i);
