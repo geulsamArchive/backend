@@ -56,6 +56,8 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 // 로그인, 회원가입은 일단 전체 허용 -> 회원가입은 deploy hasRole("master")로 이동
                                 .requestMatchers("/user/signup", "/user/login").permitAll()
+                                .requestMatchers("/poster/**").permitAll()
+                                .requestMatchers("/book/**").permitAll()
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",
