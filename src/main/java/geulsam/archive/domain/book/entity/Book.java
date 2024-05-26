@@ -74,10 +74,14 @@ public class Book {
     @Column(name = "book_created_at")
     private LocalDateTime createdAt;
 
+    /**문집 제목
+     * 타입: varchar(100)
+     */
+    @Column(name = "book_title", length = 100)
+    private String title;
 
-
-
-    public Book(String coverUrl, String designer, String plate, Integer pageNumber, Year year, String url, LocalDate release, LocalDateTime createdAt) {
+    public Book(String coverUrl, String designer, String plate, Integer pageNumber, String url, Year year, LocalDate release, LocalDateTime createdAt, String title) {
+        this.id = UUID.randomUUID();
         this.coverUrl = coverUrl;
         this.designer = designer;
         this.plate = plate;
@@ -86,5 +90,6 @@ public class Book {
         this.year = year;
         this.release = release;
         this.createdAt = createdAt;
+        this.title = title;
     }
 }

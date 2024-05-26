@@ -35,7 +35,7 @@ public class PosterController {
     @GetMapping()
     public ResponseEntity<SuccessResponse<List<PosterRes>>> poster(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "asc") String order ){
+            @RequestParam(defaultValue = "asc") String order ){ //poster?page=1&order=asc
 
         // order String 에 따라 내림차순/오름차순 선정
         Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;

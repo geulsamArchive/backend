@@ -38,7 +38,7 @@ public class PosterService {
                             poster.getUrl(),
                             poster.getThumbNailUrl(),
                             poster.getDesigner(),
-                            poster.getYear().getValue(),
+                            poster.getYear(),
                             poster.getCreatedAt()
                     );
                 }).collect(Collectors.toList());

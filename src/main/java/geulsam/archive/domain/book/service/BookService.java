@@ -37,10 +37,11 @@ public class BookService {
                     return new BookRes(
                             i,
                             book.getCoverUrl(),
-                            book.getYear().getValue(),
+                            book.getYear(),
                             null, // 현재 설명은 null 로, 추가될 수도, 추가 안 될 수도 있음:wq
                             book.getId().toString(),
-                            book.getCreatedAt()
+                            book.getCreatedAt(),
+                            book.getTitle()
                     );
                 }).collect(Collectors.toList());
     }
@@ -64,7 +65,8 @@ public class BookService {
                 book.getDesigner(),
                 book.getPlate(),
                 book.getPageNumber(),
-                book.getUrl()
+                book.getUrl(),
+                book.getTitle()
         );
     }
 }
