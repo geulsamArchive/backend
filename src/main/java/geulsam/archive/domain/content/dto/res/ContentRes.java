@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,9 +19,9 @@ public class ContentRes {
     private Genre type;
     @Schema(example = "때때로 나는 회색분자라는 소리를 듣는다")
     private String title;
-    @Schema(example = "2024")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년")
-    private LocalDate year;
+    @Schema(example = "2024년")
+    //JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년")
+    private int year;  //API 명세서 확인 필요
     @Schema(example = "하수민")
     private String author;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 M월 d일")

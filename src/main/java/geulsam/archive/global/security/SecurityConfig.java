@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 .requestMatchers("/user/signup", "/user/login").permitAll()
                                 .requestMatchers("/poster/**").permitAll()
                                 .requestMatchers("/book/**").permitAll()
+                                .requestMatchers("/content/**").permitAll()
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",
