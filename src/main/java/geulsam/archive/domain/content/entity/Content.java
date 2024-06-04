@@ -1,7 +1,5 @@
 package geulsam.archive.domain.content.entity;
 
-import geulsam.archive.domain.book.entity.Book;
-import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -10,8 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**Content Entity*/
 @Entity
