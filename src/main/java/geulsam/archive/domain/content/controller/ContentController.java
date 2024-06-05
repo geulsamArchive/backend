@@ -54,11 +54,11 @@ public class ContentController {
      * 해당 id를 가진 content의 세부 정보 리턴
      * @return ContentInfoRes
      */
-    @GetMapping("/{contentId}")
-    public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable Integer contentId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable Integer id) {
 
-        Content findContent = contentRepository.findById(contentId).orElse(null);  //
-        ContentInfoRes contentInfoRes = new ContentInfoRes();
+
+        ContentInfoRes contentInfoRes = contentService.getContentInfo(id);
 
         //contentInfoRes 채우기
 
