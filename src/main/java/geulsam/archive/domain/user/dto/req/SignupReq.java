@@ -2,6 +2,7 @@ package geulsam.archive.domain.user.dto.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -44,9 +46,9 @@ public class SignupReq {
     @Schema(example = "자기소개입니다")
     private String introduce;
 
-    @NotBlank
-    @Schema(example = "가나,다라,마바")
-    private String keyword;
+    @NotEmpty // 추후 각각 유효성 검사 필요!
+    @Schema(example = "[\"가나\",\"다라\",\"마바\"]")
+    private List<String> keyword;
 
     @NotNull
     @Schema(example = "2024-05-01")

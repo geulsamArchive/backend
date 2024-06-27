@@ -7,8 +7,6 @@ import geulsam.archive.domain.user.service.UserService;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -50,7 +48,7 @@ public class UserController {
                 signupReq.getEmail(),
                 signupReq.getJoinedAt(),
                 signupReq.getIntroduce(),
-                signupReq.getKeyword(),
+                String.join(", ", signupReq.getKeyword()), // List<String>을 쉼표로 구분된 단일 String 으로 변경
                 signupReq.getBirthDay()
         );
 

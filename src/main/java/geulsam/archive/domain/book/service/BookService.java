@@ -4,9 +4,12 @@ import geulsam.archive.domain.book.dto.res.BookIdRes;
 import geulsam.archive.domain.book.dto.res.BookRes;
 import geulsam.archive.domain.book.entity.Book;
 import geulsam.archive.domain.book.repository.BookRepository;
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,23 +30,18 @@ public class BookService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<BookRes> book() {
+    public PageRes<BookRes> book(Pageable pageable) {
 
-        List<Book> bookList = bookRepository.findAll();
+        Page<Book> bookPage = bookRepository.findAll(pageable);
 
-        return IntStream.range(0, bookList.size())
-                .mapToObj(i -> {
-                    Book book = bookList.get(i);
-                    return new BookRes(
-                            i,
-                            book.getCoverUrl(),
-                            book.getYear(),
-                            null, // 현재 설명은 null 로, 추가될 수도, 추가 안 될 수도 있음:wq
-                            book.getId().toString(),
-                            book.getCreatedAt(),
-                            book.getTitle()
-                    );
-                }).collect(Collectors.toList());
+        List<BookRes> bookResList = bookPage.getContent().stream()
+                .map(book -> new BookRes(book, bookPage.getContent().indexOf(book)))
+                .collect(Collectors.toList());
+
+        return new PageRes<>(
+                bookPage.getTotalPages(),
+                bookResList
+        );
     }
 
     /**
@@ -59,14 +57,6 @@ public class BookService {
                 ErrorCode.VALUE_ERROR, "해당 Book 없음"
         ));
 
-        return new BookIdRes(
-                book.getId().toString(),
-                book.getRelease(),
-                book.getDesigner(),
-                book.getPlate(),
-                book.getPageNumber(),
-                book.getUrl(),
-                book.getTitle()
-        );
+        return new BookIdRes(book);
     }
 }
