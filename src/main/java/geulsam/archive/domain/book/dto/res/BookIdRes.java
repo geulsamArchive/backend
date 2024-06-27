@@ -1,6 +1,7 @@
 package geulsam.archive.domain.book.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import geulsam.archive.domain.book.entity.Book;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,18 +11,17 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 M월 d일")
 public class BookIdRes {
     /**BookId Response 객체 인덱스*/
     @Schema(example = "1")
     private String id;
     /**Book 이 공개된 날짜*/
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 M월 d일")
-    @Schema(example = "2024-05-06")
+    @Schema(example = "2024년 5월 6일", type = "string")
     private LocalDate release;
     /**Book 의 Designer*/
     @Schema(example = "김철수")
-    private String Designer;
+    private String designer;
     /**Book 의 판형*/
     @Schema(example = "A4")
     private String plate;
@@ -33,5 +33,19 @@ public class BookIdRes {
     private String url;
     /**Book 의 제목*/
     @Schema(example = "책 제목")
-    private String book;
+    private String title;
+
+    /**
+     * Book 객체를 받아 BookIdRes 로 매핑 
+     * @param book
+     */
+    public BookIdRes(Book book){
+        this.id = book.getId().toString();
+        this.release = book.getRelease();
+        this.designer = book.getDesigner();
+        this.plate = book.getPlate();
+        this.page = book.getPageNumber();
+        this.url = book.getUrl();
+        this.title =book.getTitle();
+    }
 }

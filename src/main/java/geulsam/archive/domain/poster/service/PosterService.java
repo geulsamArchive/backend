@@ -1,5 +1,6 @@
 package geulsam.archive.domain.poster.service;
 
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.domain.poster.dto.res.PosterRes;
 import geulsam.archive.domain.poster.entity.Poster;
 import geulsam.archive.domain.poster.repository.PosterRepository;
@@ -26,21 +27,17 @@ public class PosterService {
      * @return List
      */
     @Transactional(readOnly = true)
-    public List<PosterRes> poster(Pageable pageable) {
-        List<Poster> posterList = posterRepository.findAll(pageable).getContent();
+    public PageRes<PosterRes> poster(Pageable pageable) {
+        Page<Poster> posterPage = posterRepository.findAll(pageable);
 
         //Poster 객체를 PosterRes 객체로 mapping
-        return IntStream.range(0, posterList.size())
-                .mapToObj(i -> {
-                    Poster poster = posterList.get(i);
-                    return new PosterRes(
-                            i,
-                            poster.getUrl(),
-                            poster.getThumbNailUrl(),
-                            poster.getDesigner(),
-                            poster.getYear(),
-                            poster.getCreatedAt()
-                    );
-                }).collect(Collectors.toList());
+        List<PosterRes> posterResList = posterPage.getContent().stream()
+                .map(poster -> new PosterRes(poster, posterPage.getContent().indexOf(poster)))
+                .collect(Collectors.toList());
+
+        return new PageRes<>(
+                posterPage.getTotalPages(),
+                posterResList
+        );
     }
 }
