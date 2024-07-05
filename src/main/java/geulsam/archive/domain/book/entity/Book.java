@@ -18,8 +18,8 @@ import java.util.UUID;
 public class Book {
 
     /**기본키
-     * 생성 전략: 자동 증가
-     * 타입: Integer
+     * 생성 전략: UUID 자동 생성
+     * 타입: UUID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,6 +31,12 @@ public class Book {
      */
     @Column(name = "book_cover_url", length = 256)
     private String coverUrl;
+
+    /**표지 이미지 썸네일 저장주소
+     * 타입: varchar(256)
+     */
+    @Column(name = "book_thumbnail_url", length = 256)
+    private String thumbNailUrl;
 
     /**표지 제작자
      * 타입: varchar(10)
@@ -50,7 +56,7 @@ public class Book {
     @Column(name = "book_page_number")
     private Integer pageNumber;
 
-    /**문집저장주소
+    /**문집 저장주소
      * 타입: varchar(256)
      */
     @Column(name = "book_url", length = 256)
@@ -68,7 +74,7 @@ public class Book {
     @Column(name ="book_release")
     private LocalDate release;
 
-    /**문집게시일
+    /**문집 게시일
      * 타입: date
      */
     @Column(name = "book_created_at")

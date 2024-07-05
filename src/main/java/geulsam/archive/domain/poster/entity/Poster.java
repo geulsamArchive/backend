@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.UUID;
@@ -18,8 +17,8 @@ import java.util.UUID;
 public class Poster {
 
     /**기본키
-     * 생성 전략: 자동 증가
-     * 타입: Integer
+     * 생성 전략: UUID 자동 생성
+     * 타입: UUID
      * */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
