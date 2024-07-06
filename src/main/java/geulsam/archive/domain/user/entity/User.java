@@ -1,6 +1,5 @@
 package geulsam.archive.domain.user.entity;
 
-import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.content.entity.Content;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,8 +10,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.util.ArrayList;
-import java.util.List;
 
 /**User Entity*/
 @Entity
@@ -40,7 +37,7 @@ public class User {
      * 타입: varchar(255)
      * 암호화 필수
      */
-    @Column(name = "user_password")
+    @Column(name = "user_password", length = 256)
     private String password;
 
     /**유저 학번
@@ -73,6 +70,13 @@ public class User {
      */
     @Column(name = "user_created_at")
     private LocalDateTime createdAt;
+
+    /** 유저 대표작
+     * 타입: Integer
+     */
+    @OneToOne
+    @JoinColumn(name = "content_id")
+    private Content majorWork;
 
     /** 유저 자기소개
      * 타입: varchar(128)

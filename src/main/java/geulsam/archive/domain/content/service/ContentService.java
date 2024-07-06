@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,7 +30,7 @@ public class ContentService {
         return IntStream.range(0, findContents.size())
                 .mapToObj(i -> {
                     Content content = findContents.get(i);
-                    int contentId = content.getId();
+                    UUID contentId = content.getId();
                     //ContentAward contentAward = contentAwardRepository.findById(contentId).orElseThrow(RuntimeException::new);  //API 명세서 확인 필요
                     return new ContentRes(
                             i,
@@ -58,7 +59,7 @@ public class ContentService {
                 findContent.getUser().getId().toString(),
                 findContent.getCreatedAt(),
                 //sentence?
-                findContent.getUrl()
+                findContent.getPdfUrl()
         );
     }
 }

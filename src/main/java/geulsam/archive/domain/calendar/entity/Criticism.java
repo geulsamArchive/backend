@@ -1,9 +1,6 @@
 package geulsam.archive.domain.calendar.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +14,16 @@ import java.time.LocalDate;
 @Setter(AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Criticism extends Calendar{
+
+    /**기본키
+     * 생성 전략: 자동 증가
+     * 타입: Integer
+     * */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "criticism_id")
+    private Integer id;
+
     /**합평회 참여자
      * 타입: String
      */
