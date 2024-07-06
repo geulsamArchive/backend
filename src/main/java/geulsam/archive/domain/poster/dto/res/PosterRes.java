@@ -19,6 +19,9 @@ public class PosterRes {
     /**poster image 저장 주소 url*/
     @Schema(description = "poster 의 저장 주소", example = "https://imageURL")
     private String image;
+    /**poster 의 고유 id*/
+    @Schema(description = "poster 의 고유 id", example = "adfsa-dfasd-dsafdsa-fdsaf")
+    private String posterId;
     /**thumbnail image 저장 주소 url*/
     @Schema(description = "poster thumbnail 의 저장 주소",example = "https://thumbnailImageURL")
     private String thumbnailImage;
@@ -41,6 +44,7 @@ public class PosterRes {
      */
     public PosterRes(Poster poster, int id){
         this.id = id;
+        this.posterId = poster.getId().toString();
         this.image = poster.getUrl();
         this.thumbnailImage = poster.getThumbNailUrl();
         this.designer = poster.getDesigner();

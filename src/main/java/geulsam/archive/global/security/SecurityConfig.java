@@ -5,6 +5,7 @@ import geulsam.archive.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -57,6 +58,10 @@ public class SecurityConfig {
                                 // 로그인, 회원가입은 일단 전체 허용 -> 회원가입은 deploy hasRole("master")로 이동
                                 .requestMatchers("/user/signup", "/user/login").permitAll()
                                 .requestMatchers("/poster/**").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.DELETE, "/poster").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.POST, "/book").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.DELETE, "/book").hasRole("NORMAL")
                                 .requestMatchers("/book/**").permitAll()
                                 .requestMatchers("/content/**").permitAll()
                                 // swagger 테스트 -> 추후 삭제

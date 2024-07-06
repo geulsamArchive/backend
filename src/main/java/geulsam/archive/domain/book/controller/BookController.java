@@ -1,10 +1,13 @@
 package geulsam.archive.domain.book.controller;
 
+import geulsam.archive.domain.book.dto.req.UploadReq;
 import geulsam.archive.domain.book.dto.res.BookIdRes;
 import geulsam.archive.domain.book.dto.res.BookRes;
 import geulsam.archive.domain.book.service.BookService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +61,32 @@ public class BookController {
                         .data(bookIdRes)
                         .message("information of the book get success")
                         .status(HttpStatus.OK.value())
+                        .build()
+        );
+    }
+
+    /**
+     * Book upload 메소드
+     * @param uploadReq Book 객체 생성에 필요한 정보를 담은 DTO
+     * @return null
+     */
+    @PostMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "문집 등록 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Void>> upload(@ModelAttribute UploadReq uploadReq){
+
+        bookService.upload(uploadReq);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("문집 업로드 성공")
                         .build()
         );
     }

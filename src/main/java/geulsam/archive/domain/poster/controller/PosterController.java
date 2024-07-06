@@ -1,9 +1,12 @@
 package geulsam.archive.domain.poster.controller;
 
+import geulsam.archive.domain.poster.dto.req.UploadReq;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.domain.poster.dto.res.PosterRes;
 import geulsam.archive.domain.poster.service.PosterService;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,10 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,6 +46,47 @@ public class PosterController {
                         .data(poster)
                         .message("posters get success")
                         .status(HttpStatus.OK.value())
+                        .build()
+        );
+    }
+
+    /**
+     * Poster upload 메소드
+     * @param uploadReq Poster 객체 생성에 필요한 정보를 담은 메서드
+     * @return null
+     */
+    @PostMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "포스터 등록 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Void>> upload(@ModelAttribute UploadReq uploadReq){
+
+        posterService.upload(uploadReq);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("포스터 업로드 성공")
+                        .build()
+        );
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<SuccessResponse<Void>> delete(
+            @RequestParam(defaultValue = "id") String field,
+            @RequestParam String search
+    ){
+        posterService.delete(field, search);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("포스터 삭제 성공")
                         .build()
         );
     }
