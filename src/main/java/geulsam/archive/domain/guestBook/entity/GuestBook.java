@@ -33,7 +33,7 @@ public class GuestBook {
     /**방명록 대상자
      * 타입: User
      */
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_owner_id")
     private User owner;
 
