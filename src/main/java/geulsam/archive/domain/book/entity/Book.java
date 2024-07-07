@@ -96,8 +96,9 @@ public class Book {
         this.title = title;
     }
 
-    public void saveS3publicUrl(String url, String bookCoverUrl) {
+    public void saveS3publicUrl(String url, String bookCoverUrl, String ThumbnailUrl) {
         this.url = url;
         this.coverUrl = bookCoverUrl;
+        this.thumbNailUrl = thumbNailUrl;
     }
 }

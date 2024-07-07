@@ -76,7 +76,20 @@ public class PosterController {
         );
     }
 
+    /**
+     * Poster delete 메소드
+     * @param field 기본값은 id, 삭제하고 싶은 포스터가 가진 필드를 지정(ex. id, designer, plate...)
+     * @param search 기본값 없음. 삭제할 포스터의 필드의 값을 지정
+     * @return
+     */
     @DeleteMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "포스터 삭제 성공",
+                    useReturnTypeSchema = true
+            )
+    })
     public ResponseEntity<SuccessResponse<Void>> delete(
             @RequestParam(defaultValue = "id") String field,
             @RequestParam String search

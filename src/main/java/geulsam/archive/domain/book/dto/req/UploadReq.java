@@ -23,4 +23,5 @@ public class UploadReq {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate release;
     private String title;
+    private MultipartFile bookCoverThumbnail;
 }

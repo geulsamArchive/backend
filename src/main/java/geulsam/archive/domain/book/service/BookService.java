@@ -8,6 +8,7 @@ import geulsam.archive.domain.book.repository.BookRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
+import geulsam.archive.global.s3.DeleteManager;
 import geulsam.archive.global.s3.UploadManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final UploadManager uploadManager;
+    private final DeleteManager deleteManager;
 
     /**
      * book 전체를 리턴하는 트랜잭션
@@ -51,7 +53,7 @@ public class BookService {
     /**
      * Book 객체의 Id 1개를 받아 Book 의 세부사항을 리턴하는 트랜잭션
      * @param id Book 객체의 id
-     * @return
+     * @return BookIdRes
      */
     @Transactional(readOnly = true)
     public BookIdRes bookId(String id) {
@@ -84,7 +86,21 @@ public class BookService {
 
         String bookUrl = uploadManager.uploadFile(uploadReq.getPdf(), book.getId(), "book");
         String bookCoverUrl = uploadManager.uploadFile(uploadReq.getBookCover(), book.getId(), "bookCover");
+        String bookCoverThumbNail = uploadManager.uploadFile(uploadReq.getBookCoverThumbnail(), book.getId(), "bookCoverThumbNail");
 
-        book.saveS3publicUrl(bookUrl, bookCoverUrl);
+        book.saveS3publicUrl(bookUrl, bookCoverUrl, bookCoverThumbNail);
+    }
+
+    @Transactional
+    public void delete(String field, String search) {
+        Book book = bookRepository.findById(UUID.fromString(search)).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 poster 없음")
+        );
+
+        deleteManager.deleteFile(book.getId(), "book");
+        deleteManager.deleteFile(book.getId(), "bookCover");
+        deleteManager.deleteFile(book.getId(), "bookCoverThumbNail");
+
+        bookRepository.deleteById(book.getId());
     }
 }
