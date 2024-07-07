@@ -23,10 +23,9 @@ public class PreSignedUrlManager {
     /**
      * GET 전용 pre signed URL 생성 함수
      * @param objectKey 찾으려는 object 의 PK + '종류'
-     * @param currentURL 현재 객체가 DB에 저장된 URL
      * @return
      */
-    public String generatePreSignedUrl(String objectKey, String currentURL){
+    public String generatePreSignedUrl(String objectKey){
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucketName, objectKey)
                         .withMethod(HttpMethod.GET)

@@ -61,13 +61,17 @@ public class Poster {
     @Column(name = "poster_created_at")
     private LocalDateTime createdAt;
 
-    public Poster(String url, String thumbNailUrl, Year year, String designer, String plate) {
-        this.id = UUID.randomUUID();
-        this.url = url;
-        this.thumbNailUrl = thumbNailUrl;
+    public Poster(Year year, String designer, String plate) {
         this.year = year;
         this.designer = designer;
         this.plate = plate;
         this.createdAt = LocalDateTime.now();
+    }
+
+
+    /*비즈니스 로직*/
+    public void saveS3publicUrl(String url, String thumbNailUrl){
+        this.url = url;
+        this.thumbNailUrl = thumbNailUrl;
     }
 }

@@ -86,16 +86,19 @@ public class Book {
     @Column(name = "book_title", length = 100)
     private String title;
 
-    public Book(String coverUrl, String designer, String plate, Integer pageNumber, String url, Year year, LocalDate release, LocalDateTime createdAt, String title) {
-        this.id = UUID.randomUUID();
-        this.coverUrl = coverUrl;
+    public Book(String designer, String plate, Integer pageNumber, Year year, LocalDate release, String title) {
         this.designer = designer;
         this.plate = plate;
         this.pageNumber = pageNumber;
-        this.url = url;
         this.year = year;
         this.release = release;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDateTime.now();
         this.title = title;
+    }
+
+    public void saveS3publicUrl(String url, String bookCoverUrl, String ThumbnailUrl) {
+        this.url = url;
+        this.coverUrl = bookCoverUrl;
+        this.thumbNailUrl = thumbNailUrl;
     }
 }

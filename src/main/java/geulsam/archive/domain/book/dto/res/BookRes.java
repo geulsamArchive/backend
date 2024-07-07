@@ -39,8 +39,12 @@ public class BookRes {
     @Schema(example = "책 제목")
     private String title;
 
+    @Schema(example = "https://boockCoverThumbnail")
+    private String thumbNail;
+
     public BookRes(Book book, int id){
         this.id = id;
+        this.thumbNail = book.getThumbNailUrl();
         this.bookCover = book.getCoverUrl();
         this.year = book.getYear();
         this.description = null;
