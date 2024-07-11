@@ -26,8 +26,8 @@ public class ContentRes {
     @Schema(example = "때때로 나는 회색분자라는 소리를 듣는다")
     private String title;
     /**Content 객체의 수상 정도*/
-    @Schema(example = "2024년 글샘문학상 수상")
-    private String award;  //award로 수정 필요
+    @Schema(example = "2024년 글샘문학상 수상", nullable = true)
+    private String award;
     /**Content 객체의 저자*/
     @Schema(example = "하수민")
     private String author;

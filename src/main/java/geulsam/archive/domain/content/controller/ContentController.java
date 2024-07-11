@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/content")
 public class ContentController {
 
-    /**
-     * Content Controller
-     */
     private final ContentService contentService;
 
     /**
