@@ -29,7 +29,6 @@ import java.util.stream.IntStream;
 public class PosterService {
 
     private final PosterRepository posterRepository;
-    private final PreSignedUrlManager preSignedUrlManager;
     private final UploadManager uploadManager;
     private final DeleteManager deleteManager;
 

@@ -59,6 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String newAccessToken = jwtProvider.createAccessToken(Integer.valueOf(id));
                 response.setHeader("accessToken", "Bearer " + newAccessToken);
                 filterChain.doFilter(request, response);
+                return;
             }
 
             if(refreshToken != null ){
@@ -83,6 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setHeader("refreshToken", "Bearer " + newRefreshToken);
 
                 filterChain.doFilter(request, response);
+                return;
             }
             // 발생 가능한 에러들 처리
         } catch (UnsupportedJwtException e){

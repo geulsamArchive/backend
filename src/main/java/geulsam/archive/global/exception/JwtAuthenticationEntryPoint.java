@@ -35,6 +35,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         // JwtAuthenticationFilter 에서 생성한 예외 추출
         ArchiveException archiveException = (ArchiveException)request.getAttribute("error");
 
+        response.setHeader("Access-Control-Allow-Origin", "*"); // 또는 특정 origin을 설정
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader("Access-Control-Expose-Headers", "accessToken, refreshToken");
+        
         ObjectMapper objectMapper = new ObjectMapper();
         response.setStatus(archiveException.getErrorCode().getStatus());
         response.setContentType("application/json;charset=UTF-8");
