@@ -28,13 +28,13 @@ public class ContentController {
     @GetMapping()
     public ResponseEntity<SuccessResponse<PageRes<ContentRes>>> getContents(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "NOVEL") String field,
-            @RequestParam String search
+            @RequestParam(required = false) String field,
+            @RequestParam(required = false) String search
     ) {  //content?page=1&field=”novel”&search=”샘”
 
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
 
-        PageRes<ContentRes> contentResList = contentService.getContents(pageable);
+        PageRes<ContentRes> contentResList = contentService.getContents(field, search, pageable);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<ContentRes>>builder()

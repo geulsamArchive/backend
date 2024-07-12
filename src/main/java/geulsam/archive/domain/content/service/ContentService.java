@@ -3,6 +3,7 @@ package geulsam.archive.domain.content.service;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
 import geulsam.archive.domain.content.entity.Content;
+import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.domain.contentAward.repository.ContentAwardRepository;
 import geulsam.archive.global.common.dto.PageRes;
@@ -24,8 +25,22 @@ public class ContentService {
     private final ContentRepository contentRepository;
     private final ContentAwardRepository contentAwardRepository;
     @Transactional(readOnly = true)
-    public PageRes<ContentRes> getContents(Pageable pageable) {
-        Page<Content> contentPage = contentRepository.findAll(pageable);
+    public PageRes<ContentRes> getContents(String field, String search, Pageable pageable) {
+        Page<Content> contentPage;
+        Genre genre = field != null ? Genre.valueOf(field.toUpperCase()) : null;
+
+        if (genre != null && search != null) {
+            contentPage = contentRepository.findByGenreAndTitleContaining(genre, search, pageable);
+
+        } else if (genre != null) {
+            contentPage = contentRepository.findByGenre(genre, pageable);
+
+        } else if (search != null) {
+            contentPage = contentRepository.findByTitleContaining(search, pageable);
+
+        } else {
+            contentPage = contentRepository.findAll(pageable);
+        }
 
         List<ContentRes> contentResList = contentPage.getContent().stream()
                 .map(content -> new ContentRes(content, contentPage.getContent().indexOf(content)))
