@@ -1,6 +1,7 @@
 package geulsam.archive.global.exception;
 
 import geulsam.archive.global.common.dto.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -47,8 +48,8 @@ public class GlobalExceptionHandler {
      * @param e: 발생한 ArchiveException
      * @return: API_ERROR 에러 객체 응답
      */
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handler(RuntimeException e){
+    @ExceptionHandler(ArchiveException.class)
+    public ResponseEntity<ErrorResponse> handler(ArchiveException e){
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(
