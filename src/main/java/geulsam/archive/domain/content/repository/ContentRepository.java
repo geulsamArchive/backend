@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContentRepository extends JpaRepository<Content, Integer> {
-    Page<Content> findByGenreAndTitleContaining(Genre genre, String title, Pageable pageable);
+    Page<Content> findByGenreAndNameContaining(Genre genre, String name, Pageable pageable);
     Page<Content> findByGenre(Genre genre, Pageable pageable);
-    Page<Content> findByTitleContaining(String title, Pageable pageable);
+    Page<Content> findByNameContaining(String name, Pageable pageable);
     Page<Content> findAll(Pageable pageable);
 }

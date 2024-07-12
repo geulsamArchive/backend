@@ -27,16 +27,23 @@ public class ContentService {
     @Transactional(readOnly = true)
     public PageRes<ContentRes> getContents(String field, String search, Pageable pageable) {
         Page<Content> contentPage;
-        Genre genre = field != null ? Genre.valueOf(field.toUpperCase()) : null;
+        Genre genre = null;
+        if (field != null) {
+            try {
+                genre = Genre.valueOf(field.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ArchiveException(ErrorCode.VALUE_ERROR, "Invalid category: " + field);
+            }
+        }
 
         if (genre != null && search != null) {
-            contentPage = contentRepository.findByGenreAndTitleContaining(genre, search, pageable);
+            contentPage = contentRepository.findByGenreAndNameContaining(genre, search, pageable);
 
         } else if (genre != null) {
             contentPage = contentRepository.findByGenre(genre, pageable);
 
         } else if (search != null) {
-            contentPage = contentRepository.findByTitleContaining(search, pageable);
+            contentPage = contentRepository.findByNameContaining(search, pageable);
 
         } else {
             contentPage = contentRepository.findAll(pageable);
