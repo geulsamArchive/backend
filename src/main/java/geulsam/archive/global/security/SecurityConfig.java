@@ -56,6 +56,9 @@ public class SecurityConfig {
                                 // 로그인, 회원가입은 일단 전체 허용 -> 회원가입은 deploy hasRole("master")로 이동
                                 .requestMatchers(HttpMethod.POST,"/user/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+                                // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
+                                .requestMatchers(HttpMethod.GET, "/user/refresh").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/user/check").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE, "/poster").hasRole("NORMAL")

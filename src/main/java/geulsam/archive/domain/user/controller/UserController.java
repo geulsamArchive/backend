@@ -2,6 +2,7 @@ package geulsam.archive.domain.user.controller;
 
 import geulsam.archive.domain.user.dto.req.LoginReq;
 import geulsam.archive.domain.user.dto.req.SignupReq;
+import geulsam.archive.domain.user.dto.res.CheckRes;
 import geulsam.archive.domain.user.dto.res.LoginRes;
 import geulsam.archive.domain.user.service.UserService;
 import geulsam.archive.global.common.dto.SuccessResponse;
@@ -18,6 +19,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,13 +70,6 @@ public class UserController {
      * @return 2개의 토큰, accessToken, RefreshToken 을 return
      * */
     @PostMapping("/login")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "로그인 성공",
-                    useReturnTypeSchema = true
-            )
-    })
     public ResponseEntity<SuccessResponse<LoginRes>> login(@RequestBody @Valid LoginReq loginReq){
         LoginRes loginRes = userService.login(loginReq.getSchoolNum(), loginReq.getPassword());
 
@@ -100,5 +97,31 @@ public class UserController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         return ResponseEntity.ok().body("hello! " + userDetails.getUserId() + " and you are " + authentication.getAuthorities());
+    }
+
+    /**
+     * 유저의 아이디와 권한을 확인
+     * @return
+     */
+    @GetMapping("/check")
+    public ResponseEntity<SuccessResponse<CheckRes>> check(){
+        /*유저 인증 객체를 가져옴*/
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        /*유저 권한 컬렉션을 스트링으로 변환*/
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())
+                .collect(Collectors.toList());
+
+        /*유저 인증 객체 생성*/
+        CheckRes checkRes = new CheckRes(userDetails.getUserId(), roles);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<CheckRes>builder()
+                        .data(checkRes)
+                        .status(HttpStatus.OK.value())
+                        .message("유저 아이디와 권한 리턴")
+                        .build()
+        );
     }
 }

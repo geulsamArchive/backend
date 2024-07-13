@@ -1,9 +1,7 @@
 package geulsam.archive.domain.refreshtoken.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import geulsam.archive.domain.user.entity.User;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,12 +15,22 @@ public class RefreshToken {
 
     @Id
     @Column(name = "refreshToken_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "refreshToken_value")
     private String token;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public void changeTokenValue(String token){
         this.token = token;
+    }
+
+    public RefreshToken(String token, User user){
+        this.token = token;
+        this.user = user;
     }
 }
