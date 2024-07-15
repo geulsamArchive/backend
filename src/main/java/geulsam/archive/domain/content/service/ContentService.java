@@ -5,6 +5,7 @@ import geulsam.archive.domain.content.dto.res.ContentRes;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.repository.ContentRepository;
+import geulsam.archive.domain.contentAward.entity.ContentAward;
 import geulsam.archive.domain.contentAward.repository.ContentAwardRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
@@ -48,9 +49,12 @@ public class ContentService {
         } else {
             contentPage = contentRepository.findAll(pageable);
         }
-
+        //N+1 문제 해결 필요
         List<ContentRes> contentResList = contentPage.getContent().stream()
-                .map(content -> new ContentRes(content, contentPage.getContent().indexOf(content)))
+                .map(content -> {
+                    List<ContentAward> awards = contentAwardRepository.findByContentId(content.getId());
+                    return new ContentRes(content, contentPage.getContent().indexOf(content), awards);
+                })
                 .collect(Collectors.toList());
 
         return new PageRes<>(

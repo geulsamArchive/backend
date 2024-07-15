@@ -30,7 +30,7 @@ public class ContentController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(required = false) String field,
             @RequestParam(required = false) String search
-    ) {  //content?page=1&field=”novel”&search=”샘”
+    ) {
 
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
 

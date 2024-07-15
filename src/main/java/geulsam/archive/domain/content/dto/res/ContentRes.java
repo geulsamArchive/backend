@@ -3,11 +3,14 @@ package geulsam.archive.domain.content.dto.res;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
+import geulsam.archive.domain.contentAward.entity.ContentAward;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -26,8 +29,8 @@ public class ContentRes {
     @Schema(example = "때때로 나는 회색분자라는 소리를 듣는다")
     private String title;
     /**Content 객체의 수상 정도*/
-    @Schema(example = "2024년 글샘문학상 수상", nullable = true)
-    private String award;
+    @Schema(example = "['2023년 글샘문학상 수상', '2024년 글샘문학상 수상']", nullable = true)
+    private List<String> awards;
     /**Content 객체의 저자*/
     @Schema(example = "하수민")
     private String author;
@@ -36,12 +39,14 @@ public class ContentRes {
     @Schema(example = "2024년 3월 10일", type = "string")
     private LocalDateTime createdAt;
 
-    public ContentRes(Content content, int id) {
+    public ContentRes(Content content, int id, List<ContentAward> awards) {
         this.id = id;
         this.contentId = content.getId().toString();
         this.type = content.getGenre();
         this.title = content.getName();
-        this.award = "(예시)2024년 글샘문학상 수상";
+        this.awards = awards.stream()
+                .map(ca -> ca.getContentAwardAt().getYear() + "년" + ca.getAward().getName() + "수상")
+                .collect(Collectors.toList());
         this.author = content.getUser().getName();
         this.createdAt = content.getCreatedAt();
     }
