@@ -1,6 +1,7 @@
 package geulsam.archive.domain.refreshtoken.repository;
 
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
+import geulsam.archive.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -13,4 +14,5 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
      * @return
      */
     Optional<RefreshToken> findByToken(String token);
+    Optional<RefreshToken> findByUser(User user);
 }

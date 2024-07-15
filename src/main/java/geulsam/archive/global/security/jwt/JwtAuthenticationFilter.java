@@ -16,15 +16,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Objects;
 
 /** jwt 를 사용해서 사용자를 식별하는 필터 */
 @Component
@@ -55,10 +52,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 /* accessToken 의 id 를 사용하여 새로운 accessToken 생성 */
-                String id = jwtProvider.getID(accessToken);
-                String newAccessToken = jwtProvider.createAccessToken(Integer.valueOf(id));
-                response.setHeader("accessToken", "Bearer " + newAccessToken);
+//                String id = jwtProvider.getID(accessToken);
+//                String newAccessToken = jwtProvider.createAccessToken(Integer.valueOf(id));
+//                response.setHeader("accessToken", "Bearer " + newAccessToken);
                 filterChain.doFilter(request, response);
+                return;
             }
 
             if(refreshToken != null ){
@@ -68,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 /* 새로운 RefreshToken 생성 */
                 String newRefreshToken = jwtProvider.createRefreshToken();
-                String newAccessToken = jwtProvider.createAccessToken(refreshTokenInRepo.getId());
+                String newAccessToken = jwtProvider.createAccessToken(refreshTokenInRepo.getUser().getId());
 
                 /* Refresh 리포지토리를 업데이트 */
                 refreshTokenInRepo.changeTokenValue(newRefreshToken);
@@ -83,6 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setHeader("refreshToken", "Bearer " + newRefreshToken);
 
                 filterChain.doFilter(request, response);
+                return;
             }
             // 발생 가능한 에러들 처리
         } catch (UnsupportedJwtException e){

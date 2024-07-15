@@ -57,7 +57,9 @@ public class UploadManager {
         } catch (IOException | SdkClientException e){
             throw new ArchiveException(ErrorCode.VALUE_ERROR, e.getMessage());
         } finally {
-            file.delete();
+            if (file != null) {
+                file.delete();
+            }
         }
     }
 
@@ -68,7 +70,9 @@ public class UploadManager {
      * @throws IOException
      */
     private File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException{
+        String currentDir = System.getProperty("user.dir");
         File convertFile = new File(multipartFile.getOriginalFilename());
+
 
         if(convertFile.createNewFile()) {
             try(FileOutputStream fos = new FileOutputStream(convertFile)) {

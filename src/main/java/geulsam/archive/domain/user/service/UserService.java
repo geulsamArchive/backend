@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -81,9 +82,18 @@ public class UserService {
             String accessToken = jwtProvider.createAccessToken(user.getId());
             String refreshToken = jwtProvider.createRefreshToken();
 
-            /* refreshToken 은 tokenRepository 에 저장*/
-            RefreshToken refreshTokenObject = new RefreshToken(user.getId(), refreshToken);
-            refreshTokenRepository.save(refreshTokenObject);
+            /*refreshTokenRepository 에서 같은 아이디를 가진 유저 탐색*/
+            Optional<RefreshToken> userOptional = refreshTokenRepository.findByUser(user);
+
+            /*이미 해당 유저에 대한 refreshToken 이 존재한다면*/
+            if(userOptional.isPresent()){
+                /*토큰 업데이트*/
+                userOptional.get().changeTokenValue(refreshToken);
+            } else {
+                /* 존재하지 않는다면 refreshToken 은 tokenRepository 에 저장*/
+                RefreshToken refreshTokenObject = new RefreshToken(refreshToken, user);
+                refreshTokenRepository.save(refreshTokenObject);
+            }
 
             /* 토큰 2개를 담은 객체 리턴 */
             return new LoginRes(accessToken, refreshToken);
@@ -92,5 +102,4 @@ public class UserService {
             throw new RuntimeException("비밀번호 불일치");
         }
     }
-
 }
