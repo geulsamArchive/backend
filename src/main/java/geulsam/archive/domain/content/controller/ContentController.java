@@ -51,7 +51,7 @@ public class ContentController {
      * @return ContentInfoRes
      */
     @GetMapping("/{id}")
-    public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable Integer id) {
+    public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable String id) {
 
         ContentInfoRes contentInfoRes = contentService.getContentInfo(id);
 

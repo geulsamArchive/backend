@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,9 +78,9 @@ public class ContentService {
      * @return ContentInfoRes
      */
     @Transactional(readOnly = true)
-    public ContentInfoRes getContentInfo(Integer contentId) {
+    public ContentInfoRes getContentInfo(String contentId) {
 
-        Content findContent = contentRepository.findById(contentId).orElseThrow(() -> new ArchiveException(
+        Content findContent = contentRepository.findById(UUID.fromString(contentId)).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
 
