@@ -53,10 +53,7 @@ public class ContentController {
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable Integer id) {
 
-
         ContentInfoRes contentInfoRes = contentService.getContentInfo(id);
-
-        //contentInfoRes 채우기
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<ContentInfoRes>builder()

@@ -25,6 +25,14 @@ public class ContentService {
 
     private final ContentRepository contentRepository;
     private final ContentAwardRepository contentAwardRepository;
+
+    /**
+     * Content 전체를 리턴하는 트랜잭션
+     * @param field Content 객체의 genre 검색 문자열
+     * @param search Content 객체의 title 검색 문제열
+     * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
+     */
     @Transactional(readOnly = true)
     public PageRes<ContentRes> getContents(String field, String search, Pageable pageable) {
         Page<Content> contentPage;
@@ -63,22 +71,18 @@ public class ContentService {
         );
     }
 
+    /**
+     * Content 객체의 Id 1개를 받아 Content 의 세부사항을 리턴하는 트랜잭션
+     * @param contentId Content 객체의 id
+     * @return ContentInfoRes
+     */
     @Transactional(readOnly = true)
-    public ContentInfoRes getContentInfo(Integer id) {
+    public ContentInfoRes getContentInfo(Integer contentId) {
 
-        Content findContent = contentRepository.findById(id).orElseThrow(() -> new ArchiveException(
+        Content findContent = contentRepository.findById(contentId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
 
-        return new ContentInfoRes(
-                findContent.getId().toString(),
-                findContent.getGenre(),
-                findContent.getName(),
-                findContent.getUser().getName(),
-                findContent.getUser().getId().toString(),
-                findContent.getCreatedAt(),
-                //sentence?
-                findContent.getPdfUrl()
-        );
+        return new ContentInfoRes(findContent);
     }
 }
