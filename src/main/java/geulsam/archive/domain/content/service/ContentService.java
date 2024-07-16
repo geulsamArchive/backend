@@ -1,5 +1,8 @@
 package geulsam.archive.domain.content.service;
 
+import geulsam.archive.domain.book.entity.Book;
+import geulsam.archive.domain.book.repository.BookRepository;
+import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
 import geulsam.archive.domain.content.entity.Content;
@@ -7,6 +10,8 @@ import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.domain.contentAward.entity.ContentAward;
 import geulsam.archive.domain.contentAward.repository.ContentAwardRepository;
+import geulsam.archive.domain.user.entity.User;
+import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
@@ -16,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Console;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,6 +33,8 @@ public class ContentService {
 
     private final ContentRepository contentRepository;
     private final ContentAwardRepository contentAwardRepository;
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
 
     /**
      * Content 전체를 리턴하는 트랜잭션
@@ -86,4 +95,41 @@ public class ContentService {
 
         return new ContentInfoRes(findContent);
     }
+
+    @Transactional
+    public UUID upload(ContentUploadReq contentUploadReq) {
+        System.out.println(1);
+        User findUser = userRepository.findById(contentUploadReq.getUserId()).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+        Book findBook = bookRepository.findById(contentUploadReq.getBookId()).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 Book 없음"
+        ));  //추후 엔티티 변경하면서 null 허용하도록 한다.
+
+        Content newContent = new Content(
+                findUser,
+                findBook,
+                contentUploadReq.getName(),
+                contentUploadReq.getPdfUrl(),
+                contentUploadReq.getGenre(),
+                LocalDateTime.now(),
+                contentUploadReq.getIsVisible(),
+                contentUploadReq.getSentence()
+        );
+
+        /*엔티티 변경 후 적용할 코드*/
+        /*
+        if(contentUploadReq.getBookId() != null) {
+            Book book = bookRepository.getReferenceById(contentUploadReq.getBookId());
+            content.setBook(book);
+        }
+        content.setHtmlUrl(contentUploadReq.getHtmlUrl());
+        content.setBookPage(contentUploadReq.getBookPage());
+         */
+
+        Content savedContent = contentRepository.save(newContent);
+
+        return savedContent.getId();
+    }
+
 }

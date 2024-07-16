@@ -23,7 +23,7 @@ public class ContentRes {
     @Schema(example = "adsa-dsafdsa-vsadf-dsafdsa")
     private String contentId;
     /**Content 객체의 장르*/
-    @Schema(example = "소설")
+    @Schema(example = "NOVEL")
     private Genre type;
     /**Content 객체의 제목*/
     @Schema(example = "때때로 나는 회색분자라는 소리를 듣는다")
