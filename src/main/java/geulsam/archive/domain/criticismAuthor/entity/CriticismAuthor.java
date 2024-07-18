@@ -2,6 +2,7 @@ package geulsam.archive.domain.criticismAuthor.entity;
 
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.content.entity.Content;
+import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -32,13 +33,13 @@ public class CriticismAuthor {
 
     /**합평회 아이디
      */
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criticism_id")
     private Criticism criticism;
 
     /**작품 아이디
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
     private Content content;
 
@@ -48,6 +49,18 @@ public class CriticismAuthor {
     @Column(name = "criticism_author_order")
     private Integer order;
 
+    /** 작품 장르
+     * 타입 : Genre ENUM
+     */
+    @Column(name = "criticism_author_genre")
+    private Genre genre;
+
+    /** 승인 현황
+     * 타입 : Condition ENUM(FIXED, UNFIXED)
+     */
+    @Column(name = "criticism_author_condition")
+    private Condition condition;
+
     /**클로버노트 주소
      * 타입: varchar(100)
      */
@@ -56,9 +69,12 @@ public class CriticismAuthor {
 
     /**생성자
      */
-    public CriticismAuthor(User author, Criticism criticism) {
+    public CriticismAuthor(User author, Criticism criticism, int order, Genre genre) {
         this.author = author;
         this.criticism = criticism;
+        this.order = order;
+        this.genre = genre;
+        this.condition = Condition.UNFIXED;
     }
 
 }
