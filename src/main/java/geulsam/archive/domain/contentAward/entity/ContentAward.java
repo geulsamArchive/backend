@@ -53,7 +53,7 @@ public class ContentAward {
     /** 생성자
      */
     public ContentAward(Content content, Award award, User recipient, LocalDate contentAwardAt) {
-        this.content = content;
+        this.content = content;   //수정 필요
         this.award = award;
         this.presenter = recipient;
         this.contentAwardAt = contentAwardAt;

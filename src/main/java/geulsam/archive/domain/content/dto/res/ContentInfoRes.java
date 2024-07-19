@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 public class ContentInfoRes {
     @Schema(example = "adsa-dsafdsa-vsadf-dsafdsa")
     private String id;
-    @Schema(example = "NOVEL")
-    private Genre type;
     @Schema(example = "별뜨기에 관하여")
     private String title;
     @Schema(example = "박연준")
@@ -31,6 +29,10 @@ public class ContentInfoRes {
     private LocalDateTime createdAt;
     @Schema(example = "https://example.com")
     private String pdf;
+    @Schema(example = "https://example.com")
+    private String html;
+    @Schema(example = "NOVEL")
+    private Genre type;
 
     public ContentInfoRes(Content content) {
         this.id = content.getId().toString();
@@ -41,5 +43,6 @@ public class ContentInfoRes {
         this.sentence = content.getSentence();
         this.createdAt = content.getCreatedAt();
         this.pdf = content.getPdfUrl();
+        this.html = content.getHtmlUrl();
     }
 }
