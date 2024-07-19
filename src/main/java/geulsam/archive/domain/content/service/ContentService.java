@@ -21,9 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Console;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -67,7 +66,7 @@ public class ContentService {
         } else {
             contentPage = contentRepository.findAll(pageable);
         }
-        //N+1 문제 해결 필요
+
         List<ContentRes> contentResList = contentPage.getContent().stream()
                 .map(content -> {
                     List<ContentAward> awards = contentAwardRepository.findByContentId(content.getId());
@@ -98,38 +97,27 @@ public class ContentService {
 
     @Transactional
     public UUID upload(ContentUploadReq contentUploadReq) {
-        System.out.println(1);
         User findUser = userRepository.findById(contentUploadReq.getUserId()).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
         ));
-        Book findBook = bookRepository.findById(contentUploadReq.getBookId()).orElseThrow(() -> new ArchiveException(
-                ErrorCode.VALUE_ERROR, "해당 Book 없음"
-        ));  //추후 엔티티 변경하면서 null 허용하도록 한다.
 
-        Content newContent = new Content(
-                findUser,
-                findBook,
-                contentUploadReq.getName(),
-                contentUploadReq.getPdfUrl(),
-                contentUploadReq.getGenre(),
-                LocalDateTime.now(),
-                contentUploadReq.getIsVisible(),
-                contentUploadReq.getSentence()
-        );
+        Optional<Book> findBook = bookRepository.findById(contentUploadReq.getBookId());
 
-        /*엔티티 변경 후 적용할 코드*/
-        /*
-        if(contentUploadReq.getBookId() != null) {
-            Book book = bookRepository.getReferenceById(contentUploadReq.getBookId());
-            content.setBook(book);
-        }
-        content.setHtmlUrl(contentUploadReq.getHtmlUrl());
-        content.setBookPage(contentUploadReq.getBookPage());
-         */
+        Content newContent = Content.builder()
+                .user(findUser)
+                .book(findBook.orElse(null))
+                .name(contentUploadReq.getName())
+                .pdfUrl(contentUploadReq.getPdfUrl())
+                .htmlUrl(contentUploadReq.getHtmlUrl())
+                .genre(contentUploadReq.getGenre())
+                .isVisible(contentUploadReq.getIsVisible())
+                .bookPage(contentUploadReq.getBookPage())
+                .sentence(contentUploadReq.getSentence())
+                .build();
+
 
         Content savedContent = contentRepository.save(newContent);
 
         return savedContent.getId();
     }
-
 }
