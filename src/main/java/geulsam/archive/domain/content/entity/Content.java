@@ -97,7 +97,6 @@ public class Content {
     @Column(name = "content_sentence", length = 256)
     private String sentence;
 
-    @Builder
     public Content(User user, Book book, String name, String pdfUrl, String htmlUrl, Genre genre, LocalDateTime createdAt, IsVisible isVisible, Integer bookPage, String sentence){
         this.id = UUID.randomUUID();
         this.user = Objects.requireNonNull(user, "User cannot be null");

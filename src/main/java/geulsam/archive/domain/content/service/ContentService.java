@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -103,18 +104,18 @@ public class ContentService {
 
         Optional<Book> findBook = bookRepository.findById(contentUploadReq.getBookId());
 
-        Content newContent = Content.builder()
-                .user(findUser)
-                .book(findBook.orElse(null))
-                .name(contentUploadReq.getName())
-                .pdfUrl(contentUploadReq.getPdfUrl())
-                .htmlUrl(contentUploadReq.getHtmlUrl())
-                .genre(contentUploadReq.getGenre())
-                .isVisible(contentUploadReq.getIsVisible())
-                .bookPage(contentUploadReq.getBookPage())
-                .sentence(contentUploadReq.getSentence())
-                .build();
-
+        Content newContent = new Content(
+                findUser,
+                findBook.orElse(null),
+                contentUploadReq.getName(),
+                contentUploadReq.getPdfUrl(),
+                contentUploadReq.getHtmlUrl(),
+                contentUploadReq.getGenre(),
+                LocalDateTime.now(),
+                contentUploadReq.getIsVisible(),
+                contentUploadReq.getBookPage(),
+                contentUploadReq.getSentence()
+        );
 
         Content savedContent = contentRepository.save(newContent);
 
