@@ -105,7 +105,7 @@ public class Content {
         this.pdfUrl = pdfUrl;
         this.htmlUrl = htmlUrl;
         this.genre = genre != null ? genre : Genre.OTHERS;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.isVisible = isVisible != null ? isVisible : IsVisible.PRIVATE;
         this.viewCount = 0;
         this.bookPage = bookPage;
