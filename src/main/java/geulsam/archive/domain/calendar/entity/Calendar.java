@@ -7,11 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter(AccessLevel.PROTECTED)
+@DiscriminatorValue("CALENDAR")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Calendar {
 
     /**기본키
@@ -30,10 +33,22 @@ public class Calendar {
     private String title;
 
     /**일시
-     * 타입: date
+     * 타입: LocalDateTime
      */
-    @Column(name = "calendar_date")
-    private LocalDate date;
+    @Column(name = "calendar_start")
+    private LocalDateTime start;
+
+    /**종료 일시
+     * 타입: LocalDateTime
+     */
+    @Column(name = "calendar_end")
+    private LocalDateTime end;
+
+    /** 장소
+     * 타입: varchar(20)
+     */
+    @Column(name = "calendar_locate", length = 20)
+    private String locate;
 
     /**소개
      * 타입: varchar(100)
@@ -41,9 +56,11 @@ public class Calendar {
     @Column(name = "calendar_introduce", length =100)
     private String introduce;
 
-    public Calendar(String title, LocalDate date, String introduce) {
+    public Calendar(String title, LocalDateTime start, LocalDateTime end, String locate, String introduce) {
         this.title = title;
-        this.date = date;
+        this.start = start;
+        this.end = end;
+        this.locate = locate;
         this.introduce = introduce;
     }
 }

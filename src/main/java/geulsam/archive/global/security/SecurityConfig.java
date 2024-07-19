@@ -66,6 +66,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/content/**").permitAll()
+                                // 일정 관련
+                                .requestMatchers(HttpMethod.POST, "/calendar").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/calendar").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/calendar").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/calendar/criticism").permitAll()
+                                // 합평회 관련
+                                .requestMatchers(HttpMethod.POST, "/criticismAuthor").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/criticismAuthor").authenticated()
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",
