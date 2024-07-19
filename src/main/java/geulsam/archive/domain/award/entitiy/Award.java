@@ -50,4 +50,8 @@ public class Award {
         this.explain = explain;
         this.createdAt = createdAt != null ? createdAt : LocalDate.now();
     }
+
+    public void changeExplain(String explain) {
+        this.explain = explain;
+    }
 }
