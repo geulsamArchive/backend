@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**Award Entity**/
 @Entity
@@ -43,10 +44,14 @@ public class Award {
     private LocalDate createdAt;
 
     /**생성자
-     * NOT NULL 이어야 하는 값들을 인자로 받음
      */
-    public Award(String name, LocalDate createdAt) {
+    public Award(String name, String explain, LocalDate createdAt) {
         this.name = name;
-        this.createdAt = createdAt;
+        this.explain = explain;
+        this.createdAt = createdAt != null ? createdAt : LocalDate.now();
+    }
+
+    public void changeExplain(String explain) {
+        this.explain = explain;
     }
 }

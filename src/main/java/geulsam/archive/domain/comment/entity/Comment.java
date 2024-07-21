@@ -53,18 +53,15 @@ public class Comment {
     private Content content;
 
     /**생성자
-     * NOT NULL 이어야 하는 값들을 인자로 받음
      */
     public Comment(String writing, LocalDateTime createdAt, User user, Content content){
         this.writing = writing;
-        this.createdAt = createdAt;
-
-        /*user-comment 연관관계 설정*/
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.user = user;
-//        user.getComments().add(this);
-
-        /*content-comment 연관관계 설정*/
         this.content = content;
-//        content.getComments().add(this);
+    }
+
+    public void changeWriting(String writing) {
+        this.writing = writing;
     }
 }

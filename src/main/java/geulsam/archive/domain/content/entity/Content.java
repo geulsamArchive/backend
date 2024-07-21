@@ -2,13 +2,13 @@ package geulsam.archive.domain.content.entity;
 
 import geulsam.archive.domain.book.entity.Book;
 import geulsam.archive.domain.user.entity.User;
+import geulsam.archive.global.exception.ArchiveException;
+import geulsam.archive.global.exception.ErrorCode;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -19,7 +19,7 @@ public class Content {
 
     /**기본키
      * 생성 전략: UUID 자동 생성
-     * 타입: Integer
+     * 타입: UUID
      * */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,10 +30,10 @@ public class Content {
      * 타입: User
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    /**문집 아이디
+    /**연관된 문집
      * 타입: Book
      */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,7 +43,7 @@ public class Content {
     /**콘텐츠 이름
      * 타입: varchar(100)
      */
-    @Column(name = "content_name", length = 100)
+    @Column(name = "content_name", length = 100, nullable = false)
     private String name;
 
     /**pdf 콘텐츠 저장 url
@@ -68,7 +68,7 @@ public class Content {
     /**콘텐츠 등록일시
      * 타입: datetime(6)
      */
-    @Column(name = "content_created_at")
+    @Column(name = "content_created_at", nullable = false)
     private LocalDateTime createdAt;
 
     /**콘텐츠 공개여부
@@ -80,6 +80,7 @@ public class Content {
 
     /**콘텐츠 조회수
      * 타입: Integer
+     * 초기값: 0
      */
     @Column(name = "content_view_count")
     private Integer viewCount;
@@ -90,30 +91,85 @@ public class Content {
     @Column(name = "content_book_page")
     private Integer bookPage;
 
-    /**콘텐프 소개
+    /**콘텐츠 소개
      * 타입: varchar(255)
      */
     @Column(name = "content_sentence", length = 256)
     private String sentence;
 
-    /**Content-Comment 양방향 매핑
-     * 콘텐츠에 작성된 코멘트 list
+    /**
+     * 생성자
      */
-//    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL)
-//    private List<Comment> comments = new ArrayList<>();
-
-    public Content(User user, Book book, String name, String pdfUrl, Genre genre, LocalDateTime createdAt, IsVisible isVisible, String sentence){
+    public Content(User user, Book book, String name, String pdfUrl, String htmlUrl, Genre genre, LocalDateTime createdAt, IsVisible isVisible, Integer bookPage, String sentence){
         this.id = UUID.randomUUID();
-        this.user = user;
+        this.user = Objects.requireNonNull(user, "User cannot be null");
         this.book = book;
-        /*user-content 연관관계 설정*/
-//        user.getContents().add(this);
-        this.name = name;
+        this.name = Objects.requireNonNull(name, "Name cannot be null");
         this.pdfUrl = pdfUrl;
-        this.genre = genre;
-        this.createdAt = createdAt;
-        this.isVisible = isVisible;
+        this.htmlUrl = htmlUrl;
+        this.genre = genre != null ? genre : Genre.OTHERS;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+        this.isVisible = isVisible != null ? isVisible : IsVisible.PRIVATE;
         this.viewCount = 0;
+        this.bookPage = bookPage;
         this.sentence = sentence;
+    }
+
+    public void updateContent(String newName, String newPdfUrl, String newHtmlUrl, Genre newGenre, String newSentence, IsVisible newIsVisible) {
+        this.name = newName;
+        this.pdfUrl = newPdfUrl;
+        this.htmlUrl = newHtmlUrl;
+        this.genre = newGenre;
+        this.sentence = newSentence;
+        this.isVisible = newIsVisible;
+    }
+
+    public void changeAuthor(User newUser) {
+        if(!this.user.equals(newUser)) {
+            this.user = Objects.requireNonNull(newUser, "User cannot be null");
+        }
+    }
+
+    public void changePdfUrl(String newPdfUrl) {
+        this.pdfUrl = newPdfUrl;
+    }
+
+    public void changeHtmlUrl(String newHtmlUrl) {
+        this.htmlUrl = newHtmlUrl;
+    }
+
+    public void changeGenre(Genre genre) { this.genre = genre; }
+
+    public void changeIsVisible(IsVisible isVisible) {
+        this.isVisible = isVisible;
+    }
+
+    /**
+     * 콘텐츠의 페이지 번호 변경 메서드
+     * 페이지 번호는 0 이상이어야 합니다.
+     */
+    public void changeBookPage(Integer newBookPage) {
+        if (newBookPage != null && newBookPage < 0) {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "Page number must be non-negative");
+        }
+
+        if(!Objects.equals(this.bookPage, newBookPage)) {
+            this.bookPage = newBookPage;
+        }
+    }
+
+    public void changeSentence(String sentence) { this.sentence = sentence; }
+
+    public void moveToBook(Book newBook, Integer newBookPage) {
+        this.book = newBook;
+        this.bookPage = newBookPage;
+    }
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
+
+    public void resetViewCount() {
+        this.viewCount = 0;
     }
 }

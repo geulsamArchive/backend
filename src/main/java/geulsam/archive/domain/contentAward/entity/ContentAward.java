@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@BatchSize(size = 100)
 public class ContentAward {
 
     /**기본키
@@ -32,7 +34,7 @@ public class ContentAward {
     @JoinColumn(name = "content_id")
     private Content content;
 
-    /**상 아이디
+    /**상
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "award_id")
