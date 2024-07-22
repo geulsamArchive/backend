@@ -1,6 +1,5 @@
 package geulsam.archive.domain.content.dto.res;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;

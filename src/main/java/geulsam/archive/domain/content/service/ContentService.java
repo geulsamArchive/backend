@@ -39,7 +39,7 @@ public class ContentService {
     /**
      * Content 전체를 리턴하는 트랜잭션
      * @param field Content 객체의 genre 검색 문자열
-     * @param search Content 객체의 title 검색 문제열
+     * @param search Content 객체의 title 검색 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
      * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
      */
