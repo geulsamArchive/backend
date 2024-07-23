@@ -16,7 +16,7 @@ import java.util.UUID;
 public class ContentUploadReq {
     @Schema(description = "작가 아이디", example = "1")
     private int userId;
-    @Schema(description = "작품 아이디", example = "adsa-dsafdsa-vsadf-dsafdsa")
+    @Schema(description = "문집 아이디", example = "adsa-dsafdsa-vsadf-dsafdsa")
     private UUID bookId;
     @Schema(description = "작품 제목", example = "때때로 나는 회색분자라는 소리를 듣는다")
     private String name;
