@@ -41,4 +41,24 @@ public class CommentController {
                         .build()
         );
     }
+
+    @PostMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "댓글 등록 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Integer>> upload(@RequestBody CommentUploadReq commentUploadReq) {
+        int commentId = commentService.upload(commentUploadReq);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Integer>builder()
+                        .data(commentId)
+                        .status(HttpStatus.CREATED.value())
+                        .message("댓글 업로드 성공")
+                        .build()
+        );
+    }
 }
