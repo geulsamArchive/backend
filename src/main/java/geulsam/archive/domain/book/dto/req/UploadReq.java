@@ -13,8 +13,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Setter(AccessLevel.PROTECTED)
 public class UploadReq {
-
     private MultipartFile bookCover;
+    private MultipartFile bookCoverThumbnail;
+    private MultipartFile backCover;
+    private MultipartFile backCoverThumbnail;
     private MultipartFile pdf;
     private String designer;
     private String plate;
@@ -23,5 +25,5 @@ public class UploadReq {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate release;
     private String title;
-    private MultipartFile bookCoverThumbnail;
+
 }

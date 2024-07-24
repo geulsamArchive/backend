@@ -87,8 +87,10 @@ public class BookService {
         String bookUrl = uploadManager.uploadFile(uploadReq.getPdf(), book.getId(), "book");
         String bookCoverUrl = uploadManager.uploadFile(uploadReq.getBookCover(), book.getId(), "bookCover");
         String bookCoverThumbNail = uploadManager.uploadFile(uploadReq.getBookCoverThumbnail(), book.getId(), "bookCoverThumbNail");
+        String backCoverUrl = uploadManager.uploadFile(uploadReq.getBackCover(), book.getId(), "backCover");
+        String backCoverThumbNail = uploadManager.uploadFile(uploadReq.getBackCoverThumbnail(), book.getId(), "backCoverThumbNail");
 
-        book.saveS3publicUrl(bookUrl, bookCoverUrl, bookCoverThumbNail);
+        book.saveS3publicUrl(bookUrl, bookCoverUrl, bookCoverThumbNail, backCoverUrl, backCoverThumbNail);
     }
 
     @Transactional
@@ -100,6 +102,8 @@ public class BookService {
         deleteManager.deleteFile(book.getId(), "book");
         deleteManager.deleteFile(book.getId(), "bookCover");
         deleteManager.deleteFile(book.getId(), "bookCoverThumbNail");
+        deleteManager.deleteFile(book.getId(), "backCover");
+        deleteManager.deleteFile(book.getId(), "backCoverThumbNail");
 
         bookRepository.deleteById(book.getId());
     }
