@@ -17,7 +17,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/content-awards")
+@RequestMapping(value = "/content-award")
 public class ContentAwardController {
 
     private final ContentAwardService contentAwardService;

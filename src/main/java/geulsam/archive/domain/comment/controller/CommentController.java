@@ -61,4 +61,25 @@ public class CommentController {
                         .build()
         );
     }
+
+    @DeleteMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "댓글 삭제 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Void>> delete(
+            @RequestParam int id
+    ) {
+        commentService.delete(id);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("댓글 삭제 성공")
+                        .build()
+        );
+    }
 }

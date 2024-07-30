@@ -62,4 +62,12 @@ public class CommentService {
 
         return savedComment.getId();
     }
+
+    public void delete(int id) {
+        Comment comment = commentRepository.findById(id).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 comment 없음")
+        );
+
+        commentRepository.deleteById(comment.getId());
+    }
 }
