@@ -68,12 +68,15 @@ public class SecurityConfig {
                                 // 상 관련
                                 .requestMatchers(HttpMethod.POST, "/award/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/award/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/award/**").permitAll()
                                 // 댓글 관련
                                 .requestMatchers(HttpMethod.POST, "/comment/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/comment/**").permitAll()
                                 // 작품 관련
                                 .requestMatchers(HttpMethod.POST, "/content/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/content/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/content/**").permitAll()
                                 // 작품상 관련
                                 .requestMatchers(HttpMethod.POST, "/comment-award/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/comment-award/**").permitAll()
