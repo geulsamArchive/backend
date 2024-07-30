@@ -4,7 +4,11 @@ import geulsam.archive.domain.award.dto.req.AwardUploadReq;
 import geulsam.archive.domain.award.dto.res.AwardRes;
 import geulsam.archive.domain.award.entitiy.Award;
 import geulsam.archive.domain.award.repository.AwardRepository;
+import geulsam.archive.domain.contentAward.entity.ContentAward;
+import geulsam.archive.domain.contentAward.repository.ContentAwardRepository;
 import geulsam.archive.global.common.dto.PageRes;
+import geulsam.archive.global.exception.ArchiveException;
+import geulsam.archive.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +24,7 @@ import java.util.stream.Collectors;
 public class AwardService {
 
     private final AwardRepository awardRepository;
+    private final ContentAwardRepository contentAwardRepository;
 
     /**
      * Award 전체를 리턴하는 트랜잭션
@@ -69,5 +74,24 @@ public class AwardService {
         Award savedAward = awardRepository.save(newAward);
 
         return savedAward.getId();
+    }
+
+    /**
+     * 관련 Content의 award 필드를 null로 설정하고 해당 Award를 삭제한다.
+     * @param id 삭제할 상의 id 값
+     */
+    @Transactional
+    public void delete(int id) {
+        Award award = awardRepository.findById(id).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 award 없음")
+        );
+
+        List<ContentAward> contentAwardList = contentAwardRepository.findByAward(award);
+        for(ContentAward contentAward : contentAwardList) {
+            contentAward.changeAward(null);
+        }
+        contentAwardRepository.saveAll(contentAwardList);
+
+        awardRepository.deleteById(award.getId());
     }
 }

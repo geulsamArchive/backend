@@ -1,5 +1,6 @@
 package geulsam.archive.domain.contentAward.repository;
 
+import geulsam.archive.domain.award.entitiy.Award;
 import geulsam.archive.domain.contentAward.entity.ContentAward;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,4 +14,6 @@ public interface ContentAwardRepository extends JpaRepository<ContentAward, Inte
     List<ContentAward> findByContentId(UUID contentId);
 
     Page<ContentAward> findByContentAwardAtGreaterThanEqualAndContentAwardAtLessThanEqual(LocalDate startDate, LocalDate endDate, Pageable pageable);
+
+    List<ContentAward> findByAward(Award award);
 }

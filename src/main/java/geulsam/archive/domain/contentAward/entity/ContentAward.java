@@ -60,4 +60,8 @@ public class ContentAward {
         this.presenter = recipient;
         this.contentAwardAt = contentAwardAt;
     }
+
+    public void changeAward(Award award) {
+        this.award = award;
+    }
 }

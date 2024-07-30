@@ -96,4 +96,28 @@ public class AwardController {
                         .build()
         );
     }
+
+    /**
+     * 관련 Content의 award 필드를 null로 설정하고 해당 Award를 삭제한다.
+     * @param id 삭제할 상의 id 값
+     * @return void
+     */
+    @DeleteMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "상 삭제 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Void>> delete(int id) {
+        awardService.delete(id);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("상 삭제 성공")
+                        .build()
+        );
+    }
 }
