@@ -1,5 +1,6 @@
 package geulsam.archive.domain.award.service;
 
+import geulsam.archive.domain.award.dto.req.AwardUploadReq;
 import geulsam.archive.domain.award.dto.res.AwardRes;
 import geulsam.archive.domain.award.entitiy.Award;
 import geulsam.archive.domain.award.repository.AwardRepository;
@@ -55,5 +56,18 @@ public class AwardService {
                 awardPage.getTotalPages(),
                 awardResList
         );
+    }
+
+    @Transactional
+    public Integer upload(AwardUploadReq awardUploadReq) {
+        Award newAward = new Award(
+                awardUploadReq.getName(),
+                awardUploadReq.getExplain(),
+                LocalDate.now()
+        );
+
+        Award savedAward = awardRepository.save(newAward);
+
+        return savedAward.getId();
     }
 }

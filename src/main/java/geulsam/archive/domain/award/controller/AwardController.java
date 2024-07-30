@@ -1,9 +1,12 @@
 package geulsam.archive.domain.award.controller;
 
+import geulsam.archive.domain.award.dto.req.AwardUploadReq;
 import geulsam.archive.domain.award.dto.res.AwardRes;
 import geulsam.archive.domain.award.service.AwardService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,5 +71,29 @@ public class AwardController {
         );
     }
 
+    /**
+     * 상 업로드 API
+     * @param awardUploadReq Award 객체 생성에 필요한 정보를 담은 DTO
+     * @return Integer 저장한 Award 객체의 id
+     */
+    @PostMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "상 등록 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Integer>> upload(@ModelAttribute AwardUploadReq awardUploadReq) {
 
+        Integer awardId = awardService.upload(awardUploadReq);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Integer>builder()
+                        .data(awardId)
+                        .status(HttpStatus.CREATED.value())
+                        .message("상 업로드 성공")
+                        .build()
+        );
+    }
 }
