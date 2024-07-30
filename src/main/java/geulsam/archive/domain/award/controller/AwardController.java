@@ -84,7 +84,7 @@ public class AwardController {
                     useReturnTypeSchema = true
             )
     })
-    public ResponseEntity<SuccessResponse<Integer>> upload(@ModelAttribute AwardUploadReq awardUploadReq) {
+    public ResponseEntity<SuccessResponse<Integer>> upload(@RequestBody AwardUploadReq awardUploadReq) {
 
         Integer awardId = awardService.upload(awardUploadReq);
 
