@@ -100,19 +100,21 @@ public class Content {
     /**
      * 생성자
      */
-    public Content(User user, Book book, String name, String pdfUrl, String htmlUrl, Genre genre, LocalDateTime createdAt, IsVisible isVisible, Integer bookPage, String sentence){
-        this.id = UUID.randomUUID();
+    public Content(User user, Book book, String name, Genre genre, LocalDateTime createdAt, IsVisible isVisible, Integer bookPage, String sentence){
         this.user = Objects.requireNonNull(user, "User cannot be null");
         this.book = book;
         this.name = Objects.requireNonNull(name, "Name cannot be null");
-        this.pdfUrl = pdfUrl;
-        this.htmlUrl = htmlUrl;
         this.genre = genre != null ? genre : Genre.OTHERS;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.isVisible = isVisible != null ? isVisible : IsVisible.PRIVATE;
         this.viewCount = 0;
         this.bookPage = bookPage;
         this.sentence = sentence;
+    }
+
+    public void saveS3publicUrl(String pdfUrl, String htmlUrl) {
+        this.pdfUrl = pdfUrl;
+        this.htmlUrl = htmlUrl;
     }
 
     public void updateContent(String newName, String newPdfUrl, String newHtmlUrl, Genre newGenre, String newSentence, IsVisible newIsVisible) {

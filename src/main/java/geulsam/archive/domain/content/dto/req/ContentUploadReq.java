@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -20,10 +21,10 @@ public class ContentUploadReq {
     private UUID bookId;
     @Schema(description = "작품 제목", example = "때때로 나는 회색분자라는 소리를 듣는다")
     private String name;
-    @Schema(description = "작품 저장 pdf url", example = "https://example.com")
-    private String pdfUrl;
-    @Schema(description = "작품 저장 html url", example = "https://example.com")
-    private String htmlUrl;
+    @Schema(description = "pdf 형식의 작품 파일")
+    private MultipartFile pdf;
+    @Schema(description = "html 형식의 작품 파일")
+    private MultipartFile html;
     @Schema(description = "작품 장르", example = "NOVEL")
     private Genre genre;
     @Schema(description = "작품 공개여부", example = "EVERY")

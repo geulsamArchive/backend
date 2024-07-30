@@ -71,7 +71,7 @@ public class ContentController {
     /**
      * 작품 업로드 API
      * @param contentUploadReq Content 객체 생성에 필요한 정보를 담은 DTO
-     * @return UUID
+     * @return UUID 저장한 Content 객체의 id
      */
     @PostMapping()
     @ApiResponses(value = {
@@ -81,7 +81,7 @@ public class ContentController {
                     useReturnTypeSchema = true
             )
     })
-    public ResponseEntity<SuccessResponse<UUID>> upload(@RequestBody ContentUploadReq contentUploadReq) {
+    public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute ContentUploadReq contentUploadReq) {
 
         UUID contentId = contentService.upload(contentUploadReq);
 

@@ -15,6 +15,8 @@ import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
+import geulsam.archive.global.s3.DeleteManager;
+import geulsam.archive.global.s3.UploadManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,8 @@ public class ContentService {
     private final ContentAwardRepository contentAwardRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final UploadManager uploadManager;
+    private final DeleteManager deleteManager;
 
     /**
      * Content 전체를 리턴하는 트랜잭션
@@ -96,6 +100,12 @@ public class ContentService {
         return new ContentInfoRes(findContent);
     }
 
+    /**
+     * contentUploadReq 객체를 받은 뒤 객체 안의 MultipartFile을 저장하고 url을 받아 옴.
+     * 받아온 url과 uploadReq 객체를 사용해 Content 객체를 만들고 repository에 저장
+     * @param contentUploadReq Content 객체를 생성할 수 있는 정보와 MultipartFile이 담긴 DTO
+     * @return UUID 저장한 Content 객체의 id
+     */
     @Transactional
     public UUID upload(ContentUploadReq contentUploadReq) {
         User findUser = userRepository.findById(contentUploadReq.getUserId()).orElseThrow(() -> new ArchiveException(
@@ -104,18 +114,22 @@ public class ContentService {
 
         Optional<Book> findBook = bookRepository.findById(contentUploadReq.getBookId());
 
+
         Content newContent = new Content(
                 findUser,
                 findBook.orElse(null),
                 contentUploadReq.getName(),
-                contentUploadReq.getPdfUrl(),
-                contentUploadReq.getHtmlUrl(),
                 contentUploadReq.getGenre(),
                 LocalDateTime.now(),
                 contentUploadReq.getIsVisible(),
                 contentUploadReq.getBookPage(),
                 contentUploadReq.getSentence()
         );
+
+        String pdfUrl = uploadManager.uploadFile(contentUploadReq.getPdf(), newContent.getId(), "contentPdf");
+        String htmlUrl = uploadManager.uploadFile(contentUploadReq.getHtml(), newContent.getId(), "contentHtml");
+
+        newContent.saveS3publicUrl(pdfUrl, htmlUrl);
 
         Content savedContent = contentRepository.save(newContent);
 
