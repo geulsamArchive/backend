@@ -135,4 +135,28 @@ public class ContentService {
 
         return savedContent.getId();
     }
+
+    /**
+     * Content
+     * @param field 삭제하고 싶은 문집이 가진 필드
+     * @param search 삭제할 문집의 필드 값
+     */
+    @Transactional
+    public void delete(String field, String search) {
+        Content content;
+
+        if (field.equals("id")) {
+            content = contentRepository.findById(UUID.fromString(search)).orElseThrow(
+                    () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 content 없음")
+            );
+        } else {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "유효하지 않은 검색 필드");
+        }
+
+        deleteManager.deleteFile(content.getId(), "contentPdf");
+        deleteManager.deleteFile(content.getId(), "contentHtml");
+
+        contentRepository.deleteById(content.getId());
+
+    }
 }

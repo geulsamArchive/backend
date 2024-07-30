@@ -93,4 +93,32 @@ public class ContentController {
                         .build()
         );
     }
+
+    /**
+     * 작품 삭제 API
+     * @param field 기본값은 id, 삭제하고 싶은 작품이 가진 필드를 지정(ex. id, user, book...)
+     * @param search 기본값 없음. 삭제할 작품의 필드 값을 지정
+     * @return null
+     */
+    @DeleteMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "작품 삭제 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Void>> delete(
+            @RequestParam(defaultValue = "id") String field,
+            @RequestParam String search
+    ) {
+        contentService.delete(field, search);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("작품 삭제 성공")
+                        .build()
+        );
+    }
 }

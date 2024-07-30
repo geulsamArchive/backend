@@ -65,7 +65,18 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
+                                // 상 관련
+                                .requestMatchers(HttpMethod.POST, "/award/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/award/**").permitAll()
+                                // 댓글 관련
+                                .requestMatchers(HttpMethod.POST, "/comment/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/comment/**").permitAll()
+                                // 작품 관련
+                                .requestMatchers(HttpMethod.POST, "/content/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/content/**").permitAll()
+                                // 작품상 관련
+                                .requestMatchers(HttpMethod.POST, "/comment-award/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/comment-award/**").permitAll()
                                 // 일정 관련
                                 .requestMatchers(HttpMethod.POST, "/calendar").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/calendar").permitAll()
