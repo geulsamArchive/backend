@@ -48,9 +48,9 @@ public class AwardController {
      * @param page 조회할 페이지 번호 (기본값: 1)
      * @return PageRes<AwardRes> 특정 연도에 대한 상 목록을 포함하는 페이지 결과
      */
-    @GetMapping()
+    @GetMapping("/{year}")
     public ResponseEntity<SuccessResponse<PageRes<AwardRes>>> getAwardsByYear(
-            @RequestParam(defaultValue = "year") int year,
+            @PathVariable int year,
             @RequestParam(defaultValue = "1") int page
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
