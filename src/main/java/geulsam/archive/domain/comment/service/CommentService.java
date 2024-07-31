@@ -1,5 +1,6 @@
 package geulsam.archive.domain.comment.service;
 
+import geulsam.archive.domain.award.dto.req.CommentUpdateReq;
 import geulsam.archive.domain.comment.dto.req.CommentUploadReq;
 import geulsam.archive.domain.comment.dto.res.CommentRes;
 import geulsam.archive.domain.comment.entity.Comment;
@@ -43,6 +44,7 @@ public class CommentService {
 
     @Transactional
     public int upload(CommentUploadReq commentUploadReq) {
+
         Content findContent = contentRepository.findById(commentUploadReq.getContentId()).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
@@ -63,11 +65,30 @@ public class CommentService {
         return savedComment.getId();
     }
 
+    @Transactional
     public void delete(int id) {
-        Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 comment 없음")
-        );
+
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 id의 comment 없음"
+        ));
 
         commentRepository.deleteById(comment.getId());
+    }
+
+    @Transactional
+    public CommentRes update(int commentId, CommentUpdateReq commentUpdateReq, int userId) {
+
+        Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 Comment 없음"
+        ));
+
+        if (!findComment.getUser().getId().equals(userId)) {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
+        }
+
+        findComment.changeWriting(commentUpdateReq.getWriting() + "(수정됨)");
+        Comment savedComment = commentRepository.save(findComment);
+
+        return new CommentRes(savedComment, savedComment.getId());
     }
 }
