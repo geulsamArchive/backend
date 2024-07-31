@@ -3,6 +3,7 @@ package geulsam.archive.domain.content.controller;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
+import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
@@ -26,19 +27,19 @@ public class ContentController {
     /**
      * DB에 있는 모든 작품 조회
      * @param page 조회할 페이지 번호 (기본값: 1)
-     * @param field 검색하고 싶은 작품이 가진 필드를 지정(ex. id, user...)
-     * @param search 해당 필드에서 검색할 키워드
+     * @param genre 검색할 콘텐츠 객체의 genre
+     * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @return PageRes<ContentRes> 생성된 순서대로 정렬된 콘텐츠 목록을 포함하는 페이지 결과
      */
     @GetMapping()
     public ResponseEntity<SuccessResponse<PageRes<ContentRes>>> getContents(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(required = false) String field,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) Genre genre,
+            @RequestParam(required = false) String keyword
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
 
-        PageRes<ContentRes> contentResList = contentService.getContents(field, search, pageable);
+        PageRes<ContentRes> contentResList = contentService.getContents(genre, keyword, pageable);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<ContentRes>>builder()

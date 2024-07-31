@@ -42,31 +42,22 @@ public class ContentService {
 
     /**
      * Content 전체를 리턴하는 트랜잭션
-     * @param field Content 객체의 genre 검색 문자열
-     * @param search Content 객체의 title 검색 문자열
+     * @param genre 검색할 콘텐츠 객체의 genre
+     * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
      * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional(readOnly = true)
-    public PageRes<ContentRes> getContents(String field, String search, Pageable pageable) {
+    public PageRes<ContentRes> getContents(Genre genre, String keyword, Pageable pageable) {
         Page<Content> contentPage;
-        Genre genre = null;
-        if (field != null) {
-            try {
-                genre = Genre.valueOf(field.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new ArchiveException(ErrorCode.VALUE_ERROR, "Invalid category: " + field);
-            }
-        }
 
-        if (genre != null && search != null) {
-            contentPage = contentRepository.findByGenreAndNameContaining(genre, search, pageable);
-
+        if (genre != null && keyword != null) {
+            contentPage = contentRepository.findByGenreAndNameContainingOrUser_NameContaining(genre, keyword, keyword, pageable);
         } else if (genre != null) {
             contentPage = contentRepository.findByGenre(genre, pageable);
 
-        } else if (search != null) {
-            contentPage = contentRepository.findByNameContaining(search, pageable);
+        } else if (keyword != null) {
+            contentPage = contentRepository.findByNameContainingOrUser_NameContaining(keyword, keyword, pageable);
 
         } else {
             contentPage = contentRepository.findAll(pageable);
