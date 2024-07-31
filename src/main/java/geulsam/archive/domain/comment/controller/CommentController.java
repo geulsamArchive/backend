@@ -87,7 +87,7 @@ public class CommentController {
      * @param commentUpdateReq 수정할 댓글의 정보가 담긴 DTO
      * @return CommentRes 수정된 댓글의 정보
      */
-    @PatchMapping()
+    @PutMapping()
     public ResponseEntity<SuccessResponse<CommentRes>> update(
             @RequestParam(defaultValue = "id") int commentId,
             @RequestBody CommentUpdateReq commentUpdateReq
