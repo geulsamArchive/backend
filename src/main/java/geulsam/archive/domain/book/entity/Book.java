@@ -38,6 +38,18 @@ public class Book {
     @Column(name = "book_thumbnail_url", length = 256)
     private String thumbNailUrl;
 
+    /**뒷표지 이미지 저장주소
+     * 타입: varchar(256)
+     */
+    @Column(name = "book_back_cover_url", length = 256)
+    private String backCoverUrl;
+
+    /**뒷표지 이미지 썸네일 저장주소
+     * 타입: varchar(256)
+     */
+    @Column(name = "book_back_thumbnail_url", length = 256)
+    private String backThumbNailUrl;
+
     /**표지 제작자
      * 타입: varchar(10)
      */
@@ -96,9 +108,11 @@ public class Book {
         this.title = title;
     }
 
-    public void saveS3publicUrl(String url, String bookCoverUrl, String ThumbnailUrl) {
+    public void saveS3publicUrl(String url, String bookCoverUrl, String thumbNailUrl, String backCoverUrl, String backThumbNailUrl) {
         this.url = url;
         this.coverUrl = bookCoverUrl;
         this.thumbNailUrl = thumbNailUrl;
+        this.backCoverUrl = backCoverUrl;
+        this.backThumbNailUrl = backThumbNailUrl;
     }
 }
