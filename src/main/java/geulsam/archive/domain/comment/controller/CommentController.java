@@ -6,8 +6,6 @@ import geulsam.archive.domain.comment.dto.res.CommentRes;
 import geulsam.archive.domain.comment.service.CommentService;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +24,13 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * 댓글 조회 API
-     * 해당 content id를 가진 모든 comment를 생성이 오래된 순서로 리턴
-     * @param contentId
-     * @return List<CommentRes>
+     * 특정 콘텐츠에 대한 댓글 조회
+     * @param contentId 댓글을 조회할 콘텐츠의 고유 ID
+     * @return List<CommentRes> 해당 content id에 대해 생성된 순서대로 정렬된 댓글 목록
      */
-    @GetMapping("/{contentId}")
+    @GetMapping()
     public ResponseEntity<SuccessResponse<List<CommentRes>>> getCommentsByContentId(
-            @PathVariable UUID contentId
+            @RequestParam(defaultValue = "id") UUID contentId
     ) {
         List<CommentRes> commentResList = commentService.getCommentsByContentId(contentId);
 
@@ -46,14 +43,12 @@ public class CommentController {
         );
     }
 
+    /**
+     * 댓글 등록
+     * @param commentUploadReq Comment 객체 생성에 필요한 정보가 담긴 DTO
+     * @return Integer 등록된 댓글의 ID
+     */
     @PostMapping()
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "댓글 등록 성공",
-                    useReturnTypeSchema = true
-            )
-    })
     public ResponseEntity<SuccessResponse<Integer>> upload(@RequestBody CommentUploadReq commentUploadReq) {
         int commentId = commentService.upload(commentUploadReq);
 
@@ -66,14 +61,12 @@ public class CommentController {
         );
     }
 
+    /**
+     * 댓글 삭제
+     * @param commentId 삭제할 댓글의 고유 ID
+     * @return null
+     */
     @DeleteMapping()
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "댓글 삭제 성공",
-                    useReturnTypeSchema = true
-            )
-    })
     public ResponseEntity<SuccessResponse<Void>> delete(
             @RequestParam int commentId
     ) {
@@ -88,15 +81,15 @@ public class CommentController {
     }
 
     /**
-     * 댓글 수정 API
-     * 해당 comment id를 가진 comment를 사용자 권한 확인 후 내용을 수정 후 CommentRes를 리턴
-     * @param commentId comment의 id
-     * @param commentUpdateReq Comment 객체 수정에 필요한 정보를 담은 DTO
-     * @return CommentRes
+     * 댓글 수정
+     * 해당 comment id를 가진 댓글을 권한 확인과 함께 수정 후 CommentRes를 리턴
+     * @param commentId 수정할 댓글의 고유 ID
+     * @param commentUpdateReq 수정할 댓글의 정보가 담긴 DTO
+     * @return CommentRes 수정된 댓글의 정보
      */
-    @PatchMapping("/{commentId}")
+    @PatchMapping()
     public ResponseEntity<SuccessResponse<CommentRes>> update(
-            @PathVariable int commentId,
+            @RequestParam(defaultValue = "id") int commentId,
             @RequestBody CommentUpdateReq commentUpdateReq
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

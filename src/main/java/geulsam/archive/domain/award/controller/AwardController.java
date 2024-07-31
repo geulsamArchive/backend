@@ -5,8 +5,6 @@ import geulsam.archive.domain.award.dto.res.AwardRes;
 import geulsam.archive.domain.award.service.AwardService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +21,9 @@ public class AwardController {
     private final AwardService awardService;
 
     /**
-     * 상 조회 API
-     * DB에 있는 모든 상 리턴
-     * @param page
-     * @return PageRes<AwardRes>
+     * DB에 있는 모든 상 조회
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @return PageRes<AwardRes> 상 목록을 포함하는 페이지 결과
      */
     @GetMapping()
     public ResponseEntity<SuccessResponse<PageRes<AwardRes>>> getAwards(
@@ -39,21 +36,21 @@ public class AwardController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<AwardRes>>builder()
                         .data(awardResList)
-                        .message("awards get success")
+                        .message("awards retrieved successfully")
                         .status(HttpStatus.OK.value())
                         .build()
         );
     }
 
     /**
-     * 상 조회 API
-     * DB에 있는 모든 상 리턴
-     * @param page
-     * @return PageRes<AwardRes>
+     * 특정 연도에 대한 상 조회
+     * @param year 조회할 연도
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @return PageRes<AwardRes> 특정 연도에 대한 상 목록을 포함하는 페이지 결과
      */
-    @GetMapping("/{year}")
+    @GetMapping()
     public ResponseEntity<SuccessResponse<PageRes<AwardRes>>> getAwardsByYear(
-            @PathVariable int year,
+            @RequestParam(defaultValue = "year") int year,
             @RequestParam(defaultValue = "1") int page
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
@@ -65,25 +62,18 @@ public class AwardController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<AwardRes>>builder()
                         .data(awardResList)
-                        .message("awards get success")
+                        .message("awards retrieved successfully")
                         .status(HttpStatus.OK.value())
                         .build()
         );
     }
 
     /**
-     * 상 업로드 API
-     * @param awardUploadReq Award 객체 생성에 필요한 정보를 담은 DTO
-     * @return Integer 저장한 Award 객체의 id
+     * 상 등록
+     * @param awardUploadReq Award 객체 생성에 필요한 정보가 담긴 DTO
+     * @return Integer 저장한 상 객체의 고유 ID
      */
     @PostMapping()
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "상 등록 성공",
-                    useReturnTypeSchema = true
-            )
-    })
     public ResponseEntity<SuccessResponse<Integer>> upload(@RequestBody AwardUploadReq awardUploadReq) {
 
         Integer awardId = awardService.upload(awardUploadReq);
@@ -92,31 +82,25 @@ public class AwardController {
                 SuccessResponse.<Integer>builder()
                         .data(awardId)
                         .status(HttpStatus.CREATED.value())
-                        .message("상 업로드 성공")
+                        .message("award added successfully")
                         .build()
         );
     }
 
     /**
-     * 관련 Content의 award 필드를 null로 설정하고 해당 Award를 삭제한다.
-     * @param id 삭제할 상의 id 값
-     * @return void
+     * 상 삭제
+     * 수상한 콘텐츠의 award 필드를 null로 설정하고 해당 award id를 가진 상을 삭제한다.
+     * @param awardId 삭제할 상의 고유 ID
+     * @return null
      */
     @DeleteMapping()
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "상 삭제 성공",
-                    useReturnTypeSchema = true
-            )
-    })
-    public ResponseEntity<SuccessResponse<Void>> delete(int id) {
-        awardService.delete(id);
+    public ResponseEntity<SuccessResponse<Void>> delete(int awardId) {
+        awardService.delete(awardId);
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
                         .data(null)
                         .status(HttpStatus.OK.value())
-                        .message("상 삭제 성공")
+                        .message("award removed successfully")
                         .build()
         );
     }

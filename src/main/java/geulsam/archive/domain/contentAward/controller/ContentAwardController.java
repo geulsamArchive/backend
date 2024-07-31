@@ -24,10 +24,10 @@ public class ContentAwardController {
 
     /**
      * 특정 기간의 수상 이력 조회
-     * @param page
-     * @param startDate
-     * @param endDate
-     * @return PageRes<ContentAwardRes>
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @param startDate 조회 시작 날짜 (형식: yyyy-MM-dd)
+     * @param endDate 조회 종료 날짜 (형식: yyyy-MM-dd)
+     * @return PageRes<ContentAwardRes> 요청한 기간 내의 수상 이력을 포함하는 페이지 결과
      */
     @GetMapping("/period")
     public ResponseEntity<SuccessResponse<PageRes<ContentAwardRes>>> getAwardsByPeriod(
@@ -46,7 +46,7 @@ public class ContentAwardController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<ContentAwardRes>>builder()
                         .data(contentAwardResList)
-                        .message("awards during the period get success")
+                        .message("awards during the period retrieved successfully")
                         .status(HttpStatus.OK.value())
                         .build()
         );
