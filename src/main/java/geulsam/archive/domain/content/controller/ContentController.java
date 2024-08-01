@@ -3,11 +3,10 @@ package geulsam.archive.domain.content.controller;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
+import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,33 +25,35 @@ public class ContentController {
     private final ContentService contentService;
 
     /**
-     * 작품 조회 API
-     * DB에 있는 모든 작품 리턴
-     * @return PageRes<ContentRes>
+     * DB에 있는 모든 작품 조회
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @param genre 검색할 콘텐츠 객체의 genre
+     * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
+     * @return PageRes<ContentRes> 생성된 순서대로 정렬된 콘텐츠 목록을 포함하는 페이지 결과
      */
     @GetMapping()
     public ResponseEntity<SuccessResponse<PageRes<ContentRes>>> getContents(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(required = false) String field,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) Genre genre,
+            @RequestParam(required = false) String keyword
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
 
-        PageRes<ContentRes> contentResList = contentService.getContents(field, search, pageable);
+        PageRes<ContentRes> contentResList = contentService.getContents(genre, keyword, pageable);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<ContentRes>>builder()
                         .data(contentResList)
-                        .message("contents get success")
+                        .message("contents retrieved successfully")
                         .status(HttpStatus.OK.value())
                         .build()
         );
     }
 
     /**
-     * 작품 세부정보 조회 API
-     * 해당 id를 가진 content의 세부 정보 리턴
-     * @return ContentInfoRes
+     * 특정 작품의 세부 정보 조회
+     * @param id 조회할 콘텐츠의 고유 ID
+     * @return ContentInfoRes 해당 id를 가진 콘텐츠의 정보를 포함한 DTO
      */
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable String id) {
@@ -62,26 +63,19 @@ public class ContentController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<ContentInfoRes>builder()
                         .data(contentInfoRes)
-                        .message("contents get success")
+                        .message("content retrieved successfully")
                         .status(HttpStatus.OK.value())
                         .build()
         );
     }
 
     /**
-     * 작품 업로드 API
-     * @param contentUploadReq Content 객체 생성에 필요한 정보를 담은 DTO
-     * @return UUID
+     * 작품 등록
+     * @param contentUploadReq Content 객체 생성에 필요한 정보가 담긴 DTO
+     * @return UUID 저장한 Content 객체의 고유 ID
      */
     @PostMapping()
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "작품 등록 성공",
-                    useReturnTypeSchema = true
-            )
-    })
-    public ResponseEntity<SuccessResponse<UUID>> upload(@RequestBody ContentUploadReq contentUploadReq) {
+    public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute ContentUploadReq contentUploadReq) {
 
         UUID contentId = contentService.upload(contentUploadReq);
 
@@ -89,7 +83,28 @@ public class ContentController {
                 SuccessResponse.<UUID>builder()
                         .data(contentId)
                         .status(HttpStatus.CREATED.value())
-                        .message("작품 업로드 성공")
+                        .message("content added successfully")
+                        .build()
+        );
+    }
+
+    /**
+     * 작품 삭제
+     * @param field 기본값은 id, 삭제하고 싶은 작품이 가진 필드를 지정(ex. id, user, book...)
+     * @param search 기본값 없음. 삭제할 작품의 필드 값을 지정
+     * @return null
+     */
+    @DeleteMapping()
+    public ResponseEntity<SuccessResponse<Void>> delete(
+            @RequestParam(defaultValue = "id") String field,
+            @RequestParam String search
+    ) {
+        contentService.delete(field, search);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("content removed successfully")
                         .build()
         );
     }

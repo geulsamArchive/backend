@@ -15,6 +15,8 @@ import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
+import geulsam.archive.global.s3.DeleteManager;
+import geulsam.archive.global.s3.UploadManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,34 +37,27 @@ public class ContentService {
     private final ContentAwardRepository contentAwardRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final UploadManager uploadManager;
+    private final DeleteManager deleteManager;
 
     /**
      * Content 전체를 리턴하는 트랜잭션
-     * @param field Content 객체의 genre 검색 문자열
-     * @param search Content 객체의 title 검색 문제열
+     * @param genre 검색할 콘텐츠 객체의 genre
+     * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
      * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional(readOnly = true)
-    public PageRes<ContentRes> getContents(String field, String search, Pageable pageable) {
+    public PageRes<ContentRes> getContents(Genre genre, String keyword, Pageable pageable) {
         Page<Content> contentPage;
-        Genre genre = null;
-        if (field != null) {
-            try {
-                genre = Genre.valueOf(field.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new ArchiveException(ErrorCode.VALUE_ERROR, "Invalid category: " + field);
-            }
-        }
 
-        if (genre != null && search != null) {
-            contentPage = contentRepository.findByGenreAndNameContaining(genre, search, pageable);
-
+        if (genre != null && keyword != null) {
+            contentPage = contentRepository.findByGenreAndNameContainingOrUser_NameContaining(genre, keyword, keyword, pageable);
         } else if (genre != null) {
             contentPage = contentRepository.findByGenre(genre, pageable);
 
-        } else if (search != null) {
-            contentPage = contentRepository.findByNameContaining(search, pageable);
+        } else if (keyword != null) {
+            contentPage = contentRepository.findByNameContainingOrUser_NameContaining(keyword, keyword, pageable);
 
         } else {
             contentPage = contentRepository.findAll(pageable);
@@ -96,6 +91,12 @@ public class ContentService {
         return new ContentInfoRes(findContent);
     }
 
+    /**
+     * contentUploadReq 객체를 받은 뒤 객체 안의 MultipartFile을 저장하고 url을 받아 옴.
+     * 받아온 url과 uploadReq 객체를 사용해 Content 객체를 만들고 repository에 저장
+     * @param contentUploadReq Content 객체를 생성할 수 있는 정보와 MultipartFile이 담긴 DTO
+     * @return UUID 저장한 Content 객체의 id
+     */
     @Transactional
     public UUID upload(ContentUploadReq contentUploadReq) {
         User findUser = userRepository.findById(contentUploadReq.getUserId()).orElseThrow(() -> new ArchiveException(
@@ -104,12 +105,11 @@ public class ContentService {
 
         Optional<Book> findBook = bookRepository.findById(contentUploadReq.getBookId());
 
+
         Content newContent = new Content(
                 findUser,
                 findBook.orElse(null),
                 contentUploadReq.getName(),
-                contentUploadReq.getPdfUrl(),
-                contentUploadReq.getHtmlUrl(),
                 contentUploadReq.getGenre(),
                 LocalDateTime.now(),
                 contentUploadReq.getIsVisible(),
@@ -117,8 +117,37 @@ public class ContentService {
                 contentUploadReq.getSentence()
         );
 
+        String pdfUrl = uploadManager.uploadFile(contentUploadReq.getPdf(), newContent.getId(), "contentPdf");
+        String htmlUrl = uploadManager.uploadFile(contentUploadReq.getHtml(), newContent.getId(), "contentHtml");
+
+        newContent.saveS3publicUrl(pdfUrl, htmlUrl);
+
         Content savedContent = contentRepository.save(newContent);
 
         return savedContent.getId();
+    }
+
+    /**
+     * Content
+     * @param field 삭제하고 싶은 문집이 가진 필드
+     * @param search 삭제할 문집의 필드 값
+     */
+    @Transactional
+    public void delete(String field, String search) {
+        Content content;
+
+        if (field.equals("id")) {
+            content = contentRepository.findById(UUID.fromString(search)).orElseThrow(
+                    () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 content 없음")
+            );
+        } else {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "유효하지 않은 검색 필드");
+        }
+
+        deleteManager.deleteFile(content.getId(), "contentPdf");
+        deleteManager.deleteFile(content.getId(), "contentHtml");
+
+        contentRepository.deleteById(content.getId());
+
     }
 }

@@ -46,7 +46,7 @@ public class ContentAward {
     @JoinColumn(name = "user_id")
     private User presenter;
 
-    /**상 수상연도
+    /**상 수상날짜
      * 타입: date
      */
     @Column(name = "content_award_at")
@@ -59,5 +59,9 @@ public class ContentAward {
         this.award = award;
         this.presenter = recipient;
         this.contentAwardAt = contentAwardAt;
+    }
+
+    public void changeAward(Award award) {
+        this.award = award;
     }
 }
