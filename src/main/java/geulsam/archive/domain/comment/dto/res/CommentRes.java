@@ -21,7 +21,7 @@ public class CommentRes {
     @Schema(example = "양희재")
     private String commenter;
     /**Comment 객체의 작성 일시**/
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 M월 d일 HH:mm, timezone = Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 M월 d일 HH:mm")
     @Schema(example = "2024년 3월 21일 11:10", type = "string")
     private LocalDateTime createdAt;
 
