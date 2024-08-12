@@ -56,15 +56,16 @@ public class SecurityConfig {
                                 // 로그인, 회원가입은 일단 전체 허용 -> 회원가입은 deploy hasRole("master")로 이동
                                 .requestMatchers(HttpMethod.POST,"/user/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-                                // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
-                                .requestMatchers(HttpMethod.GET, "/user/refresh").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/user/check").authenticated()
+//                                .requestMatchers(HttpMethod.GET, "/user/one").hasRole("NORMAL")
+                                // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE, "/poster").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.POST, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/book/**").permitAll()
                                 // 상 관련
                                 .requestMatchers(HttpMethod.POST, "/award/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/award/**").permitAll()
@@ -86,6 +87,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/calendar").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/calendar").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/calendar/criticism").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/calendar/criticism").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/calendar/one").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/calendar").permitAll()
                                 // 합평회 관련
                                 .requestMatchers(HttpMethod.POST, "/criticismAuthor").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/criticismAuthor").authenticated()
@@ -101,6 +105,7 @@ public class SecurityConfig {
                                         "/swagger-ui.html",
                                         "/webjars/**").permitAll()
                                 .requestMatchers("/user/testing").hasRole("NORMAL")
+                                .anyRequest().authenticated()
                 )
                 .exceptionHandling((exceptionConfig) ->
                         exceptionConfig.authenticationEntryPoint(jwtAuthenticationEntryPoint)

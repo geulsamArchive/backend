@@ -1,6 +1,7 @@
 package geulsam.archive.domain.criticismAuthor.controller;
 
 import geulsam.archive.domain.criticismAuthor.dto.CriticismAuthorUploadReq;
+import geulsam.archive.domain.criticismAuthor.entity.Condition;
 import geulsam.archive.domain.criticismAuthor.service.CriticismAuthorService;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
@@ -63,7 +64,17 @@ public class CriticismAuthorController {
     }
 
     @GetMapping("/toggle")
-    public ResponseEntity<SuccessResponse<?>> toggleCondition(){
-        return null;
+    public ResponseEntity<SuccessResponse<?>> toggleCondition(
+            @RequestParam(defaultValue = "id") String field,
+            @RequestParam int search
+    ){
+        Condition toggle = criticismAuthorService.toggle(search);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("해당 신청 " + toggle.toString() + " 로 전환 성공").build()
+        );
     }
 }

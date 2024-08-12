@@ -1,5 +1,6 @@
 package geulsam.archive.domain.book.service;
 
+import geulsam.archive.domain.book.dto.req.UpdateReq;
 import geulsam.archive.domain.book.dto.req.UploadReq;
 import geulsam.archive.domain.book.dto.res.BookIdRes;
 import geulsam.archive.domain.book.dto.res.BookRes;
@@ -96,7 +97,7 @@ public class BookService {
     @Transactional
     public void delete(String field, String search) {
         Book book = bookRepository.findById(UUID.fromString(search)).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 poster 없음")
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없음")
         );
 
         deleteManager.deleteFile(book.getId(), "book");
@@ -106,5 +107,61 @@ public class BookService {
         deleteManager.deleteFile(book.getId(), "backCoverThumbNail");
 
         bookRepository.deleteById(book.getId());
+    }
+
+    @Transactional
+    public void update(String search, UpdateReq updateReq) {
+        Book book = bookRepository.findById(UUID.fromString(search)).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없음")
+        );
+
+        String bookUrl;
+        String bookCoverUrl;
+        String bookCoverThumbNail;
+        String backCover;
+        String backCoverThumbNail;
+
+        //book URL 업데이트
+        if(!updateReq.getPdf().isEmpty()){
+            deleteManager.deleteFile(book.getId(), "book");
+            bookUrl = uploadManager.uploadFile(updateReq.getPdf(), book.getId(), "book");
+        } else {
+            bookUrl = book.getUrl();
+        }
+
+        //bookCoverURL 업데이트
+        if(!updateReq.getBookCover().isEmpty()){
+            deleteManager.deleteFile(book.getId(), "bookCover");
+            bookCoverUrl = uploadManager.uploadFile(updateReq.getBookCover(), book.getId(), "bookCover");
+        } else {
+            bookCoverUrl = book.getCoverUrl();
+        }
+
+        //bookCoverThumbnail 업데이트
+        if(!updateReq.getBookCoverThumbnail().isEmpty()){
+            deleteManager.deleteFile(book.getId(), "bookCoverThumbNail");
+            bookCoverThumbNail = uploadManager.uploadFile(updateReq.getBookCoverThumbnail(), book.getId(), "bookCoverThumbNail");
+        } else {
+            bookCoverThumbNail = book.getThumbNailUrl();
+        }
+
+        //backCover 업데이트
+        if(!updateReq.getBackCover().isEmpty()){
+            deleteManager.deleteFile(book.getId(), "backCover");
+            backCover = uploadManager.uploadFile(updateReq.getBackCover(), book.getId(), "backCover");
+        } else {
+            backCover = book.getBackCoverUrl();
+        }
+
+        //backCoverThumbnail 업데이트
+        if(!updateReq.getBackCoverThumbnail().isEmpty()){
+            deleteManager.deleteFile(book.getId(), "backCoverThumbNail");
+            backCoverThumbNail = uploadManager.uploadFile(updateReq.getBackCoverThumbnail(), book.getId(), "backCoverThumbNail");
+        } else {
+            backCoverThumbNail = book.getBackThumbNailUrl();
+        }
+
+        book.updateByUpdateReq(updateReq);
+        book.saveS3publicUrl(bookUrl, bookCoverUrl, bookCoverThumbNail, backCover, backCoverThumbNail);
     }
 }

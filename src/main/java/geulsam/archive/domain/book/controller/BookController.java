@@ -1,5 +1,6 @@
 package geulsam.archive.domain.book.controller;
 
+import geulsam.archive.domain.book.dto.req.UpdateReq;
 import geulsam.archive.domain.book.dto.req.UploadReq;
 import geulsam.archive.domain.book.dto.res.BookIdRes;
 import geulsam.archive.domain.book.dto.res.BookRes;
@@ -118,4 +119,21 @@ public class BookController {
                         .build()
         );
     }
+
+    @PutMapping
+    public ResponseEntity<SuccessResponse<Void>> put(
+            @RequestParam(defaultValue = "id") String field,
+            @RequestParam String search,
+            @ModelAttribute UpdateReq updateReq
+    ){
+        bookService.update(search, updateReq);
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("문집 업데이트 성공")
+                        .build()
+        );
+    }
+
 }

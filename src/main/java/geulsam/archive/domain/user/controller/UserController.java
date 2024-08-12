@@ -1,9 +1,13 @@
 package geulsam.archive.domain.user.controller;
 
+import geulsam.archive.domain.user.dto.req.CheckSchoolNumReq;
 import geulsam.archive.domain.user.dto.req.LoginReq;
+import geulsam.archive.domain.user.dto.req.UpdateReq;
 import geulsam.archive.domain.user.dto.req.SignupReq;
 import geulsam.archive.domain.user.dto.res.CheckRes;
 import geulsam.archive.domain.user.dto.res.LoginRes;
+import geulsam.archive.domain.user.dto.res.UserRes;
+import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.service.UserService;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
@@ -122,6 +126,90 @@ public class UserController {
                         .data(checkRes)
                         .status(HttpStatus.OK.value())
                         .message("유저 아이디와 권한 리턴")
+                        .build()
+        );
+    }
+
+    @GetMapping("/one")
+    public ResponseEntity<SuccessResponse<UserRes>> one(
+            @RequestParam(defaultValue = "0") int search
+    ){
+        /*유저 인증 객체를 가져옴*/
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        /*유저 권한 컬렉션을 스트링으로 변환*/
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+
+        // 역할이 ADMIN 이면 필드 사용
+        if(roles.get(0).contains(Level.ADMIN.toString())){
+            UserRes UserById = userService.findOneById(search);
+
+            return ResponseEntity.ok().body(
+                    SuccessResponse.<UserRes>builder()
+                            .data(UserById)
+                            .status(HttpStatus.OK.value())
+                            .message(Level.ADMIN + " 권한 USER " + search + " 정보")
+                            .build()
+            );
+        } else {
+            // NORMAL 이면 user 인증 객체 사용
+            UserRes UserById = userService.findOneById(userDetails.getUserId());
+
+            return ResponseEntity.ok().body(
+                    SuccessResponse.<UserRes>builder()
+                            .data(UserById)
+                            .status(HttpStatus.OK.value())
+                            .message(Level.NORMAL + " 권한 USER " + search + " 정보")
+                            .build()
+            );
+        }
+    }
+
+    @PutMapping()
+    public ResponseEntity<SuccessResponse<Void>> put(
+            @RequestBody UpdateReq updateReq,
+            @RequestParam(defaultValue = "0") int search)
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        /*유저 권한 컬렉션을 스트링으로 변환*/
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+
+        // 역할이 ADMIN 이면 필드 사용
+        if(roles.get(0).contains(Level.ADMIN.toString())){
+            userService.update(search, updateReq);
+        } else {
+            // NORMAL 이면 user 인증 객체 사용
+            userService.update(userDetails.getUserId(), updateReq);
+        }
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("유저 정보 업데이트")
+                        .build()
+        );
+    }
+
+    /**
+     * 학번 중복 체크 - 정보 노출의 위험이 있어 POST 로 작성
+     * @return
+     */
+    @PostMapping("/checkSchoolNum")
+    public ResponseEntity<SuccessResponse<Void>> checkSchoolNum(
+            @RequestBody CheckSchoolNumReq checkSchoolNumReq
+    ){
+        userService.checkSchoolNum(checkSchoolNumReq.getSchoolNum());
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("입력하신 학번은 처음으로 가입하는 사용자입니다")
                         .build()
         );
     }

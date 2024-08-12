@@ -1,5 +1,6 @@
 package geulsam.archive.domain.calendar.entity;
 
+import geulsam.archive.domain.calendar.dto.req.CalendarUpdateReq;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -62,5 +63,13 @@ public class Calendar {
         this.end = end;
         this.locate = locate;
         this.introduce = introduce;
+    }
+
+    public void updateByCalendarUpdateReq(CalendarUpdateReq calendarUpdateReq) {
+        this.end = calendarUpdateReq.getEnd() != null ? calendarUpdateReq.getEnd() : this.end;
+        this.introduce = calendarUpdateReq.getIntroduce() != null ? calendarUpdateReq.getIntroduce() : this.introduce;
+        this.start = calendarUpdateReq.getStart() != null ? calendarUpdateReq.getStart() : this.start;
+        this.title = calendarUpdateReq.getTitle() != null ? calendarUpdateReq.getTitle() : this.title;
+        this.locate = calendarUpdateReq.getLocate() != null ? calendarUpdateReq.getLocate() : this.locate;
     }
 }
