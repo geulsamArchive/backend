@@ -3,6 +3,7 @@ package geulsam.archive.domain.content.controller;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
+import geulsam.archive.domain.content.dto.res.RecentContentRes;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
@@ -67,6 +68,29 @@ public class ContentController {
                         .status(HttpStatus.OK.value())
                         .build()
         );
+    }
+
+    /**
+     * 최근 공개된 8개 작품 조회
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @return PageRes<RecentContentRes> 가장 최근에 생성된 8개의 콘텐츠 목록을 포함하는 페이지 결과
+     */
+    @GetMapping("/recent")
+    public ResponseEntity<SuccessResponse<PageRes<RecentContentRes>>> getRecentContents(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
+
+        PageRes<RecentContentRes> recentContentResList = contentService.getRecentContents(pageable);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PageRes<RecentContentRes>>builder()
+                        .data(recentContentResList)
+                        .message("recent contents retrieved successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+
     }
 
     /**

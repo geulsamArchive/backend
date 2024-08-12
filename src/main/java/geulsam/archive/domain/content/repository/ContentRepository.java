@@ -13,4 +13,5 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     Page<Content> findByGenre(Genre genre, Pageable pageable);
     Page<Content> findByNameContainingOrUser_NameContaining(String nameKeyword, String userNameKeyword, Pageable pageable);
     Page<Content> findAll(Pageable pageable);
+    Page<Content> findTop8ByOrderByCreatedAtDesc(Pageable pageable);
 }
