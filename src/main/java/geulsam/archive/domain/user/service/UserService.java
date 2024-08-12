@@ -2,7 +2,9 @@ package geulsam.archive.domain.user.service;
 
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
+import geulsam.archive.domain.user.dto.req.UpdateReq;
 import geulsam.archive.domain.user.dto.res.LoginRes;
+import geulsam.archive.domain.user.dto.res.UserRes;
 import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
@@ -10,7 +12,6 @@ import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +101,27 @@ public class UserService {
         } else {
             /* 비밀번호가 맞지 않으면 비밀번호 불일치 예외 생성 후 전달*/
             throw new RuntimeException("비밀번호 불일치");
+        }
+    }
+
+    @Transactional
+    public UserRes findOneById(int id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 사용자 없음"));
+        return(new UserRes(user));
+    }
+
+    @Transactional
+    public void update(int id, UpdateReq updateReq) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 사용자 없음"));
+        user.updateByPutReq(updateReq);
+        userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public void checkSchoolNum(String search) {
+        Optional<User> bySchoolNum = userRepository.findBySchoolNum(search);
+        if(bySchoolNum.isPresent()){
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "해당 학번 이미 가입됨. 관리자에게 문의하세요");
         }
     }
 }

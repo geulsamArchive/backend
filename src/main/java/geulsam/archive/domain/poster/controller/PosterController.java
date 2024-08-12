@@ -1,5 +1,6 @@
 package geulsam.archive.domain.poster.controller;
 
+import geulsam.archive.domain.poster.dto.req.UpdateReq;
 import geulsam.archive.domain.poster.dto.req.UploadReq;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.domain.poster.dto.res.PosterRes;
@@ -7,6 +8,7 @@ import geulsam.archive.domain.poster.service.PosterService;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -100,6 +102,50 @@ public class PosterController {
                         .data(null)
                         .status(HttpStatus.OK.value())
                         .message("포스터 삭제 성공")
+                        .build()
+        );
+    }
+
+    /**
+     * id를 통해 Poster 객체 1개 return
+     * @param field id
+     * @return
+     */
+    @GetMapping("/one")
+    public ResponseEntity<SuccessResponse<PosterRes>> one(
+            @RequestParam(defaultValue = "id") String search
+    ) {
+        PosterRes posterRes = posterService.findOneById(search);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PosterRes>builder()
+                        .data(posterRes)
+                        .status(HttpStatus.OK.value())
+                        .message(search + " POSTER 객체")
+                        .build()
+        );
+    }
+
+    @PutMapping()
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "포스터 수정 등록 성공",
+                    useReturnTypeSchema = true
+            )
+    })
+    public ResponseEntity<SuccessResponse<Void>> put(
+            @RequestParam(defaultValue = "id") String search,
+            @ModelAttribute @Valid UpdateReq updateReq
+            ){
+
+        posterService.update(search, updateReq);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("포스터 업로드 성공")
                         .build()
         );
     }

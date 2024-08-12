@@ -77,4 +77,14 @@ public class CriticismAuthor {
         this.condition = Condition.UNFIXED;
     }
 
+    /**
+     * 신청을 고정-고정해제 하는 함수
+     */
+    public void toggleCondition() {
+        if(this.condition == Condition.UNFIXED){
+            this.condition = Condition.FIXED;
+        } else {
+            this.condition = Condition.UNFIXED;
+        }
+    }
 }

@@ -2,7 +2,6 @@ package geulsam.archive.domain.poster.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.poster.entity.Poster;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -28,6 +27,9 @@ public class PosterRes {
     /**poster 제작자*/
     @Schema(description = "poster 제작자", example = "김철수")
     private String designer;
+    /**poster 제작자*/
+    @Schema(description = "poster 판형", example = "A4")
+    private String plate;
     /**poster 제작 연도*/
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년")
     @Schema(description = "poster 가 사용된 연도", example = "2024년", type = "string")
@@ -50,5 +52,17 @@ public class PosterRes {
         this.designer = poster.getDesigner();
         this.year = poster.getYear();
         this.createdAt = poster.getCreatedAt();
+        this.plate = null;
+    }
+
+    public PosterRes(Poster poster){
+        this.id = 0;
+        this.posterId = poster.getId().toString();
+        this.image = poster.getUrl();
+        this.thumbnailImage = poster.getThumbNailUrl();
+        this.designer = poster.getDesigner();
+        this.year = poster.getYear();
+        this.createdAt = poster.getCreatedAt();
+        this.plate = poster.getPlate();
     }
 }
