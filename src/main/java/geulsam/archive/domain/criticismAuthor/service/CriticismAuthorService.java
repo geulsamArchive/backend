@@ -3,6 +3,7 @@ package geulsam.archive.domain.criticismAuthor.service;
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.calendar.repository.CriticismRepository;
 import geulsam.archive.domain.criticismAuthor.dto.CriticismAuthorUploadReq;
+import geulsam.archive.domain.criticismAuthor.entity.Condition;
 import geulsam.archive.domain.criticismAuthor.entity.CriticismAuthor;
 import geulsam.archive.domain.criticismAuthor.repository.CriticismAuthorRepository;
 import geulsam.archive.domain.user.entity.User;
@@ -48,7 +49,7 @@ public class CriticismAuthorService {
             }
         }
 
-        // 새로운 합평회-작가 객체 생성
+        // 새로운 criticism-author 객체 생성
         CriticismAuthor criticismAuthor = new CriticismAuthor(
                 user,
                 criticism,
@@ -78,8 +79,11 @@ public class CriticismAuthorService {
                 // 해당 합평회의 작가 아이디와 입력받은 아이디가 일치하거나 관리자 권한이라면
                 if (criticismAuthor.getAuthor().getId().intValue() == userId.intValue() ||
                         Objects.equals(roles, "ROLE_ADMIN")) {
+                    // criticism 과의 연관관계 제거
+                    criticism.removeCriticismAuthor(criticismAuthor);
                     // 데이터베이스에서 삭제
                     criticismAuthorRepository.deleteById(criticismAuthor.getId());
+                    criticism.removeCriticismAuthor(criticismAuthor);
                     // Remove from the collection
                     iterator.remove();
                     deleted = true; // Set flag indicating deletion occurred
@@ -93,7 +97,12 @@ public class CriticismAuthorService {
     }
 
     @Transactional
-    public void toggle(){
+    public Condition toggle(int search){
+        CriticismAuthor criticismAuthor = criticismAuthorRepository.findById(search).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 신청 없음")
+        );
+        criticismAuthor.toggleCondition();
 
+        return criticismAuthor.getCondition();
     }
 }

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @Setter(AccessLevel.PROTECTED)
-public class UploadReq {
+public class UpdateReq {
     private MultipartFile bookCover;
     private MultipartFile bookCoverThumbnail;
     private MultipartFile backCover;

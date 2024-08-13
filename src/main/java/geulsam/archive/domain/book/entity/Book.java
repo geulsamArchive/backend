@@ -1,5 +1,6 @@
 package geulsam.archive.domain.book.entity;
 
+import geulsam.archive.domain.book.dto.req.UpdateReq;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -114,5 +115,14 @@ public class Book {
         this.thumbNailUrl = thumbNailUrl;
         this.backCoverUrl = backCoverUrl;
         this.backThumbNailUrl = backThumbNailUrl;
+    }
+
+    public void updateByUpdateReq(UpdateReq updateReq) {
+        this.designer = updateReq.getDesigner() == null ? this.designer : updateReq.getDesigner();
+        this.plate = updateReq.getPlate() == null ? this.plate : updateReq.getPlate();
+        this.year = updateReq.getYear() == 0 ? this.year : Year.of(updateReq.getYear());
+        this.pageNumber = updateReq.getPageNumber() == 0 ? this.pageNumber : updateReq.getPageNumber();
+        this.release = updateReq.getRelease() == null ? this.release : updateReq.getRelease();
+        this.title = updateReq.getTitle() == null ? this.title : updateReq.getTitle();
     }
 }

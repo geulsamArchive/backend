@@ -1,6 +1,7 @@
 package geulsam.archive.domain.user.entity;
 
 import geulsam.archive.domain.content.entity.Content;
+import geulsam.archive.domain.user.dto.req.UpdateReq;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -72,7 +73,7 @@ public class User {
     private LocalDateTime createdAt;
 
     /** 유저 대표작
-     * 타입: Integer
+     * 타입: Content
      */
     @OneToOne
     @JoinColumn(name = "content_id")
@@ -148,4 +149,14 @@ public class User {
     }
 
     //이 밑에 앞으로 필요한 비즈니스 로직 작성
+
+    public void updateByPutReq(UpdateReq updateReq) {
+        this.name = updateReq.getName() == null ? this.name : updateReq.getName();
+        this.email = updateReq.getEmail() == null ? this.email : updateReq.getEmail();
+        this.phone = updateReq.getPhone() == null ? this.phone : updateReq.getPhone();
+        this.joinedAt = updateReq.getJoinedAt() == 0 ? this.joinedAt : Year.of(updateReq.getJoinedAt());
+        this.keyword = updateReq.getKeyword() == null ? this.keyword : updateReq.getKeyword();
+        this.introduce = updateReq.getIntroduce() == null ? this.introduce : updateReq.getIntroduce();
+        this.birthDay = updateReq.getBirthDay() == null ? this.birthDay : updateReq.getBirthDay();
+    }
 }

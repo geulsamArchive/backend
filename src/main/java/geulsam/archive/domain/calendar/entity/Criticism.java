@@ -1,5 +1,6 @@
 package geulsam.archive.domain.calendar.entity;
 
+import geulsam.archive.domain.calendar.dto.req.CalendarUpdateReq;
 import geulsam.archive.domain.criticismAuthor.entity.CriticismAuthor;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -64,5 +65,9 @@ public class Criticism extends Calendar{
 
     public void removeCriticismAuthor(CriticismAuthor criticismAuthor){
         criticismAuthors.remove(criticismAuthor);
+    }
+
+    public void updateByCalendarUpdateReq(CalendarUpdateReq calendarUpdateReq) {
+        super.updateByCalendarUpdateReq(calendarUpdateReq);
     }
 }

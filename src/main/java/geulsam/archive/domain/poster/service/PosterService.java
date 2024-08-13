@@ -1,14 +1,14 @@
 package geulsam.archive.domain.poster.service;
 
+import geulsam.archive.domain.poster.dto.req.UpdateReq;
+import geulsam.archive.domain.poster.entity.Poster;
+import geulsam.archive.domain.poster.repository.PosterRepository;
 import geulsam.archive.domain.poster.dto.req.UploadReq;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.domain.poster.dto.res.PosterRes;
-import geulsam.archive.domain.poster.entity.Poster;
-import geulsam.archive.domain.poster.repository.PosterRepository;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.s3.DeleteManager;
-import geulsam.archive.global.s3.PreSignedUrlManager;
 import geulsam.archive.global.s3.UploadManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,13 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -87,5 +84,37 @@ public class PosterService {
         deleteManager.deleteFile(poster.getId(), "posterThumbNail");
 
         posterRepository.deleteById(poster.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public PosterRes findOneById(String id) {
+        Poster poster = posterRepository.findById(UUID.fromString(id)).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 poster 없음")
+        );
+
+        return new PosterRes(poster);
+    }
+
+    @Transactional
+    public void update(String id, UpdateReq updateReq) {
+        Poster poster = posterRepository.findById(UUID.fromString(id)).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 poster 없음")
+        );
+
+        if(!updateReq.getImage().isEmpty()){
+            deleteManager.deleteFile(poster.getId(), "poster");
+            String posterUrl = uploadManager.uploadFile(updateReq.getImage(), poster.getId(), "poster");
+            poster.saveS3publicUrl(posterUrl, poster.getThumbNailUrl());
+        }
+
+        if(!updateReq.getThumbNail().isEmpty()){
+            deleteManager.deleteFile(poster.getId(), "posterThumbNail");
+            String posterThumbNailUrl = uploadManager.uploadFile(updateReq.getThumbNail(), poster.getId(), "posterThumbNail");
+            poster.saveS3publicUrl(poster.getUrl(), posterThumbNailUrl);
+        }
+
+        poster.updateByUpdateReq(updateReq);
+
+        posterRepository.save(poster);
     }
 }

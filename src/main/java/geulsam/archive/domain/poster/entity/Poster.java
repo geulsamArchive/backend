@@ -1,5 +1,6 @@
 package geulsam.archive.domain.poster.entity;
 
+import geulsam.archive.domain.poster.dto.req.UpdateReq;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -73,5 +74,15 @@ public class Poster {
     public void saveS3publicUrl(String url, String thumbNailUrl){
         this.url = url;
         this.thumbNailUrl = thumbNailUrl;
+    }
+
+    /**
+     * updateReq를 받아서 Poster update
+     * @param updateReq
+     */
+    public void updateByUpdateReq(UpdateReq updateReq) {
+        this.year = updateReq.getYear() == 0 ? this.year : Year.of(updateReq.getYear());
+        this.plate = updateReq.getPlate() == null ? this.plate : updateReq.getPlate();
+        this.designer = updateReq.getDesigner() == null ? this.designer : updateReq.getDesigner();
     }
 }

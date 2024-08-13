@@ -1,6 +1,8 @@
 package geulsam.archive.global.swagger;
 
 import geulsam.archive.global.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -21,6 +23,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@OpenAPIDefinition(servers = {
+        @Server(url = "https://geulsaem.store", description = "실제 사용 도메인"),
+        @Server(url = "http://localhost:8080", description = "로컬 도메인")})
 public class SwaggerConfig {
 
     @Bean
