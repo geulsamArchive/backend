@@ -159,4 +159,8 @@ public class User {
         this.introduce = updateReq.getIntroduce() == null ? this.introduce : updateReq.getIntroduce();
         this.birthDay = updateReq.getBirthDay() == null ? this.birthDay : updateReq.getBirthDay();
     }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

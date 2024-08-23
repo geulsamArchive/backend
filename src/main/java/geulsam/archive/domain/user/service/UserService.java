@@ -2,6 +2,7 @@ package geulsam.archive.domain.user.service;
 
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
+import geulsam.archive.domain.user.dto.req.PasswordReq;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
 import geulsam.archive.domain.user.dto.res.LoginRes;
 import geulsam.archive.domain.user.dto.res.UserRes;
@@ -11,7 +12,12 @@ import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.jwt.JwtProvider;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +35,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JavaMailSender javaMailSender;
 
     /**
      * 유저 저장 트랜잭션
@@ -45,11 +52,36 @@ public class UserService {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "이미 존재하는 사용자입니다.");
         }
 
+        //임시비밀번호 생성
+        String tempPassword = RandomStringUtils.randomAlphanumeric(12);
+
+        // 임시비밀번호로 메일 발송
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
+
+            String htmlMsg = "<h3>안녕하세요, " + name + " 회원님</h3>"
+                    + "<p>임시 비밀번호를 발급해 드립니다.</p>"
+                    + "<div style='border: 2px solid #000; padding: 10px; width: fit-content; background-color: #f3f3f3;'>"
+                    + "<strong style='font-size: 1.2em;'>" + tempPassword + "</strong>"
+                    + "</div>"
+                    + "<p>로그인 후에 비밀번호를 바꿔 주세요.</p>";
+
+            helper.setText(htmlMsg, true);
+
+            javaMailSender.send(mimeMessage);
+        } catch (Exception e) {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
+        }
+
         /*user 생성자로 신규 유저 생성
         * password 는 학번을 사용하되, 암호화하여 저장한다.*/
         User user = new User(
                 name,
-                passwordEncoder.encode(schoolNum),
+                passwordEncoder.encode(tempPassword),
                 schoolNum,
                 Level.NORMAL,
                 LocalDateTime.now(),
@@ -100,7 +132,7 @@ public class UserService {
             return new LoginRes(accessToken, refreshToken);
         } else {
             /* 비밀번호가 맞지 않으면 비밀번호 불일치 예외 생성 후 전달*/
-            throw new RuntimeException("비밀번호 불일치");
+            throw new ArchiveException(ErrorCode.VALUE_ERROR,"비밀번호 불일치");
         }
     }
 
@@ -123,5 +155,35 @@ public class UserService {
         if(bySchoolNum.isPresent()){
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "해당 학번 이미 가입됨. 관리자에게 문의하세요");
         }
+    }
+
+    @Transactional
+    public void delete(Integer userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
+        }
+
+        userRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public void updatePassword(PasswordReq passwordReq, int search) {
+        User user = userRepository.findById(search).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.")
+        );
+
+        if(passwordEncoder.matches(passwordReq.getOldPassword(), user.getPassword())){
+            user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
+        } else {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR,"입력하신 비밀번호가 올바르지 않습니다.");
+        }
+    }
+
+    @Transactional
+    public void updatePasswordAdmin(PasswordReq passwordReq, int search) {
+        User user = userRepository.findById(search).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.")
+        );
+        user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
     }
 }
