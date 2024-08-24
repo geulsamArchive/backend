@@ -94,6 +94,8 @@ public class SecurityConfig {
                                 // 합평회 관련
                                 .requestMatchers(HttpMethod.POST, "/criticismAuthor").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/criticismAuthor").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/criticismAuthor").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/criticismAuthor/close").permitAll()
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",
