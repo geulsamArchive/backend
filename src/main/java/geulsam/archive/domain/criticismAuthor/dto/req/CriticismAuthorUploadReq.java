@@ -1,4 +1,4 @@
-package geulsam.archive.domain.criticismAuthor.dto;
+package geulsam.archive.domain.criticismAuthor.dto.req;
 
 import geulsam.archive.domain.content.entity.Genre;
 import io.swagger.v3.oas.annotations.media.Schema;

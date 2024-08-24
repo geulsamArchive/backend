@@ -3,6 +3,7 @@ package geulsam.archive.domain.criticismAuthor.entity;
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
+import geulsam.archive.domain.criticismAuthor.dto.req.CriticismAuthorCloseReq;
 import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -86,5 +87,10 @@ public class CriticismAuthor {
         } else {
             this.condition = Condition.UNFIXED;
         }
+    }
+
+    public void close(CriticismAuthorCloseReq criticismAuthorCloseReq) {
+        //criticismAuthorCloseReq.getCloverNotePassword();
+        this.cloverNoteURL = criticismAuthorCloseReq.getCloverNoteURL();
     }
 }
