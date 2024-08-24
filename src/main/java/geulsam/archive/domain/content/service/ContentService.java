@@ -8,6 +8,7 @@ import geulsam.archive.domain.content.dto.res.ContentRes;
 import geulsam.archive.domain.content.dto.res.RecentContentRes;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
+import geulsam.archive.domain.content.entity.IsVisible;
 import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.domain.contentAward.entity.ContentAward;
 import geulsam.archive.domain.contentAward.repository.ContentAwardRepository;
@@ -99,7 +100,7 @@ public class ContentService {
      */
     @Transactional
     public PageRes<RecentContentRes> getRecentContents(Pageable pageable) {
-        Page<Content> recentContentPage = contentRepository.findTop8ByOrderByCreatedAtDesc(pageable);
+        Page<Content> recentContentPage = contentRepository.findTop8ByIsVisibleOrderByCreatedAtDesc(IsVisible.EVERY, pageable);
 
         List<RecentContentRes> recentContentResList = recentContentPage.getContent().stream()
                 .map(RecentContentRes::new)
