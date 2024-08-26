@@ -132,6 +132,7 @@ public class Content {
         }
     }
 
+    public void changeName(String newName) { this.name = newName; }
     public void changePdfUrl(String newPdfUrl) {
         this.pdfUrl = newPdfUrl;
     }
@@ -144,6 +145,10 @@ public class Content {
 
     public void changeIsVisible(IsVisible isVisible) {
         this.isVisible = isVisible;
+    }
+
+    public void changeBook(Book newBook) {
+        this.book = newBook;
     }
 
     /**

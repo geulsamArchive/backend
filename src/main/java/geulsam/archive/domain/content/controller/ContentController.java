@@ -1,18 +1,23 @@
 package geulsam.archive.domain.content.controller;
 
+import geulsam.archive.domain.content.dto.req.ContentUpdateReq;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
+import geulsam.archive.domain.content.dto.res.RecentContentRes;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import geulsam.archive.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -70,14 +75,39 @@ public class ContentController {
     }
 
     /**
+     * 최근 공개된 8개 작품 조회
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @return PageRes<RecentContentRes> 가장 최근에 생성된 8개의 콘텐츠 목록을 포함하는 페이지 결과
+     */
+    @GetMapping("/recent")
+    public ResponseEntity<SuccessResponse<PageRes<RecentContentRes>>> getRecentContents(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
+
+        PageRes<RecentContentRes> recentContentResList = contentService.getRecentContents(pageable);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PageRes<RecentContentRes>>builder()
+                        .data(recentContentResList)
+                        .message("recent contents retrieved successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+
+    }
+
+    /**
      * 작품 등록
      * @param contentUploadReq Content 객체 생성에 필요한 정보가 담긴 DTO
      * @return UUID 저장한 Content 객체의 고유 ID
      */
     @PostMapping()
     public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute ContentUploadReq contentUploadReq) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        UUID contentId = contentService.upload(contentUploadReq);
+        UUID contentId = contentService.upload(contentUploadReq, userDetails.getUserId());
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<UUID>builder()
@@ -105,6 +135,25 @@ public class ContentController {
                         .data(null)
                         .status(HttpStatus.OK.value())
                         .message("content removed successfully")
+                        .build()
+        );
+    }
+
+    @PutMapping()
+    public ResponseEntity<SuccessResponse<ContentInfoRes>> update(
+            @RequestParam(defaultValue = "id")  String contentId,
+            @RequestBody ContentUpdateReq contentUpdateReq
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        ContentInfoRes updatedContentRes = contentService.update(contentId, contentUpdateReq, userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<ContentInfoRes>builder()
+                        .data(updatedContentRes)
+                        .status(HttpStatus.OK.value())
+                        .message("작품 수정 성공")
                         .build()
         );
     }
