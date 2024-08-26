@@ -1,24 +1,29 @@
 package geulsam.archive.domain.criticismAuthor.service;
 
+import geulsam.archive.domain.criticismAuthor.dto.req.CriticismAuthorCloseReq;
+import geulsam.archive.domain.criticismAuthor.dto.res.CriticismAuthorRes;
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.calendar.repository.CriticismRepository;
-import geulsam.archive.domain.criticismAuthor.dto.CriticismAuthorUploadReq;
+import geulsam.archive.domain.criticismAuthor.dto.req.CriticismAuthorUploadReq;
 import geulsam.archive.domain.criticismAuthor.entity.Condition;
 import geulsam.archive.domain.criticismAuthor.entity.CriticismAuthor;
 import geulsam.archive.domain.criticismAuthor.repository.CriticismAuthorRepository;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,5 +109,27 @@ public class CriticismAuthorService {
         criticismAuthor.toggleCondition();
 
         return criticismAuthor.getCondition();
+    }
+
+    @Transactional(readOnly = true)
+    public PageRes<CriticismAuthorRes> criticismAuthor(Pageable pageable) {
+        Page<CriticismAuthor> criticismAuthorPages = criticismAuthorRepository.findCriticismAuthorBeforeNow(LocalDateTime.now(), pageable);
+
+        List<CriticismAuthorRes> criticismAuthorRes = criticismAuthorPages.getContent().stream()
+                .map(criticismAuthor -> new CriticismAuthorRes(criticismAuthor, criticismAuthorPages.getContent().indexOf(criticismAuthor))).toList();
+
+        return new PageRes<>(
+                criticismAuthorPages.getTotalPages(),
+                criticismAuthorRes
+        );
+    }
+
+    @Transactional
+    public void close(CriticismAuthorCloseReq criticismAuthorCloseReq) {
+        CriticismAuthor criticismAuthor = criticismAuthorRepository.findByContentId(UUID.fromString(criticismAuthorCloseReq.getContentId())).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 신청 없음")
+        );
+
+        criticismAuthor.close(criticismAuthorCloseReq);
     }
 }

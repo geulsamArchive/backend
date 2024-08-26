@@ -57,7 +57,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST,"/user/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/user/check").authenticated()
-//                                .requestMatchers(HttpMethod.GET, "/user/one").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.GET, "/user/one").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.DELETE,"/user").permitAll()
                                 // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
@@ -93,6 +94,8 @@ public class SecurityConfig {
                                 // 합평회 관련
                                 .requestMatchers(HttpMethod.POST, "/criticismAuthor").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/criticismAuthor").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/criticismAuthor").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/criticismAuthor/close").permitAll()
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",

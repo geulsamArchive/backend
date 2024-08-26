@@ -35,6 +35,11 @@ public class CalendarService {
 
     @Transactional
     public void calendarUpload(CalendarUploadReq calendarUploadReq) {
+
+        if(calendarRepository.existsOverlappingSchedule(calendarUploadReq.getStart(), calendarUploadReq.getEnd())){
+            throw new ArchiveException(ErrorCode.VALUE_ERROR,"일정이 겹칩니다.");
+        }
+
         Calendar calendar = new Calendar(
                 calendarUploadReq.getTitle(),
                 calendarUploadReq.getStart(),
@@ -103,6 +108,11 @@ public class CalendarService {
 
     @Transactional
     public void criticismUpload(CriticismUploadReq criticismUploadReq) {
+
+        if(calendarRepository.existsOverlappingSchedule(criticismUploadReq.getStart(), criticismUploadReq.getEnd())){
+            throw new ArchiveException(ErrorCode.VALUE_ERROR,"일정이 겹칩니다.");
+        }
+
         Criticism criticism = new Criticism(
                 criticismUploadReq.getTitle(),
                 criticismUploadReq.getStart(),
