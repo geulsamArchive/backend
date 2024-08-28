@@ -124,13 +124,14 @@ public class ContentService {
         User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
         ));
+
         Book findBook = null;
         if(contentUploadReq.getBookId() != null) {
             findBook = bookRepository.findById(contentUploadReq.getBookId()).orElseThrow(() -> new ArchiveException(
                     ErrorCode.VALUE_ERROR, "해당 Book 없음"
             ));
         }
-        System.out.println(contentUploadReq.getName());
+
         Content newContent = new Content(
                 findUser,
                 findBook,
@@ -142,8 +143,8 @@ public class ContentService {
                 contentUploadReq.getSentence()
         );
 
-        String pdfUrl = uploadManager.uploadFile(contentUploadReq.getPdf(), newContent.getId(), "contentPdf");
-        String htmlUrl = uploadManager.uploadFile(contentUploadReq.getHtml(), newContent.getId(), "contentHtml");
+        String pdfUrl = (contentUploadReq.getPdf().isEmpty()) ? null : uploadManager.uploadFile(contentUploadReq.getPdf(), newContent.getId(), "contentPdf");
+        String htmlUrl = (contentUploadReq.getHtml().isEmpty()) ? null : uploadManager.uploadFile(contentUploadReq.getHtml(), newContent.getId(), "contentHtml");
 
         newContent.saveS3publicUrl(pdfUrl, htmlUrl);
 

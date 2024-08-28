@@ -104,6 +104,8 @@ public class Content {
         this.user = Objects.requireNonNull(user, "User cannot be null");
         this.book = book;
         this.name = Objects.requireNonNull(name, "Name cannot be null");
+        this.pdfUrl = null;
+        this.htmlUrl = null;
         this.genre = genre != null ? genre : Genre.OTHERS;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.isVisible = isVisible != null ? isVisible : IsVisible.PRIVATE;

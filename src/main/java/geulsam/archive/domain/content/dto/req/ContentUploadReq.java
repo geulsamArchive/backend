@@ -10,9 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Setter
-@Getter
 public class ContentUploadReq {
     @Schema(description = "문집 아이디", example = "adsa-dsafdsa-vsadf-dsafdsa")
     private UUID bookId;
