@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE, "/poster").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.PUT, "/poster").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.POST, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE, "/book").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.GET, "/book/**").permitAll()

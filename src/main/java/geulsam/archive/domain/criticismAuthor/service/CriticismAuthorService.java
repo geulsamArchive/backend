@@ -43,7 +43,7 @@ public class CriticismAuthorService {
                 .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 유저 없음"));
 
         // 순서는 합평회 인원수보다  작아야 함
-        if(criticism.getAuthorCnt() < criticismAuthorUploadReq.getOrder()){
+        if(criticism.getAuthorCnt() <= criticismAuthorUploadReq.getOrder()){
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "신청할 수 있는 인원수 초과");
         }
 

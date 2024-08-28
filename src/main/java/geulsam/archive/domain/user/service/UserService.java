@@ -53,7 +53,7 @@ public class UserService {
         }
 
         //임시비밀번호 생성
-        String tempPassword = RandomStringUtils.randomAlphanumeric(12);
+        String tempPassword = RandomStringUtils.randomAlphanumeric(10) + RandomStringUtils.random(2, true, true);
 
         // 임시비밀번호로 메일 발송
         try {
