@@ -143,12 +143,12 @@ public class ContentService {
                 contentUploadReq.getSentence()
         );
 
+        Content savedContent = contentRepository.save(newContent);
+
         String pdfUrl = (contentUploadReq.getPdf().isEmpty()) ? null : uploadManager.uploadFile(contentUploadReq.getPdf(), newContent.getId(), "contentPdf");
         String htmlUrl = (contentUploadReq.getHtml().isEmpty()) ? null : uploadManager.uploadFile(contentUploadReq.getHtml(), newContent.getId(), "contentHtml");
 
         newContent.saveS3publicUrl(pdfUrl, htmlUrl);
-
-        Content savedContent = contentRepository.save(newContent);
 
         return savedContent.getId();
     }
