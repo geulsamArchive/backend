@@ -115,50 +115,40 @@ public class BookService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없음")
         );
 
-        String bookUrl;
-        String bookCoverUrl;
-        String bookCoverThumbNail;
-        String backCover;
-        String backCoverThumbNail;
+        String bookUrl = book.getUrl();
+        String bookCoverUrl = book.getCoverUrl();
+        String bookCoverThumbNail = book.getThumbNailUrl();
+        String backCover = book.getBackCoverUrl();
+        String backCoverThumbNail = book.getBackThumbNailUrl();
 
-        //book URL 업데이트
-        if(!updateReq.getPdf().isEmpty()){
+        // book URL 업데이트
+        if (updateReq.getPdf().isPresent() && !updateReq.getPdf().get().isEmpty()) {
             deleteManager.deleteFile(book.getId(), "book");
-            bookUrl = uploadManager.uploadFile(updateReq.getPdf(), book.getId(), "book");
-        } else {
-            bookUrl = book.getUrl();
+            bookUrl = uploadManager.uploadFile(updateReq.getPdf().get(), book.getId(), "book");
         }
 
-        //bookCoverURL 업데이트
-        if(!updateReq.getBookCover().isEmpty()){
+        // bookCoverURL 업데이트
+        if (updateReq.getBookCover().isPresent() && !updateReq.getBookCover().get().isEmpty()) {
             deleteManager.deleteFile(book.getId(), "bookCover");
-            bookCoverUrl = uploadManager.uploadFile(updateReq.getBookCover(), book.getId(), "bookCover");
-        } else {
-            bookCoverUrl = book.getCoverUrl();
+            bookCoverUrl = uploadManager.uploadFile(updateReq.getBookCover().get(), book.getId(), "bookCover");
         }
 
-        //bookCoverThumbnail 업데이트
-        if(!updateReq.getBookCoverThumbnail().isEmpty()){
+        // bookCoverThumbnail 업데이트
+        if (updateReq.getBookCoverThumbnail().isPresent() && !updateReq.getBookCoverThumbnail().get().isEmpty()) {
             deleteManager.deleteFile(book.getId(), "bookCoverThumbNail");
-            bookCoverThumbNail = uploadManager.uploadFile(updateReq.getBookCoverThumbnail(), book.getId(), "bookCoverThumbNail");
-        } else {
-            bookCoverThumbNail = book.getThumbNailUrl();
+            bookCoverThumbNail = uploadManager.uploadFile(updateReq.getBookCoverThumbnail().get(), book.getId(), "bookCoverThumbNail");
         }
 
-        //backCover 업데이트
-        if(!updateReq.getBackCover().isEmpty()){
+        // backCover 업데이트
+        if (updateReq.getBackCover().isPresent() && !updateReq.getBackCover().get().isEmpty()) {
             deleteManager.deleteFile(book.getId(), "backCover");
-            backCover = uploadManager.uploadFile(updateReq.getBackCover(), book.getId(), "backCover");
-        } else {
-            backCover = book.getBackCoverUrl();
+            backCover = uploadManager.uploadFile(updateReq.getBackCover().get(), book.getId(), "backCover");
         }
 
-        //backCoverThumbnail 업데이트
-        if(!updateReq.getBackCoverThumbnail().isEmpty()){
+        // backCoverThumbnail 업데이트
+        if (updateReq.getBackCoverThumbnail().isPresent() && !updateReq.getBackCoverThumbnail().get().isEmpty()) {
             deleteManager.deleteFile(book.getId(), "backCoverThumbNail");
-            backCoverThumbNail = uploadManager.uploadFile(updateReq.getBackCoverThumbnail(), book.getId(), "backCoverThumbNail");
-        } else {
-            backCoverThumbNail = book.getBackThumbNailUrl();
+            backCoverThumbNail = uploadManager.uploadFile(updateReq.getBackCoverThumbnail().get(), book.getId(), "backCoverThumbNail");
         }
 
         book.updateByUpdateReq(updateReq);

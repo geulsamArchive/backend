@@ -3,6 +3,7 @@ package geulsam.archive.domain.calendar.service;
 import geulsam.archive.domain.calendar.dto.req.CalendarUpdateReq;
 import geulsam.archive.domain.calendar.dto.req.CalendarUploadReq;
 import geulsam.archive.domain.calendar.dto.req.CriticismUploadReq;
+import geulsam.archive.domain.calendar.dto.req.RegularCriticismUploadReq;
 import geulsam.archive.domain.calendar.dto.res.*;
 import geulsam.archive.domain.calendar.entity.Calendar;
 import geulsam.archive.domain.calendar.entity.Criticism;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -49,6 +52,51 @@ public class CalendarService {
         );
 
         calendarRepository.save(calendar);
+    }
+
+    @Transactional
+    public void regularCriticismUpload(RegularCriticismUploadReq regularCriticismUploadReq){
+        LocalDate currentDate = regularCriticismUploadReq.getStart();
+
+//        String title = regularCriticismUploadReq.getStart().getYear() + " 정규합평";
+//
+//        if(regularCriticismUploadReq.getStart().getMonth().getValue() == 3){
+//            title = regularCriticismUploadReq.getStart().getYear() + " 1학기" + " 정규합평";
+//        } else if (regularCriticismUploadReq.getStart().getMonth().getValue() == 9) {
+//            title = regularCriticismUploadReq.getStart().getYear() + " 2학기" + " 정규합평";
+//        }
+
+        while(!currentDate.isAfter(regularCriticismUploadReq.getEnd())){
+
+            for(DayOfWeek dayOfWeek : regularCriticismUploadReq.getWeeks()){
+                if(currentDate.getDayOfWeek() == dayOfWeek){
+
+                    // 합평회 시작 시간
+                    LocalDateTime startLocalDateTime = LocalDateTime.of(currentDate, regularCriticismUploadReq.getFirstTime());
+                    // 합평회 끝 시간
+                    LocalDateTime endLocalDateTime = LocalDateTime.of(currentDate, regularCriticismUploadReq.getSecondTime().plusHours(1));
+
+
+                    if(calendarRepository.existsOverlappingSchedule(startLocalDateTime, endLocalDateTime)){
+                        throw new ArchiveException(ErrorCode.VALUE_ERROR,"일정이 겹칩니다.");
+                    }
+
+
+                    Criticism criticism = new Criticism(
+                            "합평회",
+                            startLocalDateTime,
+                            endLocalDateTime,
+                            regularCriticismUploadReq.getLocation(),
+                            "정규 합평회",
+                            2
+                    );
+
+                    criticismRepository.save(criticism);
+                }
+            }
+
+            currentDate = currentDate.plusDays(1);
+        }
     }
 
     @Transactional

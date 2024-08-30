@@ -59,6 +59,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/user/check").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/user/one").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.DELETE,"/user").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/user/checkSchoolNum").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/user/password").permitAll()
                                 // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
@@ -92,6 +94,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/calendar/criticism").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/calendar/one").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/calendar").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/calendar/regularCriticism").permitAll()
                                 // 합평회 관련
                                 .requestMatchers(HttpMethod.POST, "/criticismAuthor").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/criticismAuthor").authenticated()
