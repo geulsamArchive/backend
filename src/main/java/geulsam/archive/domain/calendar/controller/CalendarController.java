@@ -3,6 +3,7 @@ package geulsam.archive.domain.calendar.controller;
 import geulsam.archive.domain.calendar.dto.req.CalendarUpdateReq;
 import geulsam.archive.domain.calendar.dto.req.CalendarUploadReq;
 import geulsam.archive.domain.calendar.dto.req.CriticismUploadReq;
+import geulsam.archive.domain.calendar.dto.req.RegularCriticismUploadReq;
 import geulsam.archive.domain.calendar.dto.res.CalendarOneRes;
 import geulsam.archive.domain.calendar.dto.res.CalendarRes;
 import geulsam.archive.domain.calendar.dto.res.CriticismByMonth;
@@ -58,6 +59,18 @@ public class CalendarController {
                         .data(null)
                         .status(HttpStatus.OK.value())
                         .message("합평회 업로드 성공").build()
+        );
+    }
+
+    @PostMapping("/regularCriticism")
+    public ResponseEntity<SuccessResponse<Void>> regularCriticismUpload(@RequestBody RegularCriticismUploadReq regularCriticismUploadReq){
+        calendarService.regularCriticismUpload(regularCriticismUploadReq);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("정규 합평회 업로드 성공").build()
         );
     }
 
