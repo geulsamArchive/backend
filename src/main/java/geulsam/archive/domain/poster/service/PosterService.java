@@ -101,17 +101,21 @@ public class PosterService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 poster 없음")
         );
 
-        if(!updateReq.getImage().isEmpty()){
-            deleteManager.deleteFile(poster.getId(), "poster");
-            String posterUrl = uploadManager.uploadFile(updateReq.getImage(), poster.getId(), "poster");
-            poster.saveS3publicUrl(posterUrl, poster.getThumbNailUrl());
-        }
+        updateReq.getImage().ifPresent(image -> {
+            if(!image.isEmpty()){
+                deleteManager.deleteFile(poster.getId(), "poster");
+                String posterUrl = uploadManager.uploadFile(image, poster.getId(), "poster");
+                poster.saveS3publicUrl(posterUrl, poster.getThumbNailUrl());
+            }
+        });
 
-        if(!updateReq.getThumbNail().isEmpty()){
-            deleteManager.deleteFile(poster.getId(), "posterThumbNail");
-            String posterThumbNailUrl = uploadManager.uploadFile(updateReq.getThumbNail(), poster.getId(), "posterThumbNail");
-            poster.saveS3publicUrl(poster.getUrl(), posterThumbNailUrl);
-        }
+        updateReq.getThumbNail().ifPresent(thumbNail -> {
+            if(!thumbNail.isEmpty()){
+                deleteManager.deleteFile(poster.getId(), "posterThumbNail");
+                String posterThumbNailUrl = uploadManager.uploadFile(thumbNail, poster.getId(), "posterThumbNail");
+                poster.saveS3publicUrl(poster.getUrl(), posterThumbNailUrl);
+            }
+        });
 
         poster.updateByUpdateReq(updateReq);
 
