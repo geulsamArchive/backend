@@ -3,7 +3,6 @@ package geulsam.archive.domain.criticismAuthor.entity;
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
-import geulsam.archive.domain.criticismAuthor.dto.req.CriticismAuthorCloseReq;
 import geulsam.archive.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -38,12 +37,6 @@ public class CriticismAuthor {
     @JoinColumn(name = "criticism_id")
     private Criticism criticism;
 
-    /**작품 아이디
-     */
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "content_id")
-    private Content content;
-
     /**작가의 순서
      * 타입: Integer
      */
@@ -61,12 +54,6 @@ public class CriticismAuthor {
      */
     @Column(name = "criticism_author_condition")
     private Condition condition;
-
-    /**클로버노트 주소
-     * 타입: varchar(100)
-     */
-    @Column(name = "criticism_author_cloverNoteURL")
-    private String cloverNoteURL;
 
     /**생성자
      */
@@ -89,8 +76,8 @@ public class CriticismAuthor {
         }
     }
 
-    public void close(CriticismAuthorCloseReq criticismAuthorCloseReq) {
-        //criticismAuthorCloseReq.getCloverNotePassword();
-        this.cloverNoteURL = criticismAuthorCloseReq.getCloverNoteURL();
-    }
+//    public void close(CriticismAuthorCloseReq criticismAuthorCloseReq) {
+//        //criticismAuthorCloseReq.getCloverNotePassword();
+//        this.cloverNoteURL = criticismAuthorCloseReq.getCloverNoteURL();
+//    }
 }

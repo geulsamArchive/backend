@@ -1,10 +1,10 @@
-package geulsam.archive.domain.comment.service;
+package geulsam.archive.domain.criticismAuthor.entity.comment.service;
 
 import geulsam.archive.domain.award.dto.req.CommentUpdateReq;
-import geulsam.archive.domain.comment.dto.req.CommentUploadReq;
-import geulsam.archive.domain.comment.dto.res.CommentRes;
-import geulsam.archive.domain.comment.entity.Comment;
-import geulsam.archive.domain.comment.repository.CommentRepository;
+import geulsam.archive.domain.criticismAuthor.entity.comment.dto.req.CommentUploadReq;
+import geulsam.archive.domain.criticismAuthor.entity.comment.dto.res.CommentRes;
+import geulsam.archive.domain.criticismAuthor.entity.comment.entity.Comment;
+import geulsam.archive.domain.criticismAuthor.entity.comment.repository.CommentRepository;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.domain.user.entity.User;

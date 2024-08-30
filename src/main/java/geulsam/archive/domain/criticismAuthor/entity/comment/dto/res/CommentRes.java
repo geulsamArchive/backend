@@ -1,7 +1,7 @@
-package geulsam.archive.domain.comment.dto.res;
+package geulsam.archive.domain.criticismAuthor.entity.comment.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import geulsam.archive.domain.comment.entity.Comment;
+import geulsam.archive.domain.criticismAuthor.entity.comment.entity.Comment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -22,17 +22,12 @@ public class CriticismAuthorRes {
     private String title;
     private String author;
     private LocalDate createdAt;
-    private String password;
-    private String cloverNoteURL;
 
     public CriticismAuthorRes(CriticismAuthor criticismAuthor, int id){
         this.id = id;
         this.criticismId = criticismAuthor.getCriticism().getId();
-        this.contentId = (criticismAuthor.getContent() != null) ? criticismAuthor.getContent().getId().toString() : null;
         this.genre = criticismAuthor.getGenre();
         this.author = criticismAuthor.getAuthor().getName();
         this.createdAt=criticismAuthor.getCriticism().getStart().toLocalDate();
-        this.password = "SORRY";
-        this.cloverNoteURL = criticismAuthor.getCloverNoteURL();
     }
 }

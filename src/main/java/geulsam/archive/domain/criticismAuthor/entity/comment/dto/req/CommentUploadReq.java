@@ -1,4 +1,4 @@
-package geulsam.archive.domain.comment.dto.req;
+package geulsam.archive.domain.criticismAuthor.entity.comment.dto.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
