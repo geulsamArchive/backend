@@ -54,17 +54,22 @@ public class ContentService {
     public PageRes<ContentRes> getContents(Genre genre, String keyword, Pageable pageable) {
         Page<Content> contentPage;
 
-        if (genre != null && keyword != null) {
-            contentPage = contentRepository.findByGenreAndNameContainingOrUser_NameContaining(genre, keyword, keyword, pageable);
-        } else if (genre != null) {
-            contentPage = contentRepository.findByGenre(genre, pageable);
-
-        } else if (keyword != null) {
-            contentPage = contentRepository.findByNameContainingOrUser_NameContaining(keyword, keyword, pageable);
-
+        if (genre != null) {
+            if (keyword != null && !keyword.isEmpty()) {
+                contentPage = contentRepository.findByGenreAndNameContainingOrUser_NameContaining(genre, keyword, keyword, pageable);
+            }
+            else {
+                contentPage = contentRepository.findByGenre(genre, pageable);
+            }
         } else {
-            contentPage = contentRepository.findAll(pageable);
+            if (keyword != null && !keyword.isEmpty()) {
+                contentPage = contentRepository.findByNameContainingOrUser_NameContaining(keyword, keyword, pageable);
+            }
+            else {
+                contentPage = contentRepository.findAll(pageable);
+            }
         }
+
 
         List<ContentRes> contentResList = contentPage.getContent().stream()
                 .map(content -> {
