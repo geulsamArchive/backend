@@ -10,7 +10,7 @@ import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -106,7 +106,7 @@ public class ContentController {
      * @return UUID 저장한 Content 객체의 고유 ID
      */
     @PostMapping()
-    public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute ContentUploadReq contentUploadReq) {
+    public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute @Valid ContentUploadReq contentUploadReq) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -115,7 +115,7 @@ public class ContentController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<UUID>builder()
                         .data(contentId)
-                        .status(HttpStatus.CREATED.value())
+                        .status(HttpStatus.OK.value())
                         .message("content added successfully")
                         .build()
         );
@@ -123,11 +123,11 @@ public class ContentController {
 
     /**
      * 작품 삭제
-     * @param contentId 삭제하고 싶은 Content 객체의 id
+     * @param contentId 삭제하고 싶은 Content 객체의 고유 ID
      * @return null
      */
     @DeleteMapping()
-    public ResponseEntity<SuccessResponse<Void>> delete(@RequestParam @NotNull String contentId) {
+    public ResponseEntity<SuccessResponse<Void>> delete(@RequestParam(defaultValue = "id") String contentId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -142,9 +142,15 @@ public class ContentController {
         );
     }
 
+    /**
+     * 작품 수정
+     * @param contentId 수정할 Content 객체의 고유 ID
+     * @param contentUpdateReq Content 객체 수정에 필요한 정보가 담긴 DTO
+     * @return ContentInfoRes 수정한 Content 객체의 정보를 포함한 DTO
+     */
     @PutMapping()
     public ResponseEntity<SuccessResponse<ContentInfoRes>> update(
-            @RequestParam(defaultValue = "id")  String contentId,
+            @RequestParam(defaultValue = "id") String contentId,
             @RequestBody ContentUpdateReq contentUpdateReq
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

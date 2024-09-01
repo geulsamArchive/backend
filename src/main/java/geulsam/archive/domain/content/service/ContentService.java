@@ -179,6 +179,13 @@ public class ContentService {
         contentRepository.deleteById(findContent.getId());
     }
 
+    /**
+     * 특정 Content를 수정하는 트랜잭션
+     * @param contentId 수정하고 싶은 Content 객체의 id
+     * @param contentUpdateReq Content 객체 수정에 필요한 정보가 담긴 DTO
+     * @param userId 해당 Content 수정을 시도하는 유저의 id
+     * @return ContentInfoRes 수정한 Content 객체의 정보를 포함한 DTO
+     */
     public ContentInfoRes update(String contentId, ContentUpdateReq contentUpdateReq, Integer userId) {
 
         Content findContent = contentRepository.findById(UUID.fromString(contentId)).orElseThrow(() -> new ArchiveException(
