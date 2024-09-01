@@ -160,26 +160,23 @@ public class ContentService {
 
     /**
      * 특정 Content를 삭제하는 트랜잭션
-     * @param field 삭제하고 싶은 문집이 가진 필드
-     * @param search 삭제할 문집의 필드 값
+     * @param contentId 삭제하고 싶은 Content 객체의 id
      */
     @Transactional
-    public void delete(String field, String search) {
-        Content content;
+    public void delete(String contentId, int userId) {
 
-        if (field.equals("id")) {
-            content = contentRepository.findById(UUID.fromString(search)).orElseThrow(
-                    () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 content 없음")
-            );
-        } else {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "유효하지 않은 검색 필드");
+        Content findContent = contentRepository.findById(UUID.fromString(contentId)).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 content 없음")
+        );
+
+        if(!findContent.getUser().getId().equals(userId)) {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
         }
 
-        deleteManager.deleteFile(content.getId(), "contentPdf");
-        deleteManager.deleteFile(content.getId(), "contentHtml");
+        deleteManager.deleteFile(findContent.getId(), "contentPdf");
+        deleteManager.deleteFile(findContent.getId(), "contentHtml");
 
-        contentRepository.deleteById(content.getId());
-
+        contentRepository.deleteById(findContent.getId());
     }
 
     public ContentInfoRes update(String contentId, ContentUpdateReq contentUpdateReq, Integer userId) {

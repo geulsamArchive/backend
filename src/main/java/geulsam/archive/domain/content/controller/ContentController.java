@@ -10,6 +10,7 @@ import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/content")
+@Validated
 public class ContentController {
 
     private final ContentService contentService;
@@ -120,16 +123,16 @@ public class ContentController {
 
     /**
      * 작품 삭제
-     * @param field 기본값은 id, 삭제하고 싶은 작품이 가진 필드를 지정(ex. id, user, book...)
-     * @param search 기본값 없음. 삭제할 작품의 필드 값을 지정
+     * @param contentId 삭제하고 싶은 Content 객체의 id
      * @return null
      */
     @DeleteMapping()
-    public ResponseEntity<SuccessResponse<Void>> delete(
-            @RequestParam(defaultValue = "id") String field,
-            @RequestParam String search
-    ) {
-        contentService.delete(field, search);
+    public ResponseEntity<SuccessResponse<Void>> delete(@RequestParam @NotNull String contentId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        contentService.delete(contentId, userDetails.getUserId());
+
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
                         .data(null)
