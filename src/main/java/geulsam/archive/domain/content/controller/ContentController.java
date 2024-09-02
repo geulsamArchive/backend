@@ -4,6 +4,7 @@ import geulsam.archive.domain.content.dto.req.ContentUpdateReq;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
+import geulsam.archive.domain.content.dto.res.MyContentRes;
 import geulsam.archive.domain.content.dto.res.RecentContentRes;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
@@ -98,6 +99,31 @@ public class ContentController {
                         .build()
         );
 
+    }
+
+    /**
+     * 로그인된 유저의 모든 작품 조회
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @return PageRes<MyContentRes> 로그인된 유저의 생성된 순서대로 정렬된 콘텐츠 목록을 포함하는 페이지 결과
+     */
+    @GetMapping("/mine")
+    public ResponseEntity<SuccessResponse<PageRes<MyContentRes>>> getMyContents(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Pageable pageable = PageRequest.of(page-1, 13, Sort.by("createdAt").descending());
+
+        PageRes<MyContentRes> myContentResList = contentService.getMyContents(pageable, userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PageRes<MyContentRes>>builder()
+                        .data(myContentResList)
+                        .message("user's contents retrieved successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
     }
 
     /**
