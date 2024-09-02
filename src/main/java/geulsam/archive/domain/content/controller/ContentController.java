@@ -32,6 +32,7 @@ import java.util.UUID;
 public class ContentController {
 
     private final ContentService contentService;
+    private static final int ANONYMOUS_USER_ID = -1;
 
     /**
      * DB에 있는 모든 작품 조회
@@ -47,8 +48,16 @@ public class ContentController {
             @RequestParam(required = false) String keyword
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
+        PageRes<ContentRes> contentResList;
 
-        PageRes<ContentRes> contentResList = contentService.getContents(genre, keyword, pageable);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            contentResList = contentService.getContents(genre, keyword, pageable, userDetails.getUserId());
+        } else {
+            contentResList = contentService.getContents(genre, keyword, pageable, ANONYMOUS_USER_ID);
+        }
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<ContentRes>>builder()

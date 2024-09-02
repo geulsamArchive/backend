@@ -46,31 +46,41 @@ public class ContentService {
 
     /**
      * Content 전체를 리턴하는 트랜잭션
+     * IsVisible.EVERY과 IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @param userId 로그인한 유저의 id. 음수인 경우 InVisible.EVERY 타입을 가진 Content 만을 다루도록 한다.
      * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional(readOnly = true)
-    public PageRes<ContentRes> getContents(Genre genre, String keyword, Pageable pageable) {
+    public PageRes<ContentRes> getContents(Genre genre, String keyword, Pageable pageable, int userId) {
         Page<Content> contentPage;
+        IsVisible visibleType = IsVisible.EVERY;
+
+        if(userId >= 0) {
+            userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                    ErrorCode.VALUE_ERROR, "해당 User 없음"
+            ));
+            visibleType = IsVisible.LOGGEDIN;
+        }
 
         if (genre != null) {
             if (keyword != null && !keyword.isEmpty()) {
-                contentPage = contentRepository.findByGenreAndNameContainingOrUser_NameContaining(genre, keyword, keyword, pageable);
+                contentPage = contentRepository.findContentByFilters(visibleType, genre, keyword, pageable);
             }
             else {
-                contentPage = contentRepository.findByGenre(genre, pageable);
+                contentPage = contentRepository.findByIsVisibleAndGenre(visibleType, genre, pageable);
             }
         } else {
             if (keyword != null && !keyword.isEmpty()) {
-                contentPage = contentRepository.findByNameContainingOrUser_NameContaining(keyword, keyword, pageable);
+                contentPage = contentRepository.findByIsVisibleAndKeyword(visibleType, keyword, pageable);
             }
             else {
-                contentPage = contentRepository.findAll(pageable);
+                System.out.println(visibleType);
+                contentPage = contentRepository.findByIsVisible(visibleType, pageable);
             }
         }
-
 
         List<ContentRes> contentResList = contentPage.getContent().stream()
                 .map(content -> {
@@ -122,7 +132,7 @@ public class ContentService {
     /**
      * 로그인된 유저의 Content 전체를 리턴하는 트랜잭션
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
-     * @param userId 로그인된 유저의 id
+     * @param userId 로그인한 유저의 id
      * @return PageRes<MyContentRes> 페이지네이션 정보와 MyContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional
@@ -143,7 +153,6 @@ public class ContentService {
         );
 
     }
-
 
     /**
      * contentUploadReq 객체를 받은 뒤 객체 안의 MultipartFile을 저장하고 url을 받아 옴.
@@ -210,7 +219,7 @@ public class ContentService {
      * 특정 Content를 수정하는 트랜잭션
      * @param contentId 수정하고 싶은 Content 객체의 id
      * @param contentUpdateReq Content 객체 수정에 필요한 정보가 담긴 DTO
-     * @param userId 로그인된 유저의 id
+     * @param userId 로그인한 유저의 id
      * @return ContentInfoRes 수정한 Content 객체의 정보를 포함한 DTO
      */
     public ContentInfoRes update(String contentId, ContentUpdateReq contentUpdateReq, Integer userId) {
