@@ -82,6 +82,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/content/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/content/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/content/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/content/**").permitAll()
                                 // 작품상 관련
                                 .requestMatchers(HttpMethod.POST, "/comment-award/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/comment-award/**").permitAll()
