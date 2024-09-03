@@ -48,6 +48,7 @@ public class ContentController {
             @RequestParam(required = false) String keyword
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
+
         PageRes<ContentRes> contentResList;
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -98,7 +99,17 @@ public class ContentController {
     ) {
         Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
 
-        PageRes<RecentContentRes> recentContentResList = contentService.getRecentContents(pageable);
+        PageRes<RecentContentRes> recentContentResList;
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            recentContentResList = contentService.getRecentContents(pageable, userDetails.getUserId());
+        } else {
+            recentContentResList = contentService.getRecentContents(pageable, ANONYMOUS_USER_ID);
+        }
+
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<RecentContentRes>>builder()

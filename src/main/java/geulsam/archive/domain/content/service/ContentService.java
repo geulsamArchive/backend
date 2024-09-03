@@ -112,12 +112,23 @@ public class ContentService {
 
     /**
      * 최근 생성된 8개 Content만을 리턴하는 트랜잭션
+     * IsVisible.EVERY과 IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @param userId 로그인한 유저의 id. 음수인 경우 InVisible.EVERY 타입을 가진 Content 만을 다루도록 한다.
      * @return PageRes<RecentContentRes> 페이지네이션 정보와 RecentContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional
-    public PageRes<RecentContentRes> getRecentContents(Pageable pageable) {
-        Page<Content> recentContentPage = contentRepository.findTop8ByIsVisibleOrderByCreatedAtDesc(IsVisible.EVERY, pageable);
+    public PageRes<RecentContentRes> getRecentContents(Pageable pageable, int userId) {
+        IsVisible visibleType = IsVisible.EVERY;
+
+        if(userId >= 0) {
+            userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                    ErrorCode.VALUE_ERROR, "해당 User 없음"
+            ));
+            visibleType = IsVisible.LOGGEDIN;
+        }
+
+        Page<Content> recentContentPage = contentRepository.findTop8ByIsVisibleOrderByCreatedAtDesc(visibleType, pageable);
 
         List<RecentContentRes> recentContentResList = recentContentPage.getContent().stream()
                 .map(RecentContentRes::new)
