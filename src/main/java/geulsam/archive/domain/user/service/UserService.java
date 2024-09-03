@@ -158,7 +158,7 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Integer userId) {
+    public void delete(Integer userId, String role, String schoolNum) {
         if (!userRepository.existsById(userId)) {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
         }
@@ -185,5 +185,15 @@ public class UserService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.")
         );
         user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
+    }
+
+    @Transactional(readOnly = true)
+    public void checkPassword(String password, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "입력하신 비밀번호가 다릅니다.");
+        }
     }
 }

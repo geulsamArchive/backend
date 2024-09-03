@@ -141,22 +141,22 @@ public class UserController {
 
         // 역할이 ADMIN 이면 필드 사용
         if(roles.get(0).contains(Level.ADMIN.toString())){
-            UserRes UserById = userService.findOneById(search);
+            UserRes userById = userService.findOneById(search);
 
             return ResponseEntity.ok().body(
                     SuccessResponse.<UserRes>builder()
-                            .data(UserById)
+                            .data(userById)
                             .status(HttpStatus.OK.value())
                             .message(Level.ADMIN + " 권한 USER " + search + " 정보")
                             .build()
             );
         } else {
             // NORMAL 이면 user 인증 객체 사용
-            UserRes UserById = userService.findOneById(userDetails.getUserId());
+            UserRes userById = userService.findOneById(userDetails.getUserId());
 
             return ResponseEntity.ok().body(
                     SuccessResponse.<UserRes>builder()
-                            .data(UserById)
+                            .data(userById)
                             .status(HttpStatus.OK.value())
                             .message(Level.NORMAL + " 권한 USER " + userDetails.getUserId() + " 정보")
                             .build()
@@ -199,7 +199,7 @@ public class UserController {
      */
     @PostMapping("/checkSchoolNum")
     public ResponseEntity<SuccessResponse<Void>> checkSchoolNum(
-            @RequestBody CheckSchoolNumReq checkSchoolNumReq
+            @RequestBody @Valid CheckSchoolNumReq checkSchoolNumReq
     ){
         userService.checkSchoolNum(checkSchoolNumReq.getSchoolNum());
         return ResponseEntity.ok().body(
@@ -212,15 +212,43 @@ public class UserController {
     }
 
     /**
+     *
+     * @param checkPasswordReq
+     * @return
+     */
+    @PostMapping("/checkPassword")
+    public ResponseEntity<SuccessResponse<Void>> checkPassword(
+            @RequestBody @Valid CheckPasswordReq checkPasswordReq
+    ){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        userService.checkPassword(checkPasswordReq.getPassword(), userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("입력하신 비밀번호가 일치합니다.")
+                        .build()
+        );
+    }
+
+    /**
      * 유저 개체 삭제
      * @return
      */
     @DeleteMapping()
-    public ResponseEntity<SuccessResponse<Void>> delete(){
+    public ResponseEntity<SuccessResponse<Void>> delete(
+            @RequestParam String schoolNum
+    ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        userService.delete(userDetails.getUserId());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+
+        userService.delete(userDetails.getUserId(), roles.get(0), schoolNum);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()

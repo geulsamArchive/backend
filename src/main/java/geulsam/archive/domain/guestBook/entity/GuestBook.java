@@ -52,7 +52,7 @@ public class GuestBook {
     public GuestBook(User writer, User owner, LocalDate createdAt, String writing) {
         this.writer = writer;
         this.owner = owner;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDate.now();
         this.writing = writing;
     }
 }

@@ -1,6 +1,7 @@
 package geulsam.archive.global.security;
 
 import geulsam.archive.global.exception.JwtAuthenticationEntryPoint;
+import geulsam.archive.global.exception.JwtAuthorityAccessDeniedHandler;
 import geulsam.archive.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAuthorityAccessDeniedHandler jwtAuthorityAccessDeniedHandler;
 
     /**
      * 비밀번호 암호화에 사용할 수 있는 encoder
@@ -57,18 +59,21 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST,"/user/signup").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/user/check").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/user/one").hasRole("NORMAL")
-                                .requestMatchers(HttpMethod.DELETE,"/user").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/user/one").authenticated()
+                                .requestMatchers(HttpMethod.DELETE,"/user").hasAnyRole("NORMAL", "SUSPENDED", "ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/user/checkSchoolNum").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/user/password").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/user/checkPassword").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/user/password").hasAnyRole("NORMAL", "SUSPENDED")
                                 // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
+                                // 포스터, 문집 관련
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()
-                                .requestMatchers(HttpMethod.POST,"/poster").hasRole("NORMAL")
-                                .requestMatchers(HttpMethod.DELETE, "/poster").hasRole("NORMAL")
-                                .requestMatchers(HttpMethod.POST, "/book").hasRole("NORMAL")
-                                .requestMatchers(HttpMethod.DELETE, "/book").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.POST,"/poster").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/poster").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/poster").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/book").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/book").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/book/**").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/book/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/book/**").hasRole("ADMIN")
                                 // 상 관련
                                 .requestMatchers(HttpMethod.POST, "/award/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/award/**").permitAll()
@@ -79,26 +84,26 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/comment/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/comment/**").authenticated()
                                 // 작품 관련
-                                .requestMatchers(HttpMethod.POST, "/content/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/content/**").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.GET, "/content/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/content/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/content/**").permitAll()
                                 // 작품상 관련
                                 .requestMatchers(HttpMethod.POST, "/comment-award/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/comment-award/**").permitAll()
                                 // 일정 관련
-                                .requestMatchers(HttpMethod.POST, "/calendar").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/calendar").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/calendar").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/calendar").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/calendar").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/calendar/criticism").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/calendar/criticism").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/calendar/criticism").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/calendar/one").permitAll()
-                                .requestMatchers(HttpMethod.PUT, "/calendar").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/calendar/regularCriticism").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/calendar").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/calendar/regularCriticism").hasRole("ADMIN")
                                 // 합평회 관련
                                 .requestMatchers(HttpMethod.POST, "/criticismAuthor").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/criticismAuthor").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/criticismAuthor").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/criticismAuthor/close").permitAll()
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",
@@ -114,7 +119,9 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling((exceptionConfig) ->
-                        exceptionConfig.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        exceptionConfig
+                                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                                .accessDeniedHandler(jwtAuthorityAccessDeniedHandler)
                 );
 
         return httpSecurity.build();
