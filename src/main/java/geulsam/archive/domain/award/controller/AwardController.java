@@ -3,7 +3,6 @@ package geulsam.archive.domain.award.controller;
 import geulsam.archive.domain.award.dto.req.AwardUploadReq;
 import geulsam.archive.domain.award.dto.res.AwardRes;
 import geulsam.archive.domain.award.service.AwardService;
-import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
@@ -89,7 +88,7 @@ public class AwardController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<Integer>builder()
                         .data(awardId)
-                        .status(HttpStatus.CREATED.value())
+                        .status(HttpStatus.OK.value())
                         .message("award added successfully")
                         .build()
         );
