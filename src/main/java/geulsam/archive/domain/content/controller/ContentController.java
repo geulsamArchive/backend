@@ -4,12 +4,14 @@ import geulsam.archive.domain.content.dto.req.ContentUpdateReq;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.domain.content.dto.res.ContentRes;
+import geulsam.archive.domain.content.dto.res.MyContentRes;
 import geulsam.archive.domain.content.dto.res.RecentContentRes;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,9 +28,11 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/content")
+@Validated
 public class ContentController {
 
     private final ContentService contentService;
+    private static final int ANONYMOUS_USER_ID = -1;
 
     /**
      * DB에 있는 모든 작품 조회
@@ -44,7 +49,16 @@ public class ContentController {
     ) {
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by("createdAt").descending());
 
-        PageRes<ContentRes> contentResList = contentService.getContents(genre, keyword, pageable);
+        PageRes<ContentRes> contentResList;
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            contentResList = contentService.getContents(genre, keyword, pageable, userDetails.getUserId());
+        } else {
+            contentResList = contentService.getContents(genre, keyword, pageable, ANONYMOUS_USER_ID);
+        }
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<ContentRes>>builder()
@@ -85,7 +99,17 @@ public class ContentController {
     ) {
         Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
 
-        PageRes<RecentContentRes> recentContentResList = contentService.getRecentContents(pageable);
+        PageRes<RecentContentRes> recentContentResList;
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            recentContentResList = contentService.getRecentContents(pageable, userDetails.getUserId());
+        } else {
+            recentContentResList = contentService.getRecentContents(pageable, ANONYMOUS_USER_ID);
+        }
+
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<RecentContentRes>>builder()
@@ -98,12 +122,37 @@ public class ContentController {
     }
 
     /**
+     * 로그인된 유저의 모든 작품 조회
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @return PageRes<MyContentRes> 로그인된 유저의 생성된 순서대로 정렬된 콘텐츠 목록을 포함하는 페이지 결과
+     */
+    @GetMapping("/mine")
+    public ResponseEntity<SuccessResponse<PageRes<MyContentRes>>> getMyContents(
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Pageable pageable = PageRequest.of(page-1, 13, Sort.by("createdAt").descending());
+
+        PageRes<MyContentRes> myContentResList = contentService.getMyContents(pageable, userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PageRes<MyContentRes>>builder()
+                        .data(myContentResList)
+                        .message("user's contents retrieved successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+    }
+
+    /**
      * 작품 등록
      * @param contentUploadReq Content 객체 생성에 필요한 정보가 담긴 DTO
      * @return UUID 저장한 Content 객체의 고유 ID
      */
     @PostMapping()
-    public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute ContentUploadReq contentUploadReq) {
+    public ResponseEntity<SuccessResponse<UUID>> upload(@ModelAttribute @Valid ContentUploadReq contentUploadReq) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -112,7 +161,7 @@ public class ContentController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<UUID>builder()
                         .data(contentId)
-                        .status(HttpStatus.CREATED.value())
+                        .status(HttpStatus.OK.value())
                         .message("content added successfully")
                         .build()
         );
@@ -120,16 +169,16 @@ public class ContentController {
 
     /**
      * 작품 삭제
-     * @param field 기본값은 id, 삭제하고 싶은 작품이 가진 필드를 지정(ex. id, user, book...)
-     * @param search 기본값 없음. 삭제할 작품의 필드 값을 지정
+     * @param contentId 삭제하고 싶은 Content 객체의 고유 ID
      * @return null
      */
     @DeleteMapping()
-    public ResponseEntity<SuccessResponse<Void>> delete(
-            @RequestParam(defaultValue = "id") String field,
-            @RequestParam String search
-    ) {
-        contentService.delete(field, search);
+    public ResponseEntity<SuccessResponse<Void>> delete(@RequestParam(defaultValue = "id") String contentId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        contentService.delete(contentId, userDetails.getUserId());
+
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
                         .data(null)
@@ -139,9 +188,15 @@ public class ContentController {
         );
     }
 
+    /**
+     * 작품 수정
+     * @param contentId 수정할 Content 객체의 고유 ID
+     * @param contentUpdateReq Content 객체 수정에 필요한 정보가 담긴 DTO
+     * @return ContentInfoRes 수정한 Content 객체의 정보를 포함한 DTO
+     */
     @PutMapping()
     public ResponseEntity<SuccessResponse<ContentInfoRes>> update(
-            @RequestParam(defaultValue = "id")  String contentId,
+            @RequestParam(defaultValue = "id") String contentId,
             @RequestBody ContentUpdateReq contentUpdateReq
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
