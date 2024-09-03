@@ -59,6 +59,7 @@ public class ContentAwardService {
      * LEVEL.ADMIN 타입을 가진 User 만이 실행 가능하다.
      * @param presentAwardReq Award 수상에 필요한 정보가 담긴 DTO
      * @param userId 로그인한 유저의 id
+     * @return String 수상된 Award 의 이름
      */
     @Transactional
     public String presentAward(PresentAwardReq presentAwardReq, Integer userId) {

@@ -60,7 +60,7 @@ public class ContentAwardController {
     /**
      * 작품 수상
      * @param presentAwardReq Award 수상에 필요한 정보가 담긴 DTO
-     * @return null
+     * @return String 수상된 Award 의 이름
      */
     @PostMapping()
     public ResponseEntity<SuccessResponse<String>> presentAward(@RequestBody @Valid PresentAwardReq presentAwardReq) {
