@@ -63,15 +63,15 @@ public class ContentAwardController {
      * @return null
      */
     @PostMapping()
-    public ResponseEntity<SuccessResponse<Void>> presentAward(@RequestBody @Valid PresentAwardReq presentAwardReq) {
+    public ResponseEntity<SuccessResponse<String>> presentAward(@RequestBody @Valid PresentAwardReq presentAwardReq) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        contentAwardService.presentAward(presentAwardReq, userDetails.getUserId());
+        String awardName = contentAwardService.presentAward(presentAwardReq, userDetails.getUserId());
 
         return ResponseEntity.ok().body(
-                SuccessResponse.<Void>builder()
-                        .data(null)
+                SuccessResponse.<String>builder()
+                        .data(awardName)
                         .message("award presented successfully")
                         .status(HttpStatus.OK.value())
                         .build()

@@ -61,7 +61,7 @@ public class ContentAwardService {
      * @param userId 로그인한 유저의 id
      */
     @Transactional
-    public void presentAward(PresentAwardReq presentAwardReq, Integer userId) {
+    public String presentAward(PresentAwardReq presentAwardReq, Integer userId) {
         User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
         ));
@@ -86,5 +86,7 @@ public class ContentAwardService {
         );
 
         contentAwardRepository.save(newContentAward);
+
+        return findAward.getName();
     }
 }
