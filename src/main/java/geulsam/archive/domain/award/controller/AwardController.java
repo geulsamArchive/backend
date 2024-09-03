@@ -3,14 +3,18 @@ package geulsam.archive.domain.award.controller;
 import geulsam.archive.domain.award.dto.req.AwardUploadReq;
 import geulsam.archive.domain.award.dto.res.AwardRes;
 import geulsam.archive.domain.award.service.AwardService;
+import geulsam.archive.domain.content.dto.res.ContentInfoRes;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import geulsam.archive.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -70,13 +74,17 @@ public class AwardController {
 
     /**
      * 상 등록
+     * Level.GRADUATED과 Level.SUSPENDED는 권한이 없다.
      * @param awardUploadReq Award 객체 생성에 필요한 정보가 담긴 DTO
      * @return Integer 저장한 상 객체의 고유 ID
      */
     @PostMapping()
     public ResponseEntity<SuccessResponse<Integer>> upload(@RequestBody AwardUploadReq awardUploadReq) {
 
-        Integer awardId = awardService.upload(awardUploadReq);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Integer awardId = awardService.upload(awardUploadReq, userDetails.getUserId());
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Integer>builder()
@@ -89,13 +97,17 @@ public class AwardController {
 
     /**
      * 상 삭제
-     * 수상한 콘텐츠의 award 필드를 null로 설정하고 해당 award id를 가진 상을 삭제한다.
+     * Level.GRADUATED과 Level.SUSPENDED는 권한이 없다.
      * @param awardId 삭제할 상의 고유 ID
      * @return null
      */
     @DeleteMapping()
-    public ResponseEntity<SuccessResponse<Void>> delete(int awardId) {
-        awardService.delete(awardId);
+    public ResponseEntity<SuccessResponse<Void>> delete(@RequestParam int awardId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        awardService.delete(awardId, userDetails.getUserId());
+
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
                         .data(null)
