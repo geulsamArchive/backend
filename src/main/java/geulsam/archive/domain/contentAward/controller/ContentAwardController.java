@@ -1,9 +1,12 @@
 package geulsam.archive.domain.contentAward.controller;
 
+import geulsam.archive.domain.contentAward.dto.req.PresentAwardReq;
 import geulsam.archive.domain.contentAward.dto.res.ContentAwardRes;
 import geulsam.archive.domain.contentAward.service.ContentAwardService;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import geulsam.archive.global.security.UserDetailsImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -47,6 +52,27 @@ public class ContentAwardController {
                 SuccessResponse.<PageRes<ContentAwardRes>>builder()
                         .data(contentAwardResList)
                         .message("awards during the period retrieved successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+    }
+
+    /**
+     * 작품 수상
+     * @param presentAwardReq Award 수상에 필요한 정보가 담긴 DTO
+     * @return null
+     */
+    @PostMapping()
+    public ResponseEntity<SuccessResponse<Void>> presentAward(@RequestBody @Valid PresentAwardReq presentAwardReq) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        contentAwardService.presentAward(presentAwardReq, userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .message("award presented successfully")
                         .status(HttpStatus.OK.value())
                         .build()
         );
