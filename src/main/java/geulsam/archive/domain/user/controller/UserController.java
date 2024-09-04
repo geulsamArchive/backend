@@ -1,11 +1,14 @@
 package geulsam.archive.domain.user.controller;
 
+import geulsam.archive.domain.poster.dto.res.PosterRes;
 import geulsam.archive.domain.user.dto.req.*;
 import geulsam.archive.domain.user.dto.res.CheckRes;
 import geulsam.archive.domain.user.dto.res.LoginRes;
+import geulsam.archive.domain.user.dto.res.UserOneRes;
 import geulsam.archive.domain.user.dto.res.UserRes;
 import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.service.UserService;
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +17,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -128,7 +134,7 @@ public class UserController {
     }
 
     @GetMapping("/one")
-    public ResponseEntity<SuccessResponse<UserRes>> one(
+    public ResponseEntity<SuccessResponse<UserOneRes>> one(
             @RequestParam(defaultValue = "0") int search
     ){
         /*유저 인증 객체를 가져옴*/
@@ -141,22 +147,22 @@ public class UserController {
 
         // 역할이 ADMIN 이면 필드 사용
         if(roles.get(0).contains(Level.ADMIN.toString())){
-            UserRes UserById = userService.findOneById(search);
+            UserOneRes userById = userService.findOneById(search);
 
             return ResponseEntity.ok().body(
-                    SuccessResponse.<UserRes>builder()
-                            .data(UserById)
+                    SuccessResponse.<UserOneRes>builder()
+                            .data(userById)
                             .status(HttpStatus.OK.value())
                             .message(Level.ADMIN + " 권한 USER " + search + " 정보")
                             .build()
             );
         } else {
             // NORMAL 이면 user 인증 객체 사용
-            UserRes UserById = userService.findOneById(userDetails.getUserId());
+            UserOneRes userById = userService.findOneById(userDetails.getUserId());
 
             return ResponseEntity.ok().body(
-                    SuccessResponse.<UserRes>builder()
-                            .data(UserById)
+                    SuccessResponse.<UserOneRes>builder()
+                            .data(userById)
                             .status(HttpStatus.OK.value())
                             .message(Level.NORMAL + " 권한 USER " + userDetails.getUserId() + " 정보")
                             .build()
@@ -199,7 +205,7 @@ public class UserController {
      */
     @PostMapping("/checkSchoolNum")
     public ResponseEntity<SuccessResponse<Void>> checkSchoolNum(
-            @RequestBody CheckSchoolNumReq checkSchoolNumReq
+            @RequestBody @Valid CheckSchoolNumReq checkSchoolNumReq
     ){
         userService.checkSchoolNum(checkSchoolNumReq.getSchoolNum());
         return ResponseEntity.ok().body(
@@ -212,15 +218,43 @@ public class UserController {
     }
 
     /**
+     *
+     * @param checkPasswordReq
+     * @return
+     */
+    @PostMapping("/checkPassword")
+    public ResponseEntity<SuccessResponse<Void>> checkPassword(
+            @RequestBody @Valid CheckPasswordReq checkPasswordReq
+    ){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        userService.checkPassword(checkPasswordReq.getPassword(), userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Void>builder()
+                        .data(null)
+                        .status(HttpStatus.OK.value())
+                        .message("입력하신 비밀번호가 일치합니다.")
+                        .build()
+        );
+    }
+
+    /**
      * 유저 개체 삭제
      * @return
      */
     @DeleteMapping()
-    public ResponseEntity<SuccessResponse<Void>> delete(){
+    public ResponseEntity<SuccessResponse<Void>> delete(
+            @RequestParam String schoolNum
+    ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        userService.delete(userDetails.getUserId());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+
+        userService.delete(userDetails.getUserId(), roles.get(0), schoolNum);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
@@ -257,12 +291,81 @@ public class UserController {
             userService.updatePassword(passwordReq, userDetails.getUserId());
         }
 
-        return ResponseEntity.ok().body(
+        return ResponseEntity.ok().body
+                (
                 SuccessResponse.<Void>builder()
                         .data(null)
                         .status(HttpStatus.OK.value())
                         .message("비밀번호 변경 완료. 재로그인 필요")
                         .build()
         );
+    }
+
+    /**
+     * 유저 레벨 변경
+     * @return
+     */
+    @PutMapping("/level")
+    public ResponseEntity<SuccessResponse<Void>> level(
+            @RequestBody LevelUpdateReq levelUpdateReq
+    ){
+        userService.level(levelUpdateReq.getLevel(), levelUpdateReq.getUserId());
+
+        return ResponseEntity.ok().body
+                (
+                        SuccessResponse.<Void>builder()
+                                .data(null)
+                                .status(HttpStatus.OK.value())
+                                .message("유저 등급 변경 완료")
+                                .build()
+                );
+    }
+
+    /**
+     * 유저 전체 정보
+     * @param page 요청할 페이지 넘버
+     * @param order 유저 정렬 순서 asc or desc
+     * @return
+     */
+    @GetMapping()
+    public ResponseEntity<SuccessResponse<PageRes<UserRes>>> user(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "asc") String order
+    ){
+        Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        //pageNumber 는 클라이언트에서 1로 넘어오지만 Spring 의 페이징 기능은 페이지가 0부터 시작
+        // pageSize 는 12로 고정, 정렬 기준 속성도 year 로 고정
+        Pageable pageable = PageRequest.of(page-1, 12, Sort.by(direction, "name"));
+
+        PageRes<UserRes> user = userService.user(pageable);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PageRes<UserRes>>builder()
+                        .data(user)
+                        .message("user get success")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+    }
+
+    /**
+     * 유저 비밀번호 리셋
+     * @param id 리셋할 유저 아이디
+     * @return
+     */
+    @GetMapping("/resetPassword")
+    public ResponseEntity<SuccessResponse<Void>> resetPassword(
+            @RequestParam(defaultValue = "0") int id
+    ){
+        userService.resetPassword(id);
+
+        return ResponseEntity.ok().body
+                (
+                        SuccessResponse.<Void>builder()
+                                .data(null)
+                                .status(HttpStatus.OK.value())
+                                .message("유저 비밀번호 리셋 완료")
+                                .build()
+                );
     }
 }

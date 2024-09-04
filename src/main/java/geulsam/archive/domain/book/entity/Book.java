@@ -120,8 +120,8 @@ public class Book {
     public void updateByUpdateReq(UpdateReq updateReq) {
         this.designer = updateReq.getDesigner() == null ? this.designer : updateReq.getDesigner();
         this.plate = updateReq.getPlate() == null ? this.plate : updateReq.getPlate();
-        this.year = updateReq.getYear() == 0 ? this.year : Year.of(updateReq.getYear());
-        this.pageNumber = updateReq.getPageNumber() == 0 ? this.pageNumber : updateReq.getPageNumber();
+        this.year = updateReq.getYear() == null ? this.year : Year.of(updateReq.getYear());
+        this.pageNumber = updateReq.getPageNumber() == null ? this.pageNumber : updateReq.getPageNumber();
         this.release = updateReq.getRelease() == null ? this.release : updateReq.getRelease();
         this.title = updateReq.getTitle() == null ? this.title : updateReq.getTitle();
     }

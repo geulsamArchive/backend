@@ -65,36 +65,19 @@ public class CriticismAuthorService {
     }
 
     @Transactional
-    public void delete(Integer userId, int search, int order, String roles) {
-        Criticism criticism = criticismRepository.findById(search)
-                .orElseThrow(() ->new ArchiveException(ErrorCode.VALUE_ERROR, "해당 합평회 없음"));
+    public void delete(Integer userId, int search, String roles) {
+        CriticismAuthor criticismAuthor = criticismAuthorRepository.findById(search).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "지우려는 합평회 신청 없음")
+        );
 
-        // 합평회의 신청 리스트 전체를 순회
-        boolean deleted = false;
-
-        Iterator<CriticismAuthor> iterator = criticism.getCriticismAuthors().iterator();
-        while (iterator.hasNext()) {
-            // 계속 다음 탐색
-            CriticismAuthor criticismAuthor = iterator.next();
-            // 합평회 순서가 입력받은 순서 숫자와 일치한다면
-            if (criticismAuthor.getOrder() == order) {
-                // 해당 합평회의 작가 아이디와 입력받은 아이디가 일치하거나 관리자 권한이라면
-                if (criticismAuthor.getAuthor().getId().intValue() == userId.intValue() ||
-                        Objects.equals(roles, "ROLE_ADMIN")) {
-                    // criticism 과의 연관관계 제거
-                    criticism.removeCriticismAuthor(criticismAuthor);
-                    // 데이터베이스에서 삭제
-                    criticismAuthorRepository.deleteById(criticismAuthor.getId());
-                    criticism.removeCriticismAuthor(criticismAuthor);
-                    // Remove from the collection
-                    iterator.remove();
-                    deleted = true; // Set flag indicating deletion occurred
-                }
+        if (roles.equals("ROLE_NORMAL") && Objects.equals(criticismAuthor.getAuthor().getId(), userId)) {
+            if (criticismAuthor.getAuthor().getId().equals(userId)) {
+                criticismAuthorRepository.deleteById(search);
             }
-        }
-
-        if (!deleted) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR,"지우려는 신청이 없음");
+        } else if (roles.equals("ROLE_ADMIN")) {
+            criticismAuthorRepository.deleteById(search);
+        } else {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR);
         }
     }
 

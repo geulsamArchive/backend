@@ -163,4 +163,9 @@ public class User {
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
+
+    public void updateLevel(Level level){
+        this.level = level;
+
+    }
 }

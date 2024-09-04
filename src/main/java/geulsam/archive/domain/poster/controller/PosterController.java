@@ -108,7 +108,6 @@ public class PosterController {
 
     /**
      * id를 통해 Poster 객체 1개 return
-     * @param field id
      * @return
      */
     @GetMapping("/one")
@@ -136,7 +135,7 @@ public class PosterController {
     })
     public ResponseEntity<SuccessResponse<Void>> put(
             @RequestParam(defaultValue = "id") String search,
-            @ModelAttribute @Valid UpdateReq updateReq
+            @ModelAttribute UpdateReq updateReq
             ){
 
         posterService.update(search, updateReq);
@@ -145,7 +144,7 @@ public class PosterController {
                 SuccessResponse.<Void>builder()
                         .data(null)
                         .status(HttpStatus.OK.value())
-                        .message("포스터 업로드 성공")
+                        .message("포스터 업데이트 성공")
                         .build()
         );
     }
