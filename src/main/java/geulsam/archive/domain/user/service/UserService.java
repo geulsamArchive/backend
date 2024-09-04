@@ -5,17 +5,20 @@ import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
 import geulsam.archive.domain.user.dto.req.PasswordReq;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
 import geulsam.archive.domain.user.dto.res.LoginRes;
+import geulsam.archive.domain.user.dto.res.UserOneRes;
 import geulsam.archive.domain.user.dto.res.UserRes;
 import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.jwt.JwtProvider;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -137,9 +142,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserRes findOneById(int id) {
+    public UserOneRes findOneById(int id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 사용자 없음"));
-        return(new UserRes(user));
+        return(new UserOneRes(user));
     }
 
     @Transactional
@@ -158,7 +163,7 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Integer userId) {
+    public void delete(Integer userId, String role, String schoolNum) {
         if (!userRepository.existsById(userId)) {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
         }
@@ -185,5 +190,73 @@ public class UserService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.")
         );
         user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
+    }
+
+    @Transactional(readOnly = true)
+    public void checkPassword(String password, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "입력하신 비밀번호가 다릅니다.");
+        }
+    }
+
+    /**
+     * 유저 레벨 업데이트
+     * @param level 업데이트할 레벨
+     * @param userId 유저 아이디
+     */
+    @Transactional
+    public void level(Level level, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
+        user.updateLevel(level);
+    }
+
+    @Transactional(readOnly = true)
+    public PageRes<UserRes> user(Pageable pageable){
+        Page<User> userPage = userRepository.findAll(pageable);
+
+        List<UserRes> userResList = userPage.getContent().stream()
+                .map(user -> new UserRes(user, userPage.getContent().indexOf(user)))
+                .collect(Collectors.toList());
+
+        return new PageRes<>(
+                userPage.getTotalPages(),
+                userResList
+        );
+    }
+
+    @Transactional
+    public void resetPassword(Integer userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
+
+        String tempPassword = RandomStringUtils.randomAlphanumeric(12);
+
+        // 임시비밀번호로 메일 발송
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(user.getEmail());
+            helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
+
+            String htmlMsg = "<h3>안녕하세요, " + user.getName() + " 회원님</h3>"
+                    + "<p>임시 비밀번호를 발급해 드립니다.</p>"
+                    + "<div style='border: 2px solid #000; padding: 10px; width: fit-content; background-color: #f3f3f3;'>"
+                    + "<strong style='font-size: 1.2em;'>" + tempPassword + "</strong>"
+                    + "</div>"
+                    + "<p>로그인 후에 비밀번호를 바꿔 주세요.</p>";
+
+            helper.setText(htmlMsg, true);
+
+            javaMailSender.send(mimeMessage);
+        } catch (Exception e) {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
+        }
+
+        user.updatePassword(passwordEncoder.encode(tempPassword));
     }
 }

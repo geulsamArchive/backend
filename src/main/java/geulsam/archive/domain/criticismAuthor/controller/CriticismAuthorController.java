@@ -84,8 +84,7 @@ public class CriticismAuthorController {
 
     @DeleteMapping()
     public ResponseEntity<SuccessResponse<Void>> delete(
-            @RequestParam int search, // 삭제하려는 신청이 있는 합평회 id
-            @RequestParam int order // 삭제하려는 순서
+            @RequestParam int search // 삭제하려는 합평 신청
     ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -94,7 +93,7 @@ public class CriticismAuthorController {
                 .map(GrantedAuthority::getAuthority).toList();
 
         // 신청받은 유저 아이디, 삭제하려는 신청이 있는 합평회 id 삭제하려는 순서
-        criticismAuthorService.delete(userDetails.getUserId(), search, order, roles.get(0));
+        criticismAuthorService.delete(userDetails.getUserId(), search, roles.get(0));
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()

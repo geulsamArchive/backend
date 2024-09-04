@@ -81,7 +81,7 @@ public class Poster {
      * @param updateReq
      */
     public void updateByUpdateReq(UpdateReq updateReq) {
-        this.year = updateReq.getYear() == 0 ? this.year : Year.of(updateReq.getYear());
+        this.year = updateReq.getYear() == null ? this.year : Year.of(updateReq.getYear());
         this.plate = updateReq.getPlate() == null ? this.plate : updateReq.getPlate();
         this.designer = updateReq.getDesigner() == null ? this.designer : updateReq.getDesigner();
     }

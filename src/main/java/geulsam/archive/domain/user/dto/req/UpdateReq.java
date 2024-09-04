@@ -31,5 +31,5 @@ public class UpdateReq {
     private String majorWorkId;
 
     @Schema(description = "user 가입연도", example = "2024", type = "int")
-    private int joinedAt;
+    private Integer joinedAt;
 }
