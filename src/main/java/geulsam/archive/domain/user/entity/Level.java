@@ -7,5 +7,5 @@ package geulsam.archive.domain.user.entity;
  * 기타: SUSPENDED
  */
 public enum Level {
-    ADMIN,NORMAL,GRADUATED,SUSPENDED
+    ADMIN,NORMAL,SUSPENDED
 }

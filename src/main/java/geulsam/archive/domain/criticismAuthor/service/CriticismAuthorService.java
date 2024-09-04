@@ -73,7 +73,7 @@ public class CriticismAuthorService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "지우려는 합평회 신청 없음")
         );
 
-        if (roles.equals("ROLE_NORMAL")) {
+        if (roles.equals("ROLE_NORMAL") && Objects.equals(criticismAuthor.getAuthor().getId(), userId)) {
             if (criticismAuthor.getAuthor().getId().equals(userId)) {
                 criticismAuthorRepository.deleteById(search);
             }
