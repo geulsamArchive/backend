@@ -7,6 +7,7 @@ import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.comment.repository.CommentRepository;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.repository.ContentRepository;
+import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.exception.ArchiveException;
@@ -42,16 +43,26 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Level.SUSPENDED, Level.NORMAL 타입을 가진 User 만이 해당 기능에 접근 가능하다.
+     * @param commentUploadReq Comment 객체 생성에 필요한 정보가 담긴 DTO
+     * @param userId 로그인한 유저의 id
+     * @return int 저장한 Comment 객체의 id
+     */
     @Transactional
-    public int upload(CommentUploadReq commentUploadReq) {
+    public int upload(CommentUploadReq commentUploadReq, int userId) {
 
         Content findContent = contentRepository.findById(commentUploadReq.getContentId()).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
 
-        User findUser = userRepository.findById(commentUploadReq.getUserId()).orElseThrow(() -> new ArchiveException(
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
-        ));;
+        ));
+
+        if(findUser.getLevel().equals(Level.ADMIN)) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "댓글 등록 권한 없음");
+        }
 
         Comment newComment = new Comment(
                 commentUploadReq.getWriting(),
