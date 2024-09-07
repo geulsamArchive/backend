@@ -14,8 +14,6 @@ import java.util.UUID;
 public class CommentUploadReq {
     @Schema(description = "작품 아이디", example = "adsa-dsafdsa-vsadf-dsafdsa")
     private UUID contentId;
-    @Schema(description = "댓글 작성자 아이디", example = "1")
-    private int userId;
     @Schema(description = "댓글 내용", example = "너무 재밌게 잘 봤습니다! 전작이랑 분위기가 달라 신선했어요.")
     private String writing;
 }
