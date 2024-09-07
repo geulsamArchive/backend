@@ -4,6 +4,7 @@ import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
 import geulsam.archive.domain.user.dto.req.PasswordReq;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
+import geulsam.archive.domain.user.dto.res.AuthorRes;
 import geulsam.archive.domain.user.dto.res.LoginRes;
 import geulsam.archive.domain.user.dto.res.UserOneRes;
 import geulsam.archive.domain.user.dto.res.UserRes;
@@ -258,5 +259,13 @@ public class UserService {
         }
 
         user.updatePassword(passwordEncoder.encode(tempPassword));
+    }
+
+    @Transactional
+    public AuthorRes author(int id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
+
+        return new AuthorRes(user);
     }
 }

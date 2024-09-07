@@ -70,10 +70,9 @@ public class CriticismAuthorService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "지우려는 합평회 신청 없음")
         );
 
-        if (roles.equals("ROLE_NORMAL") && Objects.equals(criticismAuthor.getAuthor().getId(), userId)) {
-            if (criticismAuthor.getAuthor().getId().equals(userId)) {
+        // 유저의 역할이 NORMAL 이고 지우고자 하는 criticismAuthor 객체의 userID와 같으며 해당 객체의 상태가 UNFIXED 일때
+        if (roles.equals("ROLE_NORMAL") && Objects.equals(criticismAuthor.getAuthor().getId(), userId) && criticismAuthor.getCondition() == Condition.UNFIXED) {
                 criticismAuthorRepository.deleteById(search);
-            }
         } else if (roles.equals("ROLE_ADMIN")) {
             criticismAuthorRepository.deleteById(search);
         } else {

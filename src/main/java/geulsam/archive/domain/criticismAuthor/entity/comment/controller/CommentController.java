@@ -45,12 +45,16 @@ public class CommentController {
 
     /**
      * 댓글 등록
+     * Level.SUSPENDED, Level.NORMAL 타입을 가진 User 만이 해당 기능에 접근 가능하다.
      * @param commentUploadReq Comment 객체 생성에 필요한 정보가 담긴 DTO
      * @return Integer 등록된 댓글의 ID
      */
     @PostMapping()
     public ResponseEntity<SuccessResponse<Integer>> upload(@RequestBody CommentUploadReq commentUploadReq) {
-        int commentId = commentService.upload(commentUploadReq);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        int commentId = commentService.upload(commentUploadReq, userDetails.getUserId());
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Integer>builder()
