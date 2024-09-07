@@ -2,10 +2,7 @@ package geulsam.archive.domain.user.controller;
 
 import geulsam.archive.domain.poster.dto.res.PosterRes;
 import geulsam.archive.domain.user.dto.req.*;
-import geulsam.archive.domain.user.dto.res.CheckRes;
-import geulsam.archive.domain.user.dto.res.LoginRes;
-import geulsam.archive.domain.user.dto.res.UserOneRes;
-import geulsam.archive.domain.user.dto.res.UserRes;
+import geulsam.archive.domain.user.dto.res.*;
 import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.service.UserService;
 import geulsam.archive.global.common.dto.PageRes;
@@ -365,6 +362,27 @@ public class UserController {
                                 .data(null)
                                 .status(HttpStatus.OK.value())
                                 .message("유저 비밀번호 리셋 완료")
+                                .build()
+                );
+    }
+
+    /**
+     * 유저(작가)의 개인정보 리턴
+     * @param id
+     * @return
+     */
+    @GetMapping("/author")
+    public ResponseEntity<SuccessResponse<AuthorRes>> author(
+            @RequestParam(defaultValue = "0") int id
+    ){
+        AuthorRes authorRes = userService.author(id);
+
+        return ResponseEntity.ok().body
+                (
+                        SuccessResponse.<AuthorRes>builder()
+                                .data(authorRes)
+                                .status(HttpStatus.OK.value())
+                                .message("작가 개인 소개")
                                 .build()
                 );
     }
