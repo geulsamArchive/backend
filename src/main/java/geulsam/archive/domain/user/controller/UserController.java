@@ -169,7 +169,7 @@ public class UserController {
 
     @PutMapping()
     public ResponseEntity<SuccessResponse<Void>> put(
-            @RequestBody UpdateReq updateReq,
+            @RequestBody @Valid UpdateReq updateReq,
             @RequestParam(defaultValue = "0") int search)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

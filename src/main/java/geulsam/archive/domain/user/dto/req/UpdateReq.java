@@ -1,6 +1,8 @@
 package geulsam.archive.domain.user.dto.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,6 +13,10 @@ import java.time.LocalDate;
 public class UpdateReq {
     @Schema(description = "이름", example = "김철수", type = "string")
     private String name;
+
+    @Size(max = 7, min = 7)
+    @Schema(description = "학번", example = "B000000", type = "string")
+    private String schoolNum;
 
     @Schema(description = "이메일", example = "example@gmail.com", type = "string")
     private String email;
