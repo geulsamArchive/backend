@@ -1,6 +1,5 @@
 package geulsam.archive.domain.criticismAuthor.service;
 
-import geulsam.archive.domain.criticismAuthor.dto.req.CriticismAuthorCloseReq;
 import geulsam.archive.domain.criticismAuthor.dto.res.CriticismAuthorRes;
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.calendar.repository.CriticismRepository;
@@ -32,8 +31,6 @@ public class CriticismAuthorService {
     private final CriticismRepository criticismRepository;
     private final UserRepository userRepository;
     private final CriticismAuthorRepository criticismAuthorRepository;
-    @PersistenceContext
-    private EntityManager entityManager;
     @Transactional
     public void upload(CriticismAuthorUploadReq criticismAuthorUploadReq, int userId) {
         Criticism criticism = criticismRepository.findById(criticismAuthorUploadReq.getCriticismId())
@@ -43,7 +40,7 @@ public class CriticismAuthorService {
                 .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 유저 없음"));
 
         // 순서는 합평회 인원수보다  작아야 함
-        if(criticism.getAuthorCnt() < criticismAuthorUploadReq.getOrder()){
+        if(criticism.getAuthorCnt() <= criticismAuthorUploadReq.getOrder()){
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "신청할 수 있는 인원수 초과");
         }
 
@@ -93,25 +90,25 @@ public class CriticismAuthorService {
         return criticismAuthor.getCondition();
     }
 
-    @Transactional(readOnly = true)
-    public PageRes<CriticismAuthorRes> criticismAuthor(Pageable pageable) {
-        Page<CriticismAuthor> criticismAuthorPages = criticismAuthorRepository.findCriticismAuthorBeforeNow(LocalDateTime.now(), pageable);
+//    @Transactional(readOnly = true)
+//    public PageRes<CriticismAuthorRes> criticismAuthor(Pageable pageable) {
+//        Page<CriticismAuthor> criticismAuthorPages = criticismAuthorRepository.findCriticismAuthorBeforeNow(LocalDateTime.now(), pageable);
+//
+//        List<CriticismAuthorRes> criticismAuthorRes = criticismAuthorPages.getContent().stream()
+//                .map(criticismAuthor -> new CriticismAuthorRes(criticismAuthor, criticismAuthorPages.getContent().indexOf(criticismAuthor))).toList();
+//
+//        return new PageRes<>(
+//                criticismAuthorPages.getTotalPages(),
+//                criticismAuthorRes
+//        );
+//    }
 
-        List<CriticismAuthorRes> criticismAuthorRes = criticismAuthorPages.getContent().stream()
-                .map(criticismAuthor -> new CriticismAuthorRes(criticismAuthor, criticismAuthorPages.getContent().indexOf(criticismAuthor))).toList();
-
-        return new PageRes<>(
-                criticismAuthorPages.getTotalPages(),
-                criticismAuthorRes
-        );
-    }
-
-    @Transactional
-    public void close(CriticismAuthorCloseReq criticismAuthorCloseReq) {
-        CriticismAuthor criticismAuthor = criticismAuthorRepository.findByContentId(UUID.fromString(criticismAuthorCloseReq.getContentId())).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 신청 없음")
-        );
-
-        criticismAuthor.close(criticismAuthorCloseReq);
-    }
+//    @Transactional
+//    public void close(CriticismAuthorCloseReq criticismAuthorCloseReq) {
+//        CriticismAuthor criticismAuthor = criticismAuthorRepository.findByContentId(UUID.fromString(criticismAuthorCloseReq.getContentId())).orElseThrow(
+//                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 신청 없음")
+//        );
+//
+//        criticismAuthor.close(criticismAuthorCloseReq);
+//    }
 }

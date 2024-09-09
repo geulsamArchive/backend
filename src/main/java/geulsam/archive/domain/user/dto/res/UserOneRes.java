@@ -18,6 +18,10 @@ import java.util.List;
 public class UserOneRes {
     @Schema(description = "user 이름", example = "김철수", type = "string")
     private String name;
+
+    @Schema(description = "user 학번", example = "B000000", type = "string")
+    private String schoolNum;
+
     @Schema(description = "user 이메일", example = "example@gmail.com", type = "string")
     private String email;
     @Schema(description = "user 생일", example = "2024년 5월 6일", type = "string")
@@ -42,6 +46,7 @@ public class UserOneRes {
 
     public UserOneRes(User user){
         this.name = user.getName();
+        this.schoolNum = user.getSchoolNum();
         this.email = user.getEmail();
         this.birthDay = user.getBirthDay();
         this.introduce = user.getIntroduce();

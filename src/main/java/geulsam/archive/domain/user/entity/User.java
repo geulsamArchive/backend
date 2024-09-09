@@ -151,6 +151,7 @@ public class User {
     //이 밑에 앞으로 필요한 비즈니스 로직 작성
 
     public void updateByPutReq(UpdateReq updateReq) {
+        this.schoolNum = updateReq.getSchoolNum() == null ? this.name : updateReq.getSchoolNum();
         this.name = updateReq.getName() == null ? this.name : updateReq.getName();
         this.email = updateReq.getEmail() == null ? this.email : updateReq.getEmail();
         this.phone = updateReq.getPhone() == null ? this.phone : updateReq.getPhone();
