@@ -106,7 +106,7 @@ public class Content {
         this.name = Objects.requireNonNull(name, "Name cannot be null");
         this.pdfUrl = null;
         this.htmlUrl = null;
-        this.genre = genre != null ? genre : Genre.OTHERS;
+        this.genre = genre != null ? genre : Genre.NOVEL;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.isVisible = isVisible != null ? isVisible : IsVisible.PRIVATE;
         this.viewCount = 0;

@@ -7,5 +7,5 @@ package geulsam.archive.domain.content.entity;
  * OTHERS: 기타
  */
 public enum Genre {
-    NOVEL,ESSAY,POEM,OTHERS
+    NOVEL,ESSAY,POEM
 }
