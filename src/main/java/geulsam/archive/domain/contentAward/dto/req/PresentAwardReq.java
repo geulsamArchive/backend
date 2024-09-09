@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -16,8 +17,7 @@ import java.time.LocalDate;
 public class PresentAwardReq {
     @Schema(description = "작품 아이디", example = "adsa-dsafdsa-vsadf-dsafdsa")
     @NotNull(message = "작품 아이디는 Null 일 수 없습니다")
-    @NotEmpty(message = "작품 아이디는 빈값일 수 없습니다")
-    private String contentId;
+    private UUID contentId;
     @Schema(description = "상 아이디", example = "1")
     @NotNull(message = "상 아이디는 Null 일 수 없습니다")
     private int awardId;

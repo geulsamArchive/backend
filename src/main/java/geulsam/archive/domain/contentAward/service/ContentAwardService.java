@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,10 +67,10 @@ public class ContentAwardService {
         ));
 
         if(findUser.getLevel().equals(Level.ADMIN)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
         }
 
-        Content findContent = contentRepository.findById(UUID.fromString(presentAwardReq.getContentId())).orElseThrow(() -> new ArchiveException(
+        Content findContent = contentRepository.findById(presentAwardReq.getContentId()).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
 

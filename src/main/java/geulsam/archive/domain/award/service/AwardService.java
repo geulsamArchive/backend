@@ -68,7 +68,7 @@ public class AwardService {
 
     /**
      * Award 를 생성하는 트랜잭션
-     * Level.GRADUATED와 Level.SUSPENDED는 해당 권한이 없다.
+     * Level.NORMAL과 Level.SUSPENDED는 해당 권한이 없다.
      * @param awardUploadReq Award 객체 생성에 필요한 정보가 담긴 DTO
      * @param userId 로그인한 유저의 ID
      * @return Integer 생성한 Award 의 ID
@@ -79,8 +79,8 @@ public class AwardService {
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
         ));
 
-        if(findUser.getLevel().equals(Level.GRADUATED) || findUser.getLevel().equals(Level.SUSPENDED)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
+        if(findUser.getLevel().equals(Level.NORMAL) || findUser.getLevel().equals(Level.SUSPENDED)) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
         }
 
         Award newAward = new Award(
@@ -97,7 +97,7 @@ public class AwardService {
     /**
      * 특정 Award 를 삭제하는 트랜잭션
      * 수상한 콘텐츠의 award 필드를 null로 설정하고 해당 award id를 가진 상을 삭제한다.
-     * Level.GRADUATED와 Level.SUSPENDED는 해당 권한이 없다.
+     * Level.NORMAL과 Level.SUSPENDED는 해당 권한이 없다.
      * @param awardId 삭제할 상의 id 값
      * @param userId 로그인한 유저의 id
      */
@@ -107,12 +107,12 @@ public class AwardService {
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
         ));
 
-        if(findUser.getLevel().equals(Level.GRADUATED) || findUser.getLevel().equals(Level.SUSPENDED)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
+        if(findUser.getLevel().equals(Level.NORMAL) || findUser.getLevel().equals(Level.SUSPENDED)) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
         }
 
         Award award = awardRepository.findById(awardId).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 award 없음")
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 Award 없음")
         );
 
         List<ContentAward> contentAwardList = contentAwardRepository.findByAward(award);

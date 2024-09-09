@@ -77,7 +77,6 @@ public class ContentService {
                 contentPage = contentRepository.findByIsVisibleAndKeyword(visibleType, keyword, pageable);
             }
             else {
-                System.out.println(visibleType);
                 contentPage = contentRepository.findByIsVisible(visibleType, pageable);
             }
         }
@@ -217,7 +216,7 @@ public class ContentService {
         );
 
         if(!findContent.getUser().getId().equals(userId)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
         }
 
         deleteManager.deleteFile(findContent.getId(), "contentPdf");
@@ -240,7 +239,7 @@ public class ContentService {
         ));
 
         if(!findContent.getUser().getId().equals(userId)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자 권한 없음");
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
         }
 
         if(Objects.nonNull(contentUpdateReq.getBookId())) {

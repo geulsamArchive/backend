@@ -1,4 +1,4 @@
-package geulsam.archive.domain.criticismAuthor.entity.comment.entity;
+package geulsam.archive.domain.comment.entity;
 
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.user.entity.User;

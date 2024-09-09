@@ -73,7 +73,7 @@ public class AwardController {
 
     /**
      * 상 등록
-     * Level.GRADUATED과 Level.SUSPENDED는 권한이 없다.
+     * Level.NORMAL과 Level.SUSPENDED는 권한이 없다.
      * @param awardUploadReq Award 객체 생성에 필요한 정보가 담긴 DTO
      * @return Integer 저장한 상 객체의 고유 ID
      */
@@ -96,7 +96,7 @@ public class AwardController {
 
     /**
      * 상 삭제
-     * Level.GRADUATED과 Level.SUSPENDED는 권한이 없다.
+     * Level.NORMAL과 Level.SUSPENDED는 권한이 없다.
      * @param awardId 삭제할 상의 고유 ID
      * @return null
      */
