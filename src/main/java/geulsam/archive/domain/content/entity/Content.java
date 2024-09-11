@@ -97,6 +97,11 @@ public class Content {
     @Column(name = "content_sentence", length = 256)
     private String sentence;
 
+    /**수상 이력
+     */
+    @Column(name = "content_award")
+    private String award;
+
     /**
      * 생성자
      */
@@ -112,6 +117,7 @@ public class Content {
         this.viewCount = 0;
         this.bookPage = bookPage;
         this.sentence = sentence;
+        this.award = null;
     }
 
     public void saveS3publicUrl(String pdfUrl, String htmlUrl) {
@@ -168,6 +174,8 @@ public class Content {
     }
 
     public void changeSentence(String sentence) { this.sentence = sentence; }
+
+    public void presentAward(String award) { this.award = award; }
 
     public void moveToBook(Book newBook, Integer newBookPage) {
         this.book = newBook;

@@ -1,6 +1,6 @@
 package geulsam.archive.domain.comment.service;
 
-import geulsam.archive.domain.award.dto.req.CommentUpdateReq;
+import geulsam.archive.domain.comment.dto.req.CommentUpdateReq;
 import geulsam.archive.domain.comment.dto.req.CommentUploadReq;
 import geulsam.archive.domain.comment.dto.res.CommentRes;
 import geulsam.archive.domain.comment.entity.Comment;

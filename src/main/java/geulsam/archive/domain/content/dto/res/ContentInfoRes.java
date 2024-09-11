@@ -32,6 +32,8 @@ public class ContentInfoRes {
     private String html;
     @Schema(example = "NOVEL")
     private Genre type;
+    @Schema(example = "2023년 글샘문학상, 2024년 글샘문학상")
+    private String award;
 
     public ContentInfoRes(Content content) {
         this.id = content.getId().toString();
@@ -43,5 +45,6 @@ public class ContentInfoRes {
         this.createdAt = content.getCreatedAt();
         this.pdf = content.getPdfUrl();
         this.html = content.getHtmlUrl();
+        this.award = content.getAward();
     }
 }

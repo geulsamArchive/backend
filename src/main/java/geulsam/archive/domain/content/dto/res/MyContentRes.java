@@ -29,12 +29,15 @@ public class MyContentRes {
     /**Content 객체의 */
     @Schema(description = "작품 공개여부", example = "LOGGEDIN")
     private IsVisible isVisible;
-
+    /**Content 객체의 수상이력*/
+    @Schema(example = "2023년 글샘문학상, 2024년 글샘문학상")
+    private String award;
     public MyContentRes(Content content) {
         this.title = content.getName();
         this.createdAt = content.getCreatedAt();
         this.sentence = content.getSentence();
         this.contentId = content.getId().toString();
         this.isVisible = content.getIsVisible();
+        this.award = content.getAward();
     }
 }

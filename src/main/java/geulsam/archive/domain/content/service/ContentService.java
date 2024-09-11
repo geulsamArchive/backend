@@ -12,8 +12,7 @@ import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.entity.IsVisible;
 import geulsam.archive.domain.content.repository.ContentRepository;
-import geulsam.archive.domain.contentAward.entity.ContentAward;
-import geulsam.archive.domain.contentAward.repository.ContentAwardRepository;
+import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 public class ContentService {
 
     private final ContentRepository contentRepository;
-    private final ContentAwardRepository contentAwardRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final UploadManager uploadManager;
@@ -82,10 +80,7 @@ public class ContentService {
         }
 
         List<ContentRes> contentResList = contentPage.getContent().stream()
-                .map(content -> {
-                    List<ContentAward> awards = contentAwardRepository.findByContentId(content.getId());
-                    return new ContentRes(content, contentPage.getContent().indexOf(content), awards);
-                })
+                .map(content -> new ContentRes(content, contentPage.getContent().indexOf(content)))
                 .collect(Collectors.toList());
 
         return new PageRes<>(
@@ -286,5 +281,35 @@ public class ContentService {
         Content savedContent = contentRepository.save(findContent);
 
         return new ContentInfoRes(savedContent);
+    }
+
+
+    /**
+     * 특정 Content 에 Award 를 부여하는 트랜잭션
+     * LEVEL.ADMIN 타입을 가진 User 만이 실행 가능하다.
+     * @param contentId 수상 받을 Content 객체의 고유 ID
+     * @param award 수상될 상의 이름을 담은 문자열
+     * @param userId 로그인한 유저의 id
+     * @return String 수상된 Award 의 이름
+     */
+    @Transactional
+    public String presentAward(String contentId, String award, Integer userId) {
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        if(!findUser.getLevel().equals(Level.ADMIN)) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
+        }
+
+        Content findContent = contentRepository.findById(UUID.fromString(contentId)).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 Content 없음"
+        ));
+
+        findContent.presentAward(award);
+
+        Content savedContent = contentRepository.save(findContent);
+
+        return savedContent.getAward();
     }
 }

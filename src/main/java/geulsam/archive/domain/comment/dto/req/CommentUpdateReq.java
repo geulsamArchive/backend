@@ -1,11 +1,9 @@
-package geulsam.archive.domain.award.dto.req;
+package geulsam.archive.domain.comment.dto.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Setter;
 
 @Data
 @AllArgsConstructor
