@@ -1,9 +1,9 @@
-package geulsam.archive.domain.criticismAuthor.entity.comment.controller;
+package geulsam.archive.domain.comment.controller;
 
-import geulsam.archive.domain.award.dto.req.CommentUpdateReq;
-import geulsam.archive.domain.criticismAuthor.entity.comment.dto.req.CommentUploadReq;
-import geulsam.archive.domain.criticismAuthor.entity.comment.dto.res.CommentRes;
-import geulsam.archive.domain.criticismAuthor.entity.comment.service.CommentService;
+import geulsam.archive.domain.comment.dto.req.CommentUpdateReq;
+import geulsam.archive.domain.comment.dto.req.CommentUploadReq;
+import geulsam.archive.domain.comment.dto.res.CommentRes;
+import geulsam.archive.domain.comment.service.CommentService;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;

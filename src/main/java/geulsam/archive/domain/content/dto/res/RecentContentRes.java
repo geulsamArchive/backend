@@ -28,6 +28,9 @@ public class RecentContentRes {
     /**Content 객체의 PK*/
     @Schema(example = "adsa-dsafdsa-vsadf-dsafdsa")
     private String contentId;
+    /**Content 객체의 수상이력*/
+    @Schema(example = "2023년 글샘문학상, 2024년 글샘문학상")
+    private String award;
 
     public RecentContentRes(Content content) {
         this.title = content.getName();
@@ -35,5 +38,6 @@ public class RecentContentRes {
         this.author = content.getUser().getName();
         this.sentence = content.getSentence();
         this.contentId = content.getId().toString();
+        this.award = content.getAward();
     }
 }

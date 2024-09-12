@@ -12,6 +12,7 @@ import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -209,6 +210,31 @@ public class ContentController {
                         .data(updatedContentRes)
                         .status(HttpStatus.OK.value())
                         .message("작품 수정 성공")
+                        .build()
+        );
+    }
+
+    /**
+     * 작품 수상
+     * @param contentId 수상 받을 Content 객체의 고유 ID
+     * @param award 수상될 상의 이름을 담은 문자열
+     * @return String 수상된 상의 이름
+     */
+    @PutMapping("award")
+    public ResponseEntity<SuccessResponse<String>> presentAward(
+            @RequestParam(defaultValue = "id") String contentId,
+            @RequestParam @NotNull String award
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        String presentedAward = contentService.presentAward(contentId, award, userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<String>builder()
+                        .data(presentedAward)
+                        .status(HttpStatus.OK.value())
+                        .message("작품 수상 성공")
                         .build()
         );
     }

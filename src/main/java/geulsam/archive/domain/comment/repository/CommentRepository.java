@@ -1,6 +1,6 @@
-package geulsam.archive.domain.criticismAuthor.entity.comment.repository;
+package geulsam.archive.domain.comment.repository;
 
-import geulsam.archive.domain.criticismAuthor.entity.comment.entity.Comment;
+import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.content.entity.Content;
 import org.springframework.data.jpa.repository.JpaRepository;
 
