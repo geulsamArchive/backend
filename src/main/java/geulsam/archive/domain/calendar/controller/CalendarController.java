@@ -76,22 +76,22 @@ public class CalendarController {
 
     /**
      *
-     * @param field
-     * @param search
+     * @param year
+     * @param semester
      * @return
      */
     @GetMapping()
     public ResponseEntity<SuccessResponse<List<CalendarRes>>> calendar(
-            @RequestParam(defaultValue = "start") String field,
-            @RequestParam int search
+            @RequestParam int year,
+            @RequestParam int semester
     ){
-        List<CalendarRes> calendar = calendarService.calendar(field, search);
+        List<CalendarRes> calendar = calendarService.calendar(year, semester);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<List<CalendarRes>>builder()
                         .data(calendar)
                         .status(HttpStatus.OK.value())
-                        .message(Integer.toString(search) + "년 일정 목록").build()
+                        .message(year + "년 일정 목록").build()
         );
     }
 
