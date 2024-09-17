@@ -17,12 +17,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
+import java.time.*;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -108,19 +107,26 @@ public class CalendarService {
     }
 
     @Transactional
-    public List<CalendarRes> calendar(String field, int search) {
-        // 사용할 쿼리문
-        String queryString = "SELECT c FROM Calendar c WHERE c.start BETWEEN :startDate AND :endDate";
+    public List<CalendarRes> calendar(int year, int semester) {
 
-        // 기간 1년 단위로 설정
-        LocalDateTime startDate = LocalDateTime.of(search, 1, 1, 0, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(search, 12, 31, 23, 59, 59);
+        // 기간 학기 단위로 설정
+        LocalDateTime start;
+        LocalDateTime end;
 
-        // 쿼리문 실행
-        List<Calendar> calendars = entityManager.createQuery(queryString, Calendar.class)
-            .setParameter("startDate", startDate)
-            .setParameter("endDate", endDate)
-            .getResultList();
+        if (semester == 1) {
+            // 1학기: 3월 1일부터 8월 31일까지
+            start = LocalDateTime.of(year, 3, 1, 0, 0);
+            end = LocalDateTime.of(year, 8, 31, 23, 59, 59);
+        } else if (semester == 2) {
+            // 2학기: 9월 1일부터 다음 해 2월 말일까지
+            LocalDate lastDayOfFebruary = LocalDate.of(year + 1, 2, 1).with(TemporalAdjusters.lastDayOfMonth()); // 윤년 고려하여 2월 마지막 날 계산
+            start = LocalDateTime.of(year, 9, 1, 0, 0);
+            end = LocalDateTime.of(lastDayOfFebruary, LocalTime.MAX);  // 2월 마지막 날의 23:59:59
+        } else {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "1학기는 1, 2학기는 2를 입력하십시오");
+        }
+
+        List<Calendar> calendars =calendarRepository.calendarBySemester(start, end);
 
         // criticism 선언해서 바꾸기
         List<Criticism> criticisms = new ArrayList<>();
@@ -132,17 +138,29 @@ public class CalendarService {
                 criticisms.add(new Criticism(calendar));
             }
         }
+
+        List<CalendarRes> CalenderResList;
+
+        // 1학기와 2학기를 나누어서 열 설정
+        if(semester == 1){
+            CalenderResList = IntStream.range(1, 7)
+                    // 1학기 월 설정 (3-8)
+                    .mapToObj(i -> new CalendarRes(i, year, i+2)).toList();
+        } else {
+            CalenderResList = IntStream.range(1, 7)
+                    // 2학기 월 설정 (9-다음해 2)
+                    .mapToObj(i -> new CalendarRes(i, year, (i + 7) % 12 + 1)).toList();
+        }
         
         //CalendarRes 배열 담을 객체 생성
-        List<CalendarRes> CalenderResList = IntStream.rangeClosed(1, 12)
-        .mapToObj(i -> new CalendarRes(i, search + "년 " + i + "월")).toList();
+
 
         // CalendarResList 의 12개 원소에 Calendars 의 각 달에 있는 이벤트를 배분
         for(CalendarRes calendarRes : CalenderResList){
             for(Criticism criticism : criticisms){
                 int startMonth = criticism.getStart().getMonth().getValue();
                 int endMonth = criticism.getEnd().getMonth().getValue();
-                if(calendarRes.getId() == startMonth || calendarRes.getId() == endMonth){ // 이번달에 있는 이벤트면 추가
+                if(calendarRes.getMonthValue() == startMonth || calendarRes.getMonthValue() == endMonth){ // 이번달에 있는 이벤트면 추가
                     calendarRes.getEvents().add(new CalendarEvent(criticism));
                 }
             }

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,10 +63,18 @@ public class CriticismLogService {
      * 합평 기록 전체 검색해서 리턴하는 함수 GET
      */
     public PageRes<CriticismLogRes> criticismLog(Pageable pageable, String keyword){
-        Page<CriticismLog> criticismLogPage = criticismLogRepository.findCriticismLogByFilters(pageable, keyword);
+        Page<CriticismLog> criticismLogPage;
 
+        if (keyword == null || keyword.isEmpty()) {
+            criticismLogPage = criticismLogRepository.findAll(pageable); // 전체 데이터를 가져오는 로직
+        } else {
+            criticismLogPage = criticismLogRepository.findCriticismLogByFilters(pageable, keyword); // 필터된 데이터를 가져오는 로직
+        }
+
+        AtomicInteger index = new AtomicInteger(0);
         List<CriticismLogRes> criticismLogResList = criticismLogPage.getContent().stream()
-                .map(criticismLog -> new CriticismLogRes(criticismLog, criticismLogPage.getContent().indexOf(criticismLog))).toList();
+                .map(criticismLog -> new CriticismLogRes(criticismLog, index.getAndIncrement()))
+                .toList();
 
         return new PageRes<>(
                 criticismLogPage.getTotalPages(),

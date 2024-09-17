@@ -13,11 +13,17 @@ import java.util.List;
 public class CalendarRes {
     int id;
     String month;
+    int monthValue;
     List<CalendarEvent> events;
 
-    public CalendarRes(int id, String month){
+    public CalendarRes(int id, int year, int month){
         this.id = id;
-        this.month = month;
+        this.monthValue = month;
+        if(month == 1 || month == 2){
+            this.month = (year+1) + "년 " + month + "월";
+        } else {
+            this.month = year + "년 " + month + "월";
+        }
         this.events = new ArrayList<>();
     }
 
