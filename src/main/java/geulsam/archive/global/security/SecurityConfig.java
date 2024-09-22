@@ -112,6 +112,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/criticismLog").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/criticismLog").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/criticismLog").hasRole("ADMIN")
+                                // 방명록 관련
+                                .requestMatchers(HttpMethod.GET, "/guestBook").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/guestBook").hasRole("NORMAL")
+                                .requestMatchers(HttpMethod.DELETE, "/guestBook").hasAnyRole("NORMAL", "ADMIN")
                                 // swagger 테스트 -> 추후 삭제
                                 .requestMatchers(
                                         "/v3/api-docs/**",

@@ -49,7 +49,7 @@ public class GuestBook {
     @Column(name = "guestbook_writing")
     private String writing;
 
-    public GuestBook(User writer, User owner, LocalDate createdAt, String writing) {
+    public GuestBook(User writer, User owner, String writing) {
         this.writer = writer;
         this.owner = owner;
         this.createdAt = LocalDate.now();

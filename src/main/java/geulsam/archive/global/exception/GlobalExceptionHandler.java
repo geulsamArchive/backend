@@ -61,4 +61,23 @@ public class GlobalExceptionHandler {
                         .build()
                 );
     }
+
+    /**
+     * ArchiveException 으로 처리하지 못하는 RuntimeException 를 처리
+     * @param e : RuntimeException
+     * @return
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(
+                        ErrorResponse
+                                .builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .error("INTERNAL_SERVER_ERROR")
+                                .message(e.getMessage())
+                                .build()
+                );
+    }
 }

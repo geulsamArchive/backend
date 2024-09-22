@@ -25,11 +25,15 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,6 +46,7 @@ public class UserService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
 
     /**
      * 유저 저장 트랜잭션
@@ -63,22 +68,44 @@ public class UserService {
 
         // 임시비밀번호로 메일 발송
         try {
-            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-            helper.setTo(email);
-            helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
+            Map<String, Object> templateModel = new HashMap<>();
+            templateModel.put("name", name);
+            templateModel.put("schoolNum", schoolNum);
+            templateModel.put("year", joinedAt);
+            templateModel.put("password", tempPassword);
 
-            String htmlMsg = "<h3>안녕하세요, " + name + " 회원님</h3>"
-                    + "<p>임시 비밀번호를 발급해 드립니다.</p>"
-                    + "<div style='border: 2px solid #000; padding: 10px; width: fit-content; background-color: #f3f3f3;'>"
-                    + "<strong style='font-size: 1.2em;'>" + tempPassword + "</strong>"
-                    + "</div>"
-                    + "<p>로그인 후에 비밀번호를 바꿔 주세요.</p>";
+            Context context = new Context();
+            context.setVariables(templateModel);
+                String htmlContent = templateEngine.process("passwordMail", context);
 
-            helper.setText(htmlMsg, true);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            javaMailSender.send(mimeMessage);
+            helper.setTo(email);  // 수신자 이메일 주소
+            helper.setSubject("글샘문학회 회원가입을 축하드립니다");
+            helper.setText(htmlContent, true);  // HTML 형식으로 이메일 전송
+
+
+            javaMailSender.send(message);
+
+
+//            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+//            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+//
+//            helper.setTo(email);
+//            helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
+//
+//            String htmlMsg = "<h3>안녕하세요, " + name + " 회원님</h3>"
+//                    + "<p>임시 비밀번호를 발급해 드립니다.</p>"
+//                    + "<div style='border: 2px solid #000; padding: 10px; width: fit-content; background-color: #f3f3f3;'>"
+//                    + "<strong style='font-size: 1.2em;'>" + tempPassword + "</strong>"
+//                    + "</div>"
+//                    + "<p>로그인 후에 비밀번호를 바꿔 주세요.</p>";
+//
+//            helper.setText(htmlMsg, true);
+//
+//            javaMailSender.send(mimeMessage);
         } catch (Exception e) {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
         }
@@ -121,18 +148,28 @@ public class UserService {
             String accessToken = jwtProvider.createAccessToken(user.getId());
             String refreshToken = jwtProvider.createRefreshToken();
 
-            /*refreshTokenRepository 에서 같은 아이디를 가진 유저 탐색*/
-            Optional<RefreshToken> userOptional = refreshTokenRepository.findByUser(user);
+            /*refreshTokenRepository 에서 같은 유저아이디를 가진 객체들 탐색*/
+            List<RefreshToken> refreshTokensByUser = refreshTokenRepository.findByUser(user);
 
-            /*이미 해당 유저에 대한 refreshToken 이 존재한다면*/
-            if(userOptional.isPresent()){
-                /*토큰 업데이트*/
-                userOptional.get().changeTokenValue(refreshToken);
-            } else {
-                /* 존재하지 않는다면 refreshToken 은 tokenRepository 에 저장*/
-                RefreshToken refreshTokenObject = new RefreshToken(refreshToken, user);
-                refreshTokenRepository.save(refreshTokenObject);
+            /*이미 해당 유저에 대한 refreshToken 이 4개보다 많다면*/
+            if(refreshTokensByUser.size() > 4) {
+                int maxTime = Integer.MAX_VALUE;
+                RefreshToken deleteRefreshToken = null;
+
+                for(RefreshToken refreshTokenObject : refreshTokensByUser){
+                        int nowMaxTime = jwtProvider.getTokenExpirationSec(refreshTokenObject.getToken());
+
+                        if(maxTime > nowMaxTime){
+                            deleteRefreshToken = refreshTokenObject;
+                            maxTime = nowMaxTime;
+                        }
+                }
+
+                refreshTokenRepository.deleteById(deleteRefreshToken.getId());
             }
+
+            RefreshToken refreshTokenObject = new RefreshToken(refreshToken, user);
+            refreshTokenRepository.save(refreshTokenObject);
 
             /* 토큰 2개를 담은 객체 리턴 */
             return new LoginRes(accessToken, refreshToken);

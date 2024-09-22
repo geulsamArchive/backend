@@ -64,21 +64,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 RefreshToken refreshTokenInRepo = refreshTokenRepository.findByToken(refreshToken)
                         .orElseThrow(() -> new IllegalArgumentException("재로그인 필요"));
 
-                /* 새로운 RefreshToken 생성 */
-                String newRefreshToken = jwtProvider.createRefreshToken();
-                String newAccessToken = jwtProvider.createAccessToken(refreshTokenInRepo.getUser().getId());
+                if(jwtProvider.isDayExpiration(refreshToken)) {
+                    /* 새로운 RefreshToken 생성 */
+                    String newRefreshToken = jwtProvider.createRefreshToken();
 
-                /* Refresh 리포지토리를 업데이트 */
-                refreshTokenInRepo.changeTokenValue(newRefreshToken);
-                refreshTokenRepository.save(refreshTokenInRepo);
+                    /* Refresh 리포지토리를 업데이트 */
+                    refreshTokenInRepo.changeTokenValue(newRefreshToken);
+                    refreshTokenRepository.save(refreshTokenInRepo);
+
+                    /* Refresh 토큰 헤더에 삽입*/
+                    response.setHeader("refreshToken", "Bearer " + newRefreshToken);
+                }
+
+                String newAccessToken = jwtProvider.createAccessToken(refreshTokenInRepo.getUser().getId());
 
                 /* 인증 객체 생성 후 저장 */
                 Authentication authentication = jwtProvider.getAuthentication(newAccessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                /* 토큰들을 header 에 삽입 */
+                /* 엑세스토큰 header 에 삽입 */
                 response.setHeader("accessToken", "Bearer " + newAccessToken);
-                response.setHeader("refreshToken", "Bearer " + newRefreshToken);
+
 
                 filterChain.doFilter(request, response);
                 return;
