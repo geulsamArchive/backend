@@ -3,7 +3,9 @@ package geulsam.archive.domain.refreshtoken.repository;
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Integer> {
@@ -14,5 +16,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
      * @return
      */
     Optional<RefreshToken> findByToken(String token);
-    Optional<RefreshToken> findByUser(User user);
+
+    @Query("SELECT rt FROM RefreshToken rt WHERE rt.user = :user")
+    List<RefreshToken> findByUser(User user);
 }
