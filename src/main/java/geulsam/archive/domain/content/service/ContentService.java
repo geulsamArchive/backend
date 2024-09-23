@@ -4,10 +4,7 @@ import geulsam.archive.domain.book.entity.Book;
 import geulsam.archive.domain.book.repository.BookRepository;
 import geulsam.archive.domain.content.dto.req.ContentUpdateReq;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
-import geulsam.archive.domain.content.dto.res.ContentInfoRes;
-import geulsam.archive.domain.content.dto.res.ContentRes;
-import geulsam.archive.domain.content.dto.res.MyContentRes;
-import geulsam.archive.domain.content.dto.res.RecentContentRes;
+import geulsam.archive.domain.content.dto.res.*;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.entity.IsVisible;
@@ -160,6 +157,48 @@ public class ContentService {
     }
 
     /**
+     * 특정 유저의 Content 리스트를 리턴하는 트랜잭션
+     * 유저의 Level이 Normal이면 IsVisible.LOGGEDIN를, SUSPENDED이면 IsVisible.EVERY에 해당하는 Content 리스트를 제공함.
+     * 로그인된 유저가 작가 본인일 시, IsVisible.PRIVATE에 해당하는 Content 리스트를 제공함.
+     * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @param authorId 조회할 유저의 id
+     * @param userId 로그인한 유저의 id
+     * @return PageRes<AuthorContentRes> 페이지네이션 정보와 AuthorContentRes 객체 리스트를 포함하는 PageRes 객체
+     */
+    @Transactional
+    public PageRes<AuthorContentRes> getAuthorContent(Pageable pageable, int authorId, Integer userId) {
+        IsVisible isVisible = IsVisible.EVERY;
+
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        User findAuthor = userRepository.findById(authorId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        if(findUser.getLevel().equals(Level.NORMAL)) {
+            isVisible = IsVisible.LOGGEDIN;
+        }
+        if (findUser.getId().equals(authorId)) {
+            isVisible = IsVisible.PRIVATE;
+        }
+
+        System.out.println(isVisible);
+
+        Page<Content> authorContentPage = contentRepository.findByUserAndIsVisible(findAuthor, isVisible, pageable);
+
+        List<AuthorContentRes> authorContentResList = authorContentPage.getContent().stream()
+                .map(AuthorContentRes::new)
+                .toList();
+
+        return new PageRes<>(
+                authorContentPage.getTotalPages(),
+                authorContentResList
+        );
+    }
+
+    /**
      * contentUploadReq 객체를 받은 뒤 객체 안의 MultipartFile을 저장하고 url을 받아 옴.
      * 받아온 url과 uploadReq 객체를 사용해 Content 객체를 만들고 repository에 저장
      * @param contentUploadReq Content 객체를 생성할 수 있는 정보와 MultipartFile이 담긴 DTO
@@ -282,7 +321,6 @@ public class ContentService {
 
         return new ContentInfoRes(savedContent);
     }
-
 
     /**
      * 특정 Content 에 Award 를 부여하는 트랜잭션

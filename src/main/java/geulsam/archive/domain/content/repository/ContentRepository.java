@@ -58,4 +58,6 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     Page<Content> findTop8ByIsVisibleOrderByCreatedAtDesc(IsVisible isVisible, Pageable pageable);
 
     Page<Content> findByUserOrderByCreatedAtDesc(User findUser, Pageable pageable);
+
+    Page<Content> findByUserAndIsVisible(User findUser, IsVisible isVisible, Pageable pageable);
 }
