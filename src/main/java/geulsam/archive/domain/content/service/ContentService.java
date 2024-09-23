@@ -184,8 +184,6 @@ public class ContentService {
             isVisible = IsVisible.PRIVATE;
         }
 
-        System.out.println(isVisible);
-
         Page<Content> authorContentPage = contentRepository.findByUserAndIsVisible(findAuthor, isVisible, pageable);
 
         List<AuthorContentRes> authorContentResList = authorContentPage.getContent().stream()
