@@ -2,10 +2,7 @@ package geulsam.archive.domain.content.controller;
 
 import geulsam.archive.domain.content.dto.req.ContentUpdateReq;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
-import geulsam.archive.domain.content.dto.res.ContentInfoRes;
-import geulsam.archive.domain.content.dto.res.ContentRes;
-import geulsam.archive.domain.content.dto.res.MyContentRes;
-import geulsam.archive.domain.content.dto.res.RecentContentRes;
+import geulsam.archive.domain.content.dto.res.*;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
 import geulsam.archive.global.common.dto.PageRes;
@@ -145,6 +142,36 @@ public class ContentController {
                         .status(HttpStatus.OK.value())
                         .build()
         );
+    }
+
+    /**
+     * 특정 유저의 모든 작품 조회
+     * 유저의 Level이 Normal이면 IsVisible.LOGGEDIN를, SUSPENDED이면 IsVisible.EVERY에 해당하는 Content 리스트를 제공함.
+     * 로그인된 유저가 작가 본인일 시, IsVisible.PRIVATE에 해당하는 Content 리스트를 제공함.
+     * @param page 조회할 페이지 번호 (기본값: 1)
+     * @param authorId 조회할 유저의 id
+     * @return PageRes<AuthorContentRes>> 특정 유저의 콘텐츠 목록을 포함하는 페이지 결과
+     */
+    @GetMapping("/author")
+    public ResponseEntity<SuccessResponse<PageRes<AuthorContentRes>>> getAuthorContent(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam int authorId
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Pageable pageable = PageRequest.of(page-1, 13, Sort.by("createdAt").descending());
+
+        PageRes<AuthorContentRes> authorContentResList = contentService.getAuthorContent(pageable, authorId, userDetails.getUserId());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<PageRes<AuthorContentRes>>builder()
+                        .data(authorContentResList)
+                        .message("author's contents retrieved successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+
     }
 
     /**
