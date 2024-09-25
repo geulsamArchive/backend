@@ -38,3 +38,6 @@ out/
 
 ### dev-properties ###
 /src/main/resources/application-dev.properties
+
+## test ###
+src/test/**
