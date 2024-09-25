@@ -4,16 +4,19 @@ import geulsam.archive.domain.comment.dto.req.CommentUpdateReq;
 import geulsam.archive.domain.comment.dto.req.CommentUploadReq;
 import geulsam.archive.domain.comment.dto.res.CommentRes;
 import geulsam.archive.domain.comment.service.CommentService;
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
 import geulsam.archive.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,13 +32,16 @@ public class CommentController {
      * @return List<CommentRes> 해당 content id에 대해 생성된 순서대로 정렬된 댓글 목록
      */
     @GetMapping()
-    public ResponseEntity<SuccessResponse<List<CommentRes>>> getCommentsByContentId(
+    public ResponseEntity<SuccessResponse<PageRes<CommentRes>>> getCommentsByContentId(
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "id") UUID contentId
     ) {
-        List<CommentRes> commentResList = commentService.getCommentsByContentId(contentId);
+        Pageable pageable = PageRequest.of(page-1, 5, Sort.by("createdAt").descending());
+
+        PageRes<CommentRes> commentResList = commentService.getCommentsByContentId(pageable, contentId);
 
         return ResponseEntity.ok().body(
-                SuccessResponse.<List<CommentRes>>builder()
+                SuccessResponse.<PageRes<CommentRes>>builder()
                         .data(commentResList)
                         .message("comments by content id get success")
                         .status(HttpStatus.OK.value())
@@ -59,7 +65,7 @@ public class CommentController {
         return ResponseEntity.ok().body(
                 SuccessResponse.<Integer>builder()
                         .data(commentId)
-                        .status(HttpStatus.CREATED.value())
+                        .status(HttpStatus.OK.value())
                         .message("댓글 업로드 성공")
                         .build()
         );
@@ -74,7 +80,10 @@ public class CommentController {
     public ResponseEntity<SuccessResponse<Void>> delete(
             @RequestParam int commentId
     ) {
-        commentService.delete(commentId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        commentService.delete(commentId, userDetails.getUserId());
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
                         .data(null)
