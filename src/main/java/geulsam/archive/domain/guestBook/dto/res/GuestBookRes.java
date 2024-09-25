@@ -11,11 +11,13 @@ public class GuestBookRes {
     private int guestBookId;
     private String writerName;
     private LocalDate createdAt;
+    private String writing;
 
     public GuestBookRes(GuestBook guestBook, int id){
         this.id = id;
         this.guestBookId = guestBook.getId();
         this.writerName = guestBook.getWriter().getName();
         this.createdAt = guestBook.getCreatedAt();
+        this.writing = guestBook.getWriting();
     }
 }
