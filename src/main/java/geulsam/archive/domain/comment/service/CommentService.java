@@ -39,7 +39,7 @@ public class CommentService {
         List<Comment> commentList = commentRepository.findByContentOrderByCreatedAtDesc(findContent);
 
         return commentList.stream()
-                .map(comment -> new CommentRes(comment, commentList.indexOf(comment)))
+                .map(comment -> new CommentRes(comment, comment.getId()))
                 .collect(Collectors.toList());
     }
 
