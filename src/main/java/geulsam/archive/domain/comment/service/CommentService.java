@@ -10,9 +10,12 @@ import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
+import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,17 +33,22 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<CommentRes> getCommentsByContentId(UUID contentId) {
+    public PageRes<CommentRes> getCommentsByContentId(Pageable pageable, UUID contentId) {
 
         Content findContent = contentRepository.findById(contentId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
 
-        List<Comment> commentList = commentRepository.findByContentOrderByCreatedAtDesc(findContent);
+        Page<Comment> commentPage = commentRepository.findByContentOrderByCreatedAtDesc(findContent, pageable);
 
-        return commentList.stream()
+        List<CommentRes> commentResList = commentPage.getContent().stream()
                 .map(comment -> new CommentRes(comment, comment.getId()))
                 .collect(Collectors.toList());
+
+        return new PageRes<>(
+                commentPage.getTotalPages(),
+                commentResList
+        );
     }
 
     /**
@@ -77,13 +85,21 @@ public class CommentService {
     }
 
     @Transactional
-    public void delete(int id) {
+    public void delete(int commentId, int userId) {
 
-        Comment comment = commentRepository.findById(id).orElseThrow(() -> new ArchiveException(
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Comment 없음"
         ));
 
-        commentRepository.deleteById(comment.getId());
+        if (!findComment.getUser().getId().equals(userId) && !findUser.getLevel().equals(Level.ADMIN)) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
+        }
+
+        commentRepository.deleteById(findComment.getId());
     }
 
     @Transactional

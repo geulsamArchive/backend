@@ -5,8 +5,13 @@ import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.*;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
+import geulsam.archive.domain.user.entity.Level;
+import geulsam.archive.domain.user.entity.User;
+import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.common.dto.SuccessResponse;
+import geulsam.archive.global.exception.ArchiveException;
+import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -30,17 +35,17 @@ import java.util.UUID;
 public class ContentController {
 
     private final ContentService contentService;
-    private static final int ANONYMOUS_USER_ID = -1;
+    private final UserRepository userRepository;
 
     /**
-     * DB에 있는 모든 작품 조회
+     * 조건을 만족하는 모든 작품 조회
      * @param page 조회할 페이지 번호 (기본값: 1)
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @return PageRes<ContentRes> 생성된 순서대로 정렬된 콘텐츠 목록을 포함하는 페이지 결과
      */
     @GetMapping()
-    public ResponseEntity<SuccessResponse<PageRes<ContentRes>>> getContents(
+    public ResponseEntity<SuccessResponse<PageRes<ContentRes>>> getContentsByFilters(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(required = false) Genre genre,
             @RequestParam(required = false) String keyword
@@ -50,12 +55,18 @@ public class ContentController {
         PageRes<ContentRes> contentResList;
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            contentResList = contentService.getContents(genre, keyword, pageable, userDetails.getUserId());
+        User findUser = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        if(findUser.getLevel().equals(Level.SUSPENDED)) {
+            contentResList = contentService.getContentsByFiltersForANONYMOUS(genre, keyword, pageable);
+        } else if (findUser.getLevel().equals(Level.NORMAL) || findUser.getLevel().equals(Level.ADMIN)) {
+            contentResList = contentService.getContentsByFiltersForLOGGEDIN(genre, keyword, pageable);
         } else {
-            contentResList = contentService.getContents(genre, keyword, pageable, ANONYMOUS_USER_ID);
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
         }
 
         return ResponseEntity.ok().body(
@@ -101,13 +112,8 @@ public class ContentController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-            recentContentResList = contentService.getRecentContents(pageable, userDetails.getUserId());
-        } else {
-            recentContentResList = contentService.getRecentContents(pageable, ANONYMOUS_USER_ID);
-        }
-
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        recentContentResList = contentService.getContents(pageable, userDetails.getUserId());
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<RecentContentRes>>builder()
