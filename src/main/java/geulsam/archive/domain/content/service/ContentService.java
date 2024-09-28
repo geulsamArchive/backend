@@ -40,39 +40,68 @@ public class ContentService {
     private final DeleteManager deleteManager;
 
     /**
-     * Content 전체를 리턴하는 트랜잭션
-     * IsVisible.EVERY과 IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
+     * 조건을 만족하는 Content 를 리턴하는 트랜잭션
+     * IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
-     * @param userId 로그인한 유저의 id. 음수인 경우 InVisible.EVERY 타입을 가진 Content 만을 다루도록 한다.
      * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional(readOnly = true)
-    public PageRes<ContentRes> getContents(Genre genre, String keyword, Pageable pageable, int userId) {
+    public PageRes<ContentRes> getContentsByFiltersForLOGGEDIN(Genre genre, String keyword, Pageable pageable) {
         Page<Content> contentPage;
-        IsVisible visibleType = IsVisible.EVERY;
-
-        if(userId >= 0) {
-            userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
-                    ErrorCode.VALUE_ERROR, "해당 User 없음"
-            ));
-            visibleType = IsVisible.LOGGEDIN;
-        }
 
         if (genre != null) {
             if (keyword != null && !keyword.isEmpty()) {
-                contentPage = contentRepository.findContentByFilters(visibleType, genre, keyword, pageable);
+                contentPage = contentRepository.findContentByFilters(IsVisible.LOGGEDIN, IsVisible.EVERY, genre, keyword, pageable);
             }
             else {
-                contentPage = contentRepository.findByIsVisibleAndGenre(visibleType, genre, pageable);
+                contentPage = contentRepository.findByIsVisibleAndGenre(IsVisible.LOGGEDIN, IsVisible.EVERY, genre, pageable);
             }
         } else {
             if (keyword != null && !keyword.isEmpty()) {
-                contentPage = contentRepository.findByIsVisibleAndKeyword(visibleType, keyword, pageable);
+                contentPage = contentRepository.findByIsVisibleAndKeyword(IsVisible.LOGGEDIN, IsVisible.EVERY, keyword, pageable);
             }
             else {
-                contentPage = contentRepository.findByIsVisible(visibleType, pageable);
+                contentPage = contentRepository.findByIsVisible(IsVisible.LOGGEDIN, IsVisible.EVERY, pageable);
+            }
+        }
+
+        List<ContentRes> contentResList = contentPage.getContent().stream()
+                .map(content -> new ContentRes(content, contentPage.getContent().indexOf(content)))
+                .collect(Collectors.toList());
+
+        return new PageRes<>(
+                contentPage.getTotalPages(),
+                contentResList
+        );
+    }
+
+    /**
+     * Content 전체를 리턴하는 트랜잭션
+     * IsVisible.EVERY 타입을 가진 Content 만을 다룸.
+     * @param genre 검색할 콘텐츠 객체의 genre
+     * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
+     * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
+     */
+    @Transactional(readOnly = true)
+    public PageRes<ContentRes> getContentsByFiltersForANONYMOUS(Genre genre, String keyword, Pageable pageable) {
+        Page<Content> contentPage;
+
+        if (genre != null) {
+            if (keyword != null && !keyword.isEmpty()) {
+                contentPage = contentRepository.findContentByFilters(IsVisible.EVERY, genre, keyword, pageable);
+            }
+            else {
+                contentPage = contentRepository.findByIsVisibleAndGenre(IsVisible.EVERY, genre, pageable);
+            }
+        } else {
+            if (keyword != null && !keyword.isEmpty()) {
+                contentPage = contentRepository.findByIsVisibleAndKeyword(IsVisible.EVERY, keyword, pageable);
+            }
+            else {
+                contentPage = contentRepository.findByIsVisible(IsVisible.EVERY, pageable);
             }
         }
 
@@ -109,17 +138,21 @@ public class ContentService {
      * @return PageRes<RecentContentRes> 페이지네이션 정보와 RecentContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional
-    public PageRes<RecentContentRes> getRecentContents(Pageable pageable, int userId) {
-        IsVisible visibleType = IsVisible.EVERY;
+    public PageRes<RecentContentRes> getContents(Pageable pageable, int userId) {
+        Page<Content> recentContentPage;
 
-        if(userId >= 0) {
-            userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
                     ErrorCode.VALUE_ERROR, "해당 User 없음"
-            ));
-            visibleType = IsVisible.LOGGEDIN;
-        }
+        ));
 
-        Page<Content> recentContentPage = contentRepository.findTop8ByIsVisibleOrderByCreatedAtDesc(visibleType, pageable);
+        //User의 권한에 따른 적절한 Content 리스트 반환
+        if(findUser.getLevel().equals(Level.SUSPENDED)) {
+            recentContentPage = contentRepository.findByIsVisibleOrderByCreatedAtDesc(IsVisible.EVERY, pageable);
+        } else if(findUser.getLevel().equals(Level.NORMAL) || findUser.getLevel().equals(Level.ADMIN)) {
+            recentContentPage = contentRepository.findByIsVisibleOrderByCreatedAtDesc(IsVisible.EVERY, IsVisible.LOGGEDIN, pageable);
+        } else {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
+        }
 
         List<RecentContentRes> recentContentResList = recentContentPage.getContent().stream()
                 .map(RecentContentRes::new)
@@ -166,8 +199,8 @@ public class ContentService {
      * @return PageRes<AuthorContentRes> 페이지네이션 정보와 AuthorContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional
-    public PageRes<AuthorContentRes> getAuthorContent(Pageable pageable, int authorId, Integer userId) {
-        IsVisible isVisible = IsVisible.EVERY;
+    public PageRes<AuthorContentRes> getAuthorContent(Pageable pageable, int authorId, int userId) {
+        Page<Content> authorContentPage;
 
         User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
@@ -177,14 +210,14 @@ public class ContentService {
                 ErrorCode.VALUE_ERROR, "해당 User 없음"
         ));
 
-        if(findUser.getLevel().equals(Level.NORMAL)) {
-            isVisible = IsVisible.LOGGEDIN;
+        //User의 권한에 따른 적절한 Content 리스트 반환
+        if(findUser.getLevel().equals(Level.SUSPENDED)) {
+            authorContentPage = contentRepository.findByUserAndIsVisible(findAuthor, IsVisible.EVERY, pageable);
+        } else if(findUser.getLevel().equals(Level.NORMAL) || findUser.getLevel().equals(Level.ADMIN)) {
+            authorContentPage = contentRepository.findByUserAndIsVisible(IsVisible.EVERY, IsVisible.LOGGEDIN, findAuthor, pageable);
+        } else {
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
         }
-        if (findUser.getId().equals(authorId)) {
-            isVisible = IsVisible.PRIVATE;
-        }
-
-        Page<Content> authorContentPage = contentRepository.findByUserAndIsVisible(findAuthor, isVisible, pageable);
 
         List<AuthorContentRes> authorContentResList = authorContentPage.getContent().stream()
                 .map(AuthorContentRes::new)
