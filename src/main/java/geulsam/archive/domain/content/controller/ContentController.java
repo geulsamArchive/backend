@@ -141,7 +141,6 @@ public class ContentController {
                         .status(HttpStatus.OK.value())
                         .build()
         );
-
     }
 
     /**

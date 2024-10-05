@@ -148,7 +148,7 @@ public class ContentService {
                 break;
             default:
                 throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
-        };
+        }
 
         return new ContentInfoRes(findContent);
     }
