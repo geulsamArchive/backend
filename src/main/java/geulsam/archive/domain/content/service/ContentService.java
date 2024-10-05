@@ -40,15 +40,15 @@ public class ContentService {
     private final DeleteManager deleteManager;
 
     /**
-     * 조건을 만족하는 Content 를 리턴하는 트랜잭션
-     * IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
+     * 조건을 만족하는 모든 Content 를 리턴하는 트랜잭션
+     * 이때 IsVisible.PRIVATE인 Content는 제외한다.
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
      * @return PageRes<ContentRes> 페이지네이션 정보와 ContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional(readOnly = true)
-    public PageRes<ContentRes> getContentsByFiltersForLOGGEDIN(Genre genre, String keyword, Pageable pageable) {
+    public PageRes<ContentRes> getContentsByFilters(Genre genre, String keyword, Pageable pageable) {
         Page<Content> contentPage;
 
         if (genre != null) {
@@ -78,8 +78,8 @@ public class ContentService {
     }
 
     /**
-     * Content 전체를 리턴하는 트랜잭션
-     * IsVisible.EVERY 타입을 가진 Content 만을 다룸.
+     * 조건을 만족하는 모든 Content 중 IsVisible.EVERY 타입을 가진 Content 만을 리턴하는 트랜잭션
+     * 이때 IsVisible.PRIVATE인 Content는 제외한다.
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
@@ -116,16 +116,58 @@ public class ContentService {
     }
 
     /**
-     * Content 객체의 Id 1개를 받아 Content 의 세부사항을 리턴하는 트랜잭션
+     * Content 객체의 Id 1개를 받아 세부사항을 리턴하는 트랜잭션
+     * 이때 작가 본인만이 IsVisible.PRIAVATE 타입의 Content 에 접근 가능하다.
      * @param contentId Content 객체의 id
      * @return ContentInfoRes
      */
     @Transactional(readOnly = true)
-    public ContentInfoRes getContentInfo(String contentId) {
+    public ContentInfoRes getContentInfo(String contentId, int userId) {
 
         Content findContent = contentRepository.findById(UUID.fromString(contentId)).orElseThrow(() -> new ArchiveException(
                 ErrorCode.VALUE_ERROR, "해당 Content 없음"
         ));
+
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        switch (findUser.getLevel()) {
+            case SUSPENDED:
+                if (!findContent.getIsVisible().equals(IsVisible.EVERY)) {
+                    throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
+                }
+                break;
+            case NORMAL:
+            case ADMIN:
+                if(findContent.getIsVisible().equals(IsVisible.PRIVATE)) {
+                    if(!findContent.getUser().getId().equals(findUser.getId())) {
+                        throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
+                    }
+                }
+                break;
+            default:
+                throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
+        };
+
+        return new ContentInfoRes(findContent);
+    }
+
+    /**
+     * IsVisible.EVERY인 Content 객체의 Id 1개를 받아 세부사항을 리턴하는 트랜잭션
+     * @param contentId Content 객체의 id
+     * @return ContentInfoRes
+     */
+    @Transactional(readOnly = true)
+    public ContentInfoRes getContentInfoForANONYMOUS(String contentId) {
+
+        Content findContent = contentRepository.findById(UUID.fromString(contentId)).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 Content 없음"
+        ));
+
+        if (!findContent.getIsVisible().equals(IsVisible.EVERY)) {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
+        }
 
         return new ContentInfoRes(findContent);
     }
