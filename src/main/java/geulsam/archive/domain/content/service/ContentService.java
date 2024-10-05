@@ -41,7 +41,7 @@ public class ContentService {
 
     /**
      * 조건을 만족하는 모든 Content 를 리턴하는 트랜잭션
-     * 이때 IsVisible.PRIVATE인 Content는 제외한다.
+     * IsVisible.EVERY과 IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
@@ -79,7 +79,7 @@ public class ContentService {
 
     /**
      * 조건을 만족하는 모든 Content 중 IsVisible.EVERY 타입을 가진 Content 만을 리턴하는 트랜잭션
-     * 이때 IsVisible.PRIVATE인 Content는 제외한다.
+     * IsVisible.EVERY과 IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
      * @param genre 검색할 콘텐츠 객체의 genre
      * @param keyword 검색할 콘텐츠 객체의 제목 혹은 작가명 관련 문자열
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
@@ -154,7 +154,7 @@ public class ContentService {
     }
 
     /**
-     * IsVisible.EVERY인 Content 객체의 Id 1개를 받아 세부사항을 리턴하는 트랜잭션
+     * IsVisible.EVERY에 한하여 Content 객체의 Id 1개를 받아 세부사항을 리턴하는 트랜잭션
      * @param contentId Content 객체의 id
      * @return ContentInfoRes
      */
@@ -176,7 +176,7 @@ public class ContentService {
      * 최근 생성된 8개 Content만을 리턴하는 트랜잭션
      * IsVisible.EVERY과 IsVisible.LOGGEDIN 타입을 가진 Content 만을 다룸.
      * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
-     * @param userId 로그인한 유저의 id. 음수인 경우 InVisible.EVERY 타입을 가진 Content 만을 다루도록 한다.
+     * @param userId 로그인한 유저의 id
      * @return PageRes<RecentContentRes> 페이지네이션 정보와 RecentContentRes 객체 리스트를 포함하는 PageRes 객체
      */
     @Transactional
@@ -204,6 +204,28 @@ public class ContentService {
                 recentContentPage.getTotalPages(),
                 recentContentResList
         );
+    }
+
+    /**
+     * IsVisible.EVERY에 한하여 최근 생성된 8개 Content만을 리턴하는 트랜잭션
+     * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @return PageRes<RecentContentRes> 페이지네이션 정보와 RecentContentRes 객체 리스트를 포함하는 PageRes 객체
+     */
+    @Transactional
+    public PageRes<RecentContentRes> getContentsForANONYMOUS(Pageable pageable) {
+        Page<Content> recentContentPage;
+
+        recentContentPage = contentRepository.findByIsVisibleOrderByCreatedAtDesc(IsVisible.EVERY, pageable);
+
+        List<RecentContentRes> recentContentResList = recentContentPage.getContent().stream()
+                .map(RecentContentRes::new)
+                .toList();
+
+        return new PageRes<>(
+                recentContentPage.getTotalPages(),
+                recentContentResList
+        );
+
     }
 
     /**
@@ -260,6 +282,32 @@ public class ContentService {
         } else {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
         }
+
+        List<AuthorContentRes> authorContentResList = authorContentPage.getContent().stream()
+                .map(AuthorContentRes::new)
+                .toList();
+
+        return new PageRes<>(
+                authorContentPage.getTotalPages(),
+                authorContentResList
+        );
+    }
+
+    /**
+     * IsVisible.EVERY에 한하여 특정 유저의 Content 리스트를 리턴하는 트랜잭션
+     * @param pageable 페이지네이션 정보를 포함하는 Pageable 객체
+     * @param authorId 조회할 유저의 id
+     * @return PageRes<AuthorContentRes> 페이지네이션 정보와 AuthorContentRes 객체 리스트를 포함하는 PageRes 객체
+     */
+    @Transactional
+    public PageRes<AuthorContentRes> getAuthorContentForANONYMOUS(Pageable pageable, int authorId) {
+        Page<Content> authorContentPage;
+
+        User findAuthor = userRepository.findById(authorId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        authorContentPage = contentRepository.findByUserAndIsVisible(findAuthor, IsVisible.EVERY, pageable);
 
         List<AuthorContentRes> authorContentResList = authorContentPage.getContent().stream()
                 .map(AuthorContentRes::new)
