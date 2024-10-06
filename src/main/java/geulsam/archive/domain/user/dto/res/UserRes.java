@@ -15,7 +15,7 @@ public class UserRes {
     private Integer userId;
     private Level level;
     private String name;
-    private Year joinedAt;
+    private Integer joinedAt;
     private String schoolNum;
     private LocalDate birthDay;
     private String phone;
@@ -27,7 +27,7 @@ public class UserRes {
         this.userId = user.getId();
         this.level = user.getLevel();
         this.name = user.getName();
-        this.joinedAt = user.getJoinedAt();
+        this.joinedAt = user.getJoinedAt().getValue();
         this.schoolNum = user.getSchoolNum();
         this.birthDay  = user.getBirthDay();
         this.phone = user.getPhone();

@@ -202,11 +202,18 @@ public class UserService {
 
     @Transactional
     public void delete(Integer userId, String role, String schoolNum) {
-        if (!userRepository.existsById(userId)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
-        }
 
-        userRepository.deleteById(userId);
+        if(role.equals("ROLE_ADMIN")){
+            User user = userRepository.findBySchoolNum(schoolNum).orElseThrow(() ->
+                    new ArchiveException(ErrorCode.VALUE_ERROR, "해당 학번 이미 가입됨. 관리자에게 문의하세요"));
+            userRepository.delete(user);
+        } else {
+            if (!userRepository.existsById(userId)) {
+                throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
+            }
+
+            userRepository.deleteById(userId);
+        }
     }
 
     @Transactional
@@ -253,8 +260,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PageRes<UserRes> user(Pageable pageable){
-        Page<User> userPage = userRepository.findAll(pageable);
+    public PageRes<UserRes> user(Pageable pageable, Level level){
+        Page<User> userPage = userRepository.findByUserLevel(level, pageable);
 
         List<UserRes> userResList = userPage.getContent().stream()
                 .map(user -> new UserRes(user, userPage.getContent().indexOf(user)))
@@ -304,5 +311,10 @@ public class UserService {
                 .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
 
         return new AuthorRes(user);
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokenRepository.deleteRefreshTokenByToken(refreshToken);
     }
 }
