@@ -34,7 +34,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
             Pageable pageable
     );
     @Query("SELECT c FROM Content c " +
-            "WHERE c.isVisible = :isVisible1 or c.isVisible = :isVisible2 " +
+            "WHERE (c.isVisible = :isVisible1 or c.isVisible = :isVisible2) " +
             "AND c.genre = :genre " +
             "AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(c.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')))")
@@ -64,7 +64,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
             Pageable pageable
     );
     @Query("SELECT c FROM Content c " +
-            "WHERE c.isVisible = :isVisible1 or c.isVisible = :isVisible2 " +
+            "WHERE (c.isVisible = :isVisible1 or c.isVisible = :isVisible2) " +
             "AND (LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(c.user.name) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Content> findByIsVisibleAndKeyword(

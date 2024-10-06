@@ -5,7 +5,6 @@ import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.*;
 import geulsam.archive.domain.content.entity.Genre;
 import geulsam.archive.domain.content.service.ContentService;
-import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
@@ -55,18 +55,24 @@ public class ContentController {
         PageRes<ContentRes> contentResList;
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        User findUser = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new ArchiveException(
-                ErrorCode.VALUE_ERROR, "해당 User 없음"
-        ));
-
-        if(findUser.getLevel().equals(Level.SUSPENDED)) {
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            //비로그인 사용자인 경우
             contentResList = contentService.getContentsByFiltersForANONYMOUS(genre, keyword, pageable);
-        } else if (findUser.getLevel().equals(Level.NORMAL) || findUser.getLevel().equals(Level.ADMIN)) {
-            contentResList = contentService.getContentsByFiltersForLOGGEDIN(genre, keyword, pageable);
+
+        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails){
+            User findUser = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new ArchiveException(
+                    ErrorCode.VALUE_ERROR, "해당 User 없음"
+            ));
+
+            contentResList = switch (findUser.getLevel()) {
+                case SUSPENDED -> contentService.getContentsByFiltersForANONYMOUS(genre, keyword, pageable);
+                case NORMAL, ADMIN -> contentService.getContentsByFilters(genre, keyword, pageable);
+                default -> throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
+            };
+
         } else {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");
         }
 
         return ResponseEntity.ok().body(
@@ -86,7 +92,16 @@ public class ContentController {
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<ContentInfoRes>> getContentInfo(@PathVariable String id) {
 
-        ContentInfoRes contentInfoRes = contentService.getContentInfo(id);
+        ContentInfoRes contentInfoRes;
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            contentInfoRes = contentService.getContentInfoForANONYMOUS(id);
+        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            contentInfoRes = contentService.getContentInfo(id, userDetails.getUserId());
+        } else {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");
+        }
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<ContentInfoRes>builder()
@@ -106,14 +121,18 @@ public class ContentController {
     public ResponseEntity<SuccessResponse<PageRes<RecentContentRes>>> getRecentContents(
             @RequestParam(defaultValue = "1") int page
     ) {
-        Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
-
         PageRes<RecentContentRes> recentContentResList;
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        recentContentResList = contentService.getContents(pageable, userDetails.getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            recentContentResList = contentService.getContentsForANONYMOUS(pageable);
+        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            recentContentResList = contentService.getContents(pageable, userDetails.getUserId());
+        } else {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");
+        }
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<RecentContentRes>>builder()
@@ -122,7 +141,6 @@ public class ContentController {
                         .status(HttpStatus.OK.value())
                         .build()
         );
-
     }
 
     /**
@@ -163,12 +181,18 @@ public class ContentController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam int authorId
     ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        PageRes<AuthorContentRes> authorContentResList;
 
         Pageable pageable = PageRequest.of(page-1, 13, Sort.by("createdAt").descending());
 
-        PageRes<AuthorContentRes> authorContentResList = contentService.getAuthorContent(pageable, authorId, userDetails.getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            authorContentResList = contentService.getAuthorContentForANONYMOUS(pageable, authorId);
+        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+            authorContentResList = contentService.getAuthorContent(pageable, authorId, userDetails.getUserId());
+        } else {
+            throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");
+        }
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<AuthorContentRes>>builder()
