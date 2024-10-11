@@ -183,7 +183,7 @@ public class ContentController {
     ) {
         PageRes<AuthorContentRes> authorContentResList;
 
-        Pageable pageable = PageRequest.of(page-1, 13, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
