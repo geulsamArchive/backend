@@ -15,7 +15,7 @@ public class PasswordReq {
 
     @NotBlank
     @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$",
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d~`!@#$%^*()\\-_+=]{8,}$",
             message = "비밀번호는 문자와 숫자를 하나 이상 포함하고 8자리 이상이어야 합니다."
     )
     @Schema(example="B123456")
