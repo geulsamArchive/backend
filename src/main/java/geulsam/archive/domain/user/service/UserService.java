@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -252,8 +253,8 @@ public class UserService {
             userPage = userRepository.findByUserLevelAndSchoolNumOrName(level, pageable, search);
         }
 
-        List<UserRes> userResList = userPage.getContent().stream()
-                .map(user -> new UserRes(user, userPage.getContent().indexOf(user)))
+        List<UserRes> userResList = IntStream.range(0, userPage.getContent().size())
+                .mapToObj(i -> new UserRes(userPage.getContent().get(i), i))
                 .collect(Collectors.toList());
 
         return new PageRes<>(
