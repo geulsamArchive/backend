@@ -88,24 +88,6 @@ public class UserService {
 
 
             javaMailSender.send(message);
-
-
-//            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-//            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//
-//            helper.setTo(email);
-//            helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
-//
-//            String htmlMsg = "<h3>안녕하세요, " + name + " 회원님</h3>"
-//                    + "<p>임시 비밀번호를 발급해 드립니다.</p>"
-//                    + "<div style='border: 2px solid #000; padding: 10px; width: fit-content; background-color: #f3f3f3;'>"
-//                    + "<strong style='font-size: 1.2em;'>" + tempPassword + "</strong>"
-//                    + "</div>"
-//                    + "<p>로그인 후에 비밀번호를 바꿔 주세요.</p>";
-//
-//            helper.setText(htmlMsg, true);
-//
-//            javaMailSender.send(mimeMessage);
         } catch (Exception e) {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
         }
@@ -224,6 +206,7 @@ public class UserService {
 
         if(passwordEncoder.matches(passwordReq.getOldPassword(), user.getPassword())){
             user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
+            refreshTokenRepository.deleteRefreshTokenByUserId(user.getId()); // 재로그인 하도록 리프레시 토큰 삭제
         } else {
             throw new ArchiveException(ErrorCode.VALUE_ERROR,"입력하신 비밀번호가 올바르지 않습니다.");
         }
@@ -260,8 +243,14 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PageRes<UserRes> user(Pageable pageable, Level level){
-        Page<User> userPage = userRepository.findByUserLevel(level, pageable);
+    public PageRes<UserRes> user(Pageable pageable, Level level, String search){
+        Page<User> userPage;
+
+        if(search == null || search.isEmpty()){
+            userPage = userRepository.findByUserLevel(level, pageable);
+        } else {
+            userPage = userRepository.findByUserLevelAndSchoolNumOrName(level, pageable, search);
+        }
 
         List<UserRes> userResList = userPage.getContent().stream()
                 .map(user -> new UserRes(user, userPage.getContent().indexOf(user)))

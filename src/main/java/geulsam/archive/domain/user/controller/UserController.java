@@ -329,7 +329,8 @@ public class UserController {
     public ResponseEntity<SuccessResponse<PageRes<UserRes>>> user(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "asc") String order,
-            @RequestParam(defaultValue = "SUSPENDED") String level
+            @RequestParam(defaultValue = "SUSPENDED") String level,
+            @RequestParam(required = false) String search
     ){
         Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         //pageNumber 는 클라이언트에서 1로 넘어오지만 Spring 의 페이징 기능은 페이지가 0부터 시작
@@ -338,7 +339,7 @@ public class UserController {
 
         Level levelEnum = Level.valueOf(level);
 
-        PageRes<UserRes> user = userService.user(pageable, levelEnum);
+        PageRes<UserRes> user = userService.user(pageable, levelEnum, search);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<UserRes>>builder()

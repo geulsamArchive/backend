@@ -25,4 +25,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT u FROM User u WHERE u.level =:level")
     Page<User> findByUserLevel(Level level, Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.level =:level AND (u.name LIKE %:search% OR u.schoolNum LIKE %:search%)")
+    Page<User> findByUserLevelAndSchoolNumOrName(Level level, Pageable pageable, String search);
 }
