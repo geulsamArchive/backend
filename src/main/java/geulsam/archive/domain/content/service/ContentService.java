@@ -2,6 +2,7 @@ package geulsam.archive.domain.content.service;
 
 import geulsam.archive.domain.book.entity.Book;
 import geulsam.archive.domain.book.repository.BookRepository;
+import geulsam.archive.domain.comment.service.CommentService;
 import geulsam.archive.domain.content.dto.req.ContentUpdateReq;
 import geulsam.archive.domain.content.dto.req.ContentUploadReq;
 import geulsam.archive.domain.content.dto.res.*;
@@ -38,6 +39,7 @@ public class ContentService {
     private final BookRepository bookRepository;
     private final UploadManager uploadManager;
     private final DeleteManager deleteManager;
+    private final CommentService commentService;
 
     /**
      * 조건을 만족하는 모든 Content 를 리턴하는 트랜잭션
@@ -377,6 +379,8 @@ public class ContentService {
         deleteManager.deleteFile(findContent.getId(), "contentPdf");
         deleteManager.deleteFile(findContent.getId(), "contentHtml");
 
+        commentService.deleteAllCommentsByContentId(findContent.getId());
+
         contentRepository.deleteById(findContent.getId());
     }
 
@@ -471,4 +475,8 @@ public class ContentService {
 
         return savedContent.getAward();
     }
+
+    @Transactional
+    public void deleteAllContentsByUserId(int userId) { contentRepository.deleteAllByUserId(userId); }
+
 }

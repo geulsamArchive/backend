@@ -103,6 +103,11 @@ public class CommentService {
     }
 
     @Transactional
+    public void deleteAllCommentsByContentId(UUID contentId) {
+        commentRepository.deleteAllByContentId(contentId);
+    }
+
+    @Transactional
     public CommentRes update(int commentId, CommentUpdateReq commentUpdateReq, int userId) {
 
         Comment findComment = commentRepository.findById(commentId).orElseThrow(() -> new ArchiveException(
