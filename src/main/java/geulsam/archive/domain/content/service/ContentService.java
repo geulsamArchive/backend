@@ -475,8 +475,4 @@ public class ContentService {
 
         return savedContent.getAward();
     }
-
-    @Transactional
-    public void deleteAllContentsByUserId(int userId) { contentRepository.deleteAllByUserId(userId); }
-
 }

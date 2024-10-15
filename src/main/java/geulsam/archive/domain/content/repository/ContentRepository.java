@@ -96,6 +96,4 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     Page<Content> findByUserAndIsVisible(User findUser, IsVisible isVisible, Pageable pageable);
     @Query("SELECT c FROM Content c WHERE c.user = :user AND (c.isVisible = :isVisible1 OR c.isVisible = :isVisible2) ORDER BY c.createdAt DESC")
     Page<Content> findByUserAndIsVisible(IsVisible isVisible1, IsVisible isVisible2, User user, Pageable pageable);
-
-    void deleteAllByUserId(int userId);
 }
