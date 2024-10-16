@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -243,7 +244,7 @@ public class UserController {
      */
     @DeleteMapping()
     public ResponseEntity<SuccessResponse<Void>> delete(
-            @RequestParam String schoolNum
+            @RequestParam(required = false) String schoolNum
     ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -327,14 +328,18 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<SuccessResponse<PageRes<UserRes>>> user(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "asc") String order
+            @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(defaultValue = "SUSPENDED") String level,
+            @RequestParam(required = false) String search
     ){
         Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         //pageNumber 는 클라이언트에서 1로 넘어오지만 Spring 의 페이징 기능은 페이지가 0부터 시작
         // pageSize 는 12로 고정, 정렬 기준 속성도 year 로 고정
         Pageable pageable = PageRequest.of(page-1, 12, Sort.by(direction, "name"));
 
-        PageRes<UserRes> user = userService.user(pageable);
+        Level levelEnum = Level.valueOf(level);
+
+        PageRes<UserRes> user = userService.user(pageable, levelEnum, search);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<PageRes<UserRes>>builder()
@@ -383,6 +388,22 @@ public class UserController {
                                 .data(authorRes)
                                 .status(HttpStatus.OK.value())
                                 .message("작가 개인 소개")
+                                .build()
+                );
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<SuccessResponse<Void>> logout(
+            @RequestParam String refreshToken
+    ){
+        userService.logout(refreshToken);
+        
+        return ResponseEntity.ok().body
+                (
+                        SuccessResponse.<Void>builder()
+                                .data(null)
+                                .status(HttpStatus.OK.value())
+                                .message("유저 로그아웃")
                                 .build()
                 );
     }

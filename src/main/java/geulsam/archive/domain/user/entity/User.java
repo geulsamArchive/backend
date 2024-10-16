@@ -170,6 +170,5 @@ public class User {
 
     public void updateLevel(Level level){
         this.level = level;
-
     }
 }

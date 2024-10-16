@@ -21,8 +21,6 @@ import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Service
@@ -31,9 +29,6 @@ public class CalendarService {
 
     private final CalendarRepository calendarRepository;
     private final CriticismRepository criticismRepository;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Transactional
     public void calendarUpload(CalendarUploadReq calendarUploadReq) {
@@ -99,11 +94,8 @@ public class CalendarService {
     }
 
     @Transactional
-    public void calendarDelete(String field, String search) {
-        String queryString = "DELETE FROM Calendar c WHERE c." + field + " = :search";
-        entityManager.createQuery(queryString)
-                .setParameter("search", search)
-                .executeUpdate();
+    public void calendarDelete(Integer id) {
+        calendarRepository.deleteById(id);
     }
 
     @Transactional
@@ -194,7 +186,13 @@ public class CalendarService {
     @Transactional
     public List<CriticismByMonth> criticism(int year, int season) {
 
-        String queryString = "SELECT c FROM Criticism c WHERE c.start BETWEEN :startDate AND :endDate";
+        // 레거시
+//        String queryString = "SELECT c FROM Criticism c WHERE c.start BETWEEN :startDate AND :endDate";
+        // 쿼리문 실행
+//        List<Criticism> resultList = entityManager.createQuery(queryString, Criticism.class)
+//                .setParameter("startDate", startDate)
+//                .setParameter("endDate", endDate)
+//                .getResultList();
 
         //학기 끝 기간 설정
         int endSeason = switch (season) {
@@ -211,11 +209,8 @@ public class CalendarService {
         YearMonth endYearMonth = YearMonth.of(year, endSeason);
         LocalDateTime endDate = endYearMonth.atEndOfMonth().atTime(23, 59, 59);
 
-        // 쿼리문 실행
-        List<Criticism> resultList = entityManager.createQuery(queryString, Criticism.class)
-                .setParameter("startDate", startDate)
-                .setParameter("endDate", endDate)
-                .getResultList();
+        //합평회 일정 리스트 SELECT
+        List<Criticism> resultList = criticismRepository.criticismBySemester(startDate, endDate);
 
         List<CriticismByMonth> criticismByMonths = IntStream.rangeClosed(season, endSeason)
                 .mapToObj(i -> new CriticismByMonth(i-season, i)).toList();

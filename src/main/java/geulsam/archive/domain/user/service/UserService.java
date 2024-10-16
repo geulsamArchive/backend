@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +65,7 @@ public class UserService {
         }
 
         //임시비밀번호 생성
-        String tempPassword = RandomStringUtils.randomAlphanumeric(10) + RandomStringUtils.random(2, true, true);
+        String tempPassword = RandomStringUtils.randomAlphanumeric(10) + RandomStringUtils.random(2, false, true);
 
         // 임시비밀번호로 메일 발송
         try {
@@ -88,24 +89,6 @@ public class UserService {
 
 
             javaMailSender.send(message);
-
-
-//            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-//            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//
-//            helper.setTo(email);
-//            helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
-//
-//            String htmlMsg = "<h3>안녕하세요, " + name + " 회원님</h3>"
-//                    + "<p>임시 비밀번호를 발급해 드립니다.</p>"
-//                    + "<div style='border: 2px solid #000; padding: 10px; width: fit-content; background-color: #f3f3f3;'>"
-//                    + "<strong style='font-size: 1.2em;'>" + tempPassword + "</strong>"
-//                    + "</div>"
-//                    + "<p>로그인 후에 비밀번호를 바꿔 주세요.</p>";
-//
-//            helper.setText(htmlMsg, true);
-//
-//            javaMailSender.send(mimeMessage);
         } catch (Exception e) {
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
         }
@@ -202,11 +185,18 @@ public class UserService {
 
     @Transactional
     public void delete(Integer userId, String role, String schoolNum) {
-        if (!userRepository.existsById(userId)) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
-        }
 
-        userRepository.deleteById(userId);
+        if(role.equals("ROLE_ADMIN")){
+            User user = userRepository.findBySchoolNum(schoolNum).orElseThrow(() ->
+                    new ArchiveException(ErrorCode.VALUE_ERROR, "해당 학번 이미 가입됨. 관리자에게 문의하세요"));
+            userRepository.delete(user);
+        } else {
+            if (!userRepository.existsById(userId)) {
+                throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
+            }
+
+            userRepository.deleteById(userId);
+        }
     }
 
     @Transactional
@@ -217,6 +207,7 @@ public class UserService {
 
         if(passwordEncoder.matches(passwordReq.getOldPassword(), user.getPassword())){
             user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
+            refreshTokenRepository.deleteRefreshTokenByUserId(user.getId()); // 재로그인 하도록 리프레시 토큰 삭제
         } else {
             throw new ArchiveException(ErrorCode.VALUE_ERROR,"입력하신 비밀번호가 올바르지 않습니다.");
         }
@@ -253,11 +244,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PageRes<UserRes> user(Pageable pageable){
-        Page<User> userPage = userRepository.findAll(pageable);
+    public PageRes<UserRes> user(Pageable pageable, Level level, String search){
+        Page<User> userPage;
 
-        List<UserRes> userResList = userPage.getContent().stream()
-                .map(user -> new UserRes(user, userPage.getContent().indexOf(user)))
+        if(search == null || search.isEmpty()){
+            userPage = userRepository.findByUserLevel(level, pageable);
+        } else {
+            userPage = userRepository.findByUserLevelAndSchoolNumOrName(level, pageable, search);
+        }
+
+        List<UserRes> userResList = IntStream.range(0, userPage.getContent().size())
+                .mapToObj(i -> new UserRes(userPage.getContent().get(i), i))
                 .collect(Collectors.toList());
 
         return new PageRes<>(
@@ -304,5 +301,10 @@ public class UserService {
                 .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
 
         return new AuthorRes(user);
+    }
+
+    @Transactional
+    public void logout(String refreshToken) {
+        refreshTokenRepository.deleteRefreshTokenByToken(refreshToken);
     }
 }

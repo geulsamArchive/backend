@@ -59,6 +59,9 @@ dependencies {
 
 	//thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	//logging
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 tasks.named('bootBuildImage') {
