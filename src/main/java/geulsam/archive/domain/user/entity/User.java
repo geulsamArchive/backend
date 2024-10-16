@@ -1,5 +1,6 @@
 package geulsam.archive.domain.user.entity;
 
+import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
 import jakarta.persistence.*;
@@ -11,6 +12,8 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
 
 /**User Entity*/
 @Entity
@@ -112,14 +115,14 @@ public class User {
     /**User-Content 양방향 매핑
      * 유저가 작성한 content list
      */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    private List<Content> contents = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Content> contents = new ArrayList<>();
 
     /**User-Comment 양방향 매핑
      * 유저가 작성한 comment list
      */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    private List<Comment> comments = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     /**생성자
      * NOT NULL 이어야 하는 값들을 인자로 받음
