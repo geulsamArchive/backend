@@ -1,5 +1,7 @@
 package geulsam.archive.domain.user.service;
 
+import geulsam.archive.domain.criticismAuthor.repository.CriticismAuthorRepository;
+import geulsam.archive.domain.guestBook.repository.GuestBookRepository;
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
 import geulsam.archive.domain.user.dto.req.PasswordReq;
@@ -48,6 +50,8 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
+    private final GuestBookRepository guestBookRepository;
+    private final CriticismAuthorRepository criticismAuthorRepository;
 
     /**
      * 유저 저장 트랜잭션
@@ -185,17 +189,32 @@ public class UserService {
 
     @Transactional
     public void delete(Integer userId, String role, String schoolNum) {
+        Integer targetUserId;
 
-        if(role.equals("ROLE_ADMIN")){
+        // 삭제할 유저의 유저아이디 검색
+        if(role.equals("ROLE_ADMIN")) {
             User user = userRepository.findBySchoolNum(schoolNum).orElseThrow(() ->
-                    new ArchiveException(ErrorCode.VALUE_ERROR, "해당 학번 이미 가입됨. 관리자에게 문의하세요"));
-            userRepository.delete(user);
+                    new ArchiveException(ErrorCode.VALUE_ERROR, "해당 학번의 사용자가 존재하지 않습니다."));
+            targetUserId = user.getId();
         } else {
             if (!userRepository.existsById(userId)) {
                 throw new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.");
             }
+            targetUserId = userId;
+        }
 
-            userRepository.deleteById(userId);
+        // 유저와 관련된 엔티티들 삭제
+        guestBookRepository.deleteByUser(targetUserId);
+        refreshTokenRepository.deleteRefreshTokenByUserId(targetUserId);
+        criticismAuthorRepository.deleteByUserId(targetUserId);
+
+        // 유저 삭제
+        if (role.equals("ROLE_ADMIN")) {
+            User user = userRepository.findById(targetUserId)
+                    .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
+            userRepository.delete(user); 
+        } else {
+            userRepository.deleteById(targetUserId);
         }
     }
 
