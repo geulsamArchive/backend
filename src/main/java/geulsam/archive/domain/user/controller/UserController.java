@@ -93,10 +93,6 @@ public class UserController {
      * @return 로그인한 사용자의 아이디와 권한을 return
      */
     @GetMapping("/testing")
-    @Operation(security = {
-            @SecurityRequirement(name = "AccessToken"),
-            @SecurityRequirement(name = "RefreshToken")
-    })
     public ResponseEntity<String> testing(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

@@ -10,6 +10,8 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -60,40 +62,27 @@ public class SwaggerConfig {
                 .title("Guelsam Archive");
     }
 
-//    @Bean
-//    public OperationCustomizer operationCustomizer(){
-//        return new OperationCustomizer() {
-//            @Override
-//            public Operation customize(Operation operation, HandlerMethod handlerMethod) {
-////                ErrorResponse errorResponse = handlerMethod.getMethodAnnotation(ErrorResponse.class);
-//
-//                ApiResponses responses = operation.getResponses();
-////                if (errorResponse != null) {
-//                    Arrays.stream(ErrorCode.values()).forEach(errorCode -> {
-//                        ApiResponse apiResponse = new ApiResponse();
-//                        apiResponse.setDescription(errorCode.getMessage());
-//
-//                        Content content = new Content();
-//                        MediaType mediaType = new MediaType();
-//                        Schema<?> schema = new Schema<>();
-//
-//                        Map<String, Object> errorCodeExample = new HashMap<>();
-//                        errorCodeExample.put("status", errorCode.getStatus());
-//                        errorCodeExample.put("error", errorCode.getError());
-//                        errorCodeExample.put("message", errorCode.getMessage());
-//
-//                        schema.setExample(errorCodeExample); // ErrorCode 예시를 직접 추가
-//                        mediaType.setSchema(schema);
-//                        content.addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mediaType);
-//                        apiResponse.setContent(content);
-//
-//                        responses.addApiResponse(String.valueOf(errorCode.getError()), apiResponse);
-//                    });
-////                }
-//
-//                operation.setResponses(responses);
-//                return operation;
-//            }
-//        };
-//    }
+    @Bean
+    public OperationCustomizer customGlobalHeaders() {
+        return (Operation operation, org.springframework.web.method.HandlerMethod handlerMethod) -> {
+
+            Parameter accessTokenHeader = new Parameter()
+                    .in("header")
+                    .name("accessToken")
+                    .description("Access Token Header")
+                    .required(false)
+                    .schema(new StringSchema());
+
+            Parameter refreshTokenHeader = new Parameter()
+                    .in("header")
+                    .name("refreshToken")
+                    .description("Refresh Token Header")
+                    .required(false)
+                    .schema(new StringSchema());
+
+            operation.addParametersItem(accessTokenHeader);
+            operation.addParametersItem(refreshTokenHeader);
+            return operation;
+        };
+    }
 }

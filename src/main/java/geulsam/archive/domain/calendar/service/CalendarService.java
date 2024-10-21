@@ -9,6 +9,7 @@ import geulsam.archive.domain.calendar.entity.Calendar;
 import geulsam.archive.domain.calendar.entity.Criticism;
 import geulsam.archive.domain.calendar.repository.CalendarRepository;
 import geulsam.archive.domain.calendar.repository.CriticismRepository;
+import geulsam.archive.domain.criticismAuthor.repository.CriticismAuthorRepository;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
@@ -29,6 +30,7 @@ public class CalendarService {
 
     private final CalendarRepository calendarRepository;
     private final CriticismRepository criticismRepository;
+    private final CriticismAuthorRepository criticismAuthorRepository;
 
     @Transactional
     public void calendarUpload(CalendarUploadReq calendarUploadReq) {
@@ -95,6 +97,7 @@ public class CalendarService {
 
     @Transactional
     public void calendarDelete(Integer id) {
+        criticismAuthorRepository.deleteByCriticismId(id);
         calendarRepository.deleteById(id);
     }
 
