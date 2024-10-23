@@ -8,7 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ContentRepository extends JpaRepository<Content, UUID> {
@@ -96,4 +98,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
     Page<Content> findByUserAndIsVisible(User findUser, IsVisible isVisible, Pageable pageable);
     @Query("SELECT c FROM Content c WHERE c.user = :user AND (c.isVisible = :isVisible1 OR c.isVisible = :isVisible2) ORDER BY c.createdAt DESC")
     Page<Content> findByUserAndIsVisible(IsVisible isVisible1, IsVisible isVisible2, User user, Pageable pageable);
+
+    @Query("SELECT c.id From Content c WHERE c.user.id = :userId")
+    List<UUID> findIdByUserId(@Param("userId") Integer userId);
 }
