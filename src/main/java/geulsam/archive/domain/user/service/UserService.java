@@ -1,5 +1,6 @@
 package geulsam.archive.domain.user.service;
 
+import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.domain.criticismAuthor.repository.CriticismAuthorRepository;
 import geulsam.archive.domain.guestBook.repository.GuestBookRepository;
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
@@ -16,6 +17,7 @@ import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
+import geulsam.archive.global.s3.DeleteManager;
 import geulsam.archive.global.security.jwt.JwtProvider;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +35,7 @@ import org.thymeleaf.context.Context;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -52,6 +51,8 @@ public class UserService {
     private final TemplateEngine templateEngine;
     private final GuestBookRepository guestBookRepository;
     private final CriticismAuthorRepository criticismAuthorRepository;
+    private final ContentRepository contentRepository;
+    private final DeleteManager deleteManager;
 
     /**
      * 유저 저장 트랜잭션
@@ -207,6 +208,11 @@ public class UserService {
         guestBookRepository.deleteByUser(targetUserId);
         refreshTokenRepository.deleteRefreshTokenByUserId(targetUserId);
         criticismAuthorRepository.deleteByUserId(targetUserId);
+        // 유저가 올린 콘텐츠 대량 삭제
+        List<UUID> contentUUIDs = contentRepository.findIdByUserId(targetUserId);
+        deleteManager.deleteFiles(contentUUIDs, "contentHtml");
+        deleteManager.deleteFiles(contentUUIDs, "contentPdf");
+
 
         // 유저 삭제
         if (role.equals("ROLE_ADMIN")) {
@@ -268,7 +274,10 @@ public class UserService {
 
         if(search == null || search.isEmpty()){
             userPage = userRepository.findByUserLevel(level, pageable);
-        } else {
+        } else if(level == Level.NORMAL){
+            userPage = userRepository.findByUserLevelAndAdminANDSchoolNumOrName(level, Level.ADMIN, pageable, search);
+        }
+        else {
             userPage = userRepository.findByUserLevelAndSchoolNumOrName(level, pageable, search);
         }
 
