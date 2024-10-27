@@ -134,17 +134,15 @@ public class CalendarController {
 
     /**
      * 일정 삭제
-     * @param field 삭제할 기준 컬럼 이름
-     * @param search 삭제할 기준 컬럼의 값
+     * @param id
      * @return
      */
     @DeleteMapping()
     public ResponseEntity<SuccessResponse<Void>> delete(
-            @RequestParam(defaultValue = "id") String field,
-            @RequestParam String search
+            @RequestParam Integer id
 
     ){
-        calendarService.calendarDelete(field, search);
+        calendarService.calendarDelete(id);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()

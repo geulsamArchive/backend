@@ -68,6 +68,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/user/resetPassword").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/user/level").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/user/author").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/user/logout").permitAll()
                                 // 유저 refresh 토큰 받아서 새로운 토큰 생성(초기 로그인)
                                 // 포스터, 문집 관련
                                 .requestMatchers(HttpMethod.GET, "/poster/**").permitAll()

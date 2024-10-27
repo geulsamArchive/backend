@@ -6,6 +6,7 @@ import geulsam.archive.domain.criticismAuthor.entity.CriticismAuthor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +27,12 @@ public interface CriticismAuthorRepository extends JpaRepository<CriticismAuthor
      */
     @Query("SELECT ca FROM CriticismAuthor ca WHERE ca.condition = geulsam.archive.domain.criticismAuthor.entity.Condition.FIXED AND ca.author.id =: userID AND ca.genre =: genre AND ca.criticism.start >: now")
     List<CriticismAuthor> findAvailableDateTime(@Param("userID") Integer userID, @Param("genre") Genre genre, @Param("now") LocalDateTime now);
+
+    @Modifying
+    @Query("DELETE FROM CriticismAuthor ca WHERE ca.criticism.id = :criticismId")
+    int deleteByCriticismId(@Param("criticismId") Integer criticismId);
+
+    @Modifying
+    @Query("DELETE FROM CriticismAuthor ca WHERE ca.author.id = :userId")
+    int deleteByUserId(@Param("userId") Integer userId);
 }
