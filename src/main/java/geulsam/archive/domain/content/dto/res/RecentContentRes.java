@@ -2,6 +2,7 @@ package geulsam.archive.domain.content.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.content.entity.Content;
+import geulsam.archive.domain.content.entity.IsVisible;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,9 +29,13 @@ public class RecentContentRes {
     /**Content 객체의 PK*/
     @Schema(example = "adsa-dsafdsa-vsadf-dsafdsa")
     private String contentId;
+    /**Content 객체의 공개여부*/
+    @Schema(description = "작품 공개여부", example = "LOGGEDIN")
+    private IsVisible isVisible;
     /**Content 객체의 수상이력*/
     @Schema(example = "2023년 글샘문학상, 2024년 글샘문학상")
     private String award;
+
 
     public RecentContentRes(Content content) {
         this.title = content.getName();
@@ -38,6 +43,7 @@ public class RecentContentRes {
         this.author = content.getUser().getName();
         this.sentence = content.getSentence();
         this.contentId = content.getId().toString();
+        this.isVisible = content.getIsVisible();
         this.award = content.getAward();
     }
 }
