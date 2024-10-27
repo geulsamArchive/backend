@@ -35,6 +35,8 @@ public class ContentInfoRes {
     private Genre type;
     @Schema(description = "작품 공개여부", example = "LOGGEDIN")
     private IsVisible isVisible;
+    @Schema(description = "문집 아이디")
+    private String book;
     @Schema(example = "2023년 글샘문학상, 2024년 글샘문학상")
     private String award;
 
@@ -49,6 +51,7 @@ public class ContentInfoRes {
         this.createdAt = content.getCreatedAt();
         this.pdf = content.getPdfUrl();
         this.html = content.getHtmlUrl();
+        this.book = (this.book==null) ? null : content.getBook().getId().toString();
         this.award = content.getAward();
     }
 }

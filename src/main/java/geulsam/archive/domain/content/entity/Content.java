@@ -6,6 +6,8 @@ import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -37,7 +39,8 @@ public class Content {
      * 타입: Book
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
+    @JoinColumn(name = "book_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Book book;
 
     /**콘텐츠 이름
