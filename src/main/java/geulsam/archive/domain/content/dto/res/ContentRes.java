@@ -3,6 +3,7 @@ package geulsam.archive.domain.content.dto.res;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
+import geulsam.archive.domain.content.entity.IsVisible;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,9 @@ public class ContentRes {
     /**Content 객체의 장르*/
     @Schema(example = "NOVEL")
     private Genre type;
+    /**Content 객체의 공개여부*/
+    @Schema(description = "작품 공개여부", example = "LOGGEDIN")
+    private IsVisible isVisible;
     /**Content 객체의 제목*/
     @Schema(example = "때때로 나는 회색분자라는 소리를 듣는다")
     private String title;
@@ -40,6 +44,7 @@ public class ContentRes {
         this.id = id;
         this.contentId = content.getId().toString();
         this.type = content.getGenre();
+        this.isVisible = content.getIsVisible();
         this.title = content.getName();
         this.award = content.getAward();
         this.author = content.getUser().getName();

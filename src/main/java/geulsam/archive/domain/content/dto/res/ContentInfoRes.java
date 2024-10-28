@@ -3,6 +3,7 @@ package geulsam.archive.domain.content.dto.res;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.content.entity.Content;
 import geulsam.archive.domain.content.entity.Genre;
+import geulsam.archive.domain.content.entity.IsVisible;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,12 +33,17 @@ public class ContentInfoRes {
     private String html;
     @Schema(example = "NOVEL")
     private Genre type;
+    @Schema(description = "작품 공개여부", example = "LOGGEDIN")
+    private IsVisible isVisible;
+    @Schema(description = "문집 아이디")
+    private String book;
     @Schema(example = "2023년 글샘문학상, 2024년 글샘문학상")
     private String award;
 
     public ContentInfoRes(Content content) {
         this.id = content.getId().toString();
         this.type = content.getGenre();
+        this.isVisible = content.getIsVisible();
         this.title = content.getName();
         this.author = content.getUser().getName();
         this.authorId = content.getUser().getId();
@@ -45,6 +51,7 @@ public class ContentInfoRes {
         this.createdAt = content.getCreatedAt();
         this.pdf = content.getPdfUrl();
         this.html = content.getHtmlUrl();
+        this.book = (this.book==null) ? null : content.getBook().getId().toString();
         this.award = content.getAward();
     }
 }

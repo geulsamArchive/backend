@@ -372,7 +372,11 @@ public class ContentService {
                 () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 content 없음")
         );
 
-        if(!findContent.getUser().getId().equals(userId)) {
+        User findUser = userRepository.findById(userId).orElseThrow(() -> new ArchiveException(
+                ErrorCode.VALUE_ERROR, "해당 User 없음"
+        ));
+
+        if(!(findContent.getUser().getId().equals(userId) || findUser.getLevel().equals(Level.ADMIN))) {
             throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "사용자 권한 없음");
         }
 
