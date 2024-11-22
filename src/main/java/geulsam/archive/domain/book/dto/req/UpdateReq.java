@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Data
@@ -26,4 +27,6 @@ public class UpdateReq {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate release;
     private String title;
+    private String bookContentList;
+//    private List<geulsam.archive.domain.bookContent.dto.req.UpdateReq> bookContentList;
 }

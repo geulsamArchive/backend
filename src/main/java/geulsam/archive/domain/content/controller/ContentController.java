@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -83,6 +84,29 @@ public class ContentController {
                         .build()
         );
     }
+
+    /**
+     * book 에 수록하기 위한 content 의 id(목록) 추출
+     * @param userName content 제작 작가의 이름
+     * @param contentTitle content 제목
+     * @return contentId List String
+     */
+    @GetMapping("/forBook")
+    public ResponseEntity<SuccessResponse<List<String>>> getContentForBook (
+            @RequestParam String userName,
+            @RequestParam String contentTitle
+    ) {
+
+        List<String> contentsForBook = contentService.getContentForBook(userName, contentTitle);
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<List<String>>builder()
+                        .data(contentsForBook)
+                        .message("contents list for book successfully")
+                        .status(HttpStatus.OK.value())
+                        .build()
+        );
+    };
 
     /**
      * 특정 작품의 세부 정보 조회

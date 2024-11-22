@@ -1,11 +1,18 @@
 package geulsam.archive.domain.book.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import geulsam.archive.domain.book.dto.req.UpdateReq;
 import geulsam.archive.domain.book.dto.req.UploadReq;
 import geulsam.archive.domain.book.dto.res.BookIdRes;
 import geulsam.archive.domain.book.dto.res.BookRes;
 import geulsam.archive.domain.book.entity.Book;
 import geulsam.archive.domain.book.repository.BookRepository;
+import geulsam.archive.domain.bookContent.dto.res.BookContentRes;
+import geulsam.archive.domain.bookContent.entity.BookContent;
+import geulsam.archive.domain.bookContent.repository.BookContentRepository;
+import geulsam.archive.domain.content.entity.Content;
+import geulsam.archive.domain.content.repository.ContentRepository;
 import geulsam.archive.global.common.dto.PageRes;
 import geulsam.archive.global.exception.ArchiveException;
 import geulsam.archive.global.exception.ErrorCode;
@@ -31,6 +38,9 @@ public class BookService {
     private final BookRepository bookRepository;
     private final UploadManager uploadManager;
     private final DeleteManager deleteManager;
+    private final BookContentRepository bookContentRepository;
+    private final ContentRepository contentRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * book 전체를 리턴하는 트랜잭션
@@ -64,7 +74,12 @@ public class BookService {
                 ErrorCode.VALUE_ERROR, "해당 Book 없음"
         ));
 
-        return new BookIdRes(book);
+        List<BookContent> bookContents = bookContentRepository.findAllByBookId(UUID.fromString(id));
+
+        List<BookContentRes> bookContentResList = bookContents.stream()
+                .map(bookContent -> new BookContentRes(bookContent, bookContents.indexOf(bookContent))).toList();
+
+        return new BookIdRes(book, bookContentResList);
     }
 
     /**
@@ -84,6 +99,20 @@ public class BookService {
         );
 
         bookRepository.save(book);
+
+        // book upload 시, 목차도 함께 추가
+        try{
+            geulsam.archive.domain.bookContent.dto.req.UploadReq[] bookContentUploadReqs =
+                    objectMapper.readValue(uploadReq.getBookContentList(), geulsam.archive.domain.bookContent.dto.req.UploadReq[].class);
+
+            for(geulsam.archive.domain.bookContent.dto.req.UploadReq bookContentUploadReq : bookContentUploadReqs){
+                Content content = contentRepository.findById(UUID.fromString(bookContentUploadReq.getContentId()))
+                        .orElse(null); // 값이 없으면 null 반환
+                bookContentRepository.save(new BookContent(bookContentUploadReq, book, content));
+            }
+        } catch (JsonProcessingException e){
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "목차 파싱 에러");
+        }
 
         String bookUrl = uploadManager.uploadFile(uploadReq.getPdf(), book.getId(), "book");
         String bookCoverUrl = uploadManager.uploadFile(uploadReq.getBookCover(), book.getId(), "bookCover");
@@ -120,6 +149,36 @@ public class BookService {
         String bookCoverThumbNail = book.getThumbNailUrl();
         String backCover = book.getBackCoverUrl();
         String backCoverThumbNail = book.getBackThumbNailUrl();
+
+        try{
+            geulsam.archive.domain.bookContent.dto.req.UpdateReq[] bookContentUpdateReqs
+                    = objectMapper.readValue(updateReq.getBookContentList(), geulsam.archive.domain.bookContent.dto.req.UpdateReq[].class);
+
+            for(geulsam.archive.domain.bookContent.dto.req.UpdateReq bookContentsUpdateReq : bookContentUpdateReqs){
+                // todo: content.findById 리팩토링
+                if(bookContentsUpdateReq.getUuid() == null){
+                    // bookContent 생성
+                    Content content = contentRepository.findById(UUID.fromString(bookContentsUpdateReq.getContentId())).orElseThrow(
+                            () -> new ArchiveException(ErrorCode.VALUE_ERROR, bookContentsUpdateReq.getContentId() + " 에 해당하는 작품 없음")
+                    );
+                    BookContent bookContent = new BookContent(bookContentsUpdateReq, book, content);
+                    bookContentRepository.save(bookContent);
+                }else if(bookContentsUpdateReq.getName() == null || bookContentsUpdateReq.getTitle() == null || bookContentsUpdateReq.getPage() == null) {
+                    // bookContent 삭제
+                    bookContentRepository.deleteById(UUID.fromString(bookContentsUpdateReq.getUuid()));
+                } else {
+                    // bookContent 업데이트
+                    BookContent bookContent = bookContentRepository.findById(UUID.fromString(bookContentsUpdateReq.getUuid())).orElseThrow(
+                            () -> new ArchiveException(ErrorCode.VALUE_ERROR, bookContentsUpdateReq.getUuid() + " 에 해당하는 목차 없음")
+                    );
+                    Content content = contentRepository.findById(UUID.fromString(bookContentsUpdateReq.getContentId()))
+                            .orElse(null);
+                    bookContent.updateByUpdateReq(bookContentsUpdateReq, content);
+                }
+            }
+        } catch (JsonProcessingException e){
+            throw new ArchiveException(ErrorCode.VALUE_ERROR, "목차 파싱 에러");
+        }
 
         // book URL 업데이트
         if (updateReq.getPdf().isPresent() && !updateReq.getPdf().get().isEmpty()) {

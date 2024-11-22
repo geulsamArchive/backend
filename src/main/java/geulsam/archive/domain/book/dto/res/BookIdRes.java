@@ -2,12 +2,14 @@ package geulsam.archive.domain.book.dto.res;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import geulsam.archive.domain.book.entity.Book;
+import geulsam.archive.domain.bookContent.dto.res.BookContentRes;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -35,11 +37,14 @@ public class BookIdRes {
     @Schema(example = "책 제목")
     private String title;
 
+    @Schema()
+    private List<BookContentRes> bookContentResList;
+
     /**
      * Book 객체를 받아 BookIdRes 로 매핑 
      * @param book
      */
-    public BookIdRes(Book book){
+    public BookIdRes(Book book, List<BookContentRes> bookContentResList){
         this.id = book.getId().toString();
         this.release = book.getRelease();
         this.designer = book.getDesigner();
@@ -47,5 +52,6 @@ public class BookIdRes {
         this.page = book.getPageNumber();
         this.url = book.getUrl();
         this.title =book.getTitle();
+        this.bookContentResList = bookContentResList;
     }
 }

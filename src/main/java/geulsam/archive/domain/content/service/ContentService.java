@@ -479,4 +479,15 @@ public class ContentService {
 
         return savedContent.getAward();
     }
+
+    /**
+     * content title 과 user name 으로 contentId List 를 추출하는 트랜잭션
+     * @param userName 찾고자 하는 user name
+     * @param contentTitle 찾고자 하는 content title
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<String> getContentForBook(String userName, String contentTitle) {
+        return contentRepository.findByTitleAndUserName(userName, contentTitle);
+    }
 }
