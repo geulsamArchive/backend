@@ -89,6 +89,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/comment/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/comment/**").authenticated()
                                 // 작품 관련
+                                .requestMatchers(HttpMethod.GET, "/content/forBook").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/content/**").hasRole("NORMAL")
                                 .requestMatchers(HttpMethod.GET, "/content/**").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/content/**").permitAll()

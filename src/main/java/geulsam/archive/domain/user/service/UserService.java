@@ -104,7 +104,7 @@ public class UserService {
                 name,
                 passwordEncoder.encode(tempPassword),
                 schoolNum,
-                Level.NORMAL,
+                Level.SUSPENDED,
                 LocalDateTime.now(),
                 email,
                 phone,

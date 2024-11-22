@@ -101,4 +101,7 @@ public interface ContentRepository extends JpaRepository<Content, UUID> {
 
     @Query("SELECT c.id From Content c WHERE c.user.id = :userId")
     List<UUID> findIdByUserId(@Param("userId") Integer userId);
+
+    @Query("SELECT c.id FROM Content c WHERE c.user.name = :userName AND c.name = :contentTitle")
+    List<String> findByTitleAndUserName(@Param("userName") String userName, @Param("contentTitle") String contentTitle);
 }

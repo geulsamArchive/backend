@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.UUID;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -16,9 +18,9 @@ import org.hibernate.annotations.OnDeleteAction;
 public class RefreshToken {
 
     @Id
-    @Column(name = "refreshToken_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "refreshToken_id", columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @Column(name = "refreshToken_value")
     private String token;
