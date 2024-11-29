@@ -2,11 +2,14 @@ package geulsam.archive.global.security.jwt;
 
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
+import geulsam.archive.global.exception.ArchiveException;
+import geulsam.archive.global.exception.ErrorCode;
 import geulsam.archive.global.security.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -102,12 +105,19 @@ public class JwtProvider {
      * @return
      */
     public int getTokenExpirationSec(String token){
-        Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-        Date expiration = claimsJws.getBody().getExpiration();
-
-        long expirationTimeInMillis = claimsJws.getBody().getExpiration().getTime();
-
-        return (int) (expirationTimeInMillis / 1000);
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            long expirationTimeInMillis = claimsJws.getBody().getExpiration().getTime();
+            return (int) (expirationTimeInMillis / 1000);
+        } catch (ExpiredJwtException e){
+            Date expiration = e.getClaims().getExpiration();
+            if (expiration != null) {
+                long expirationTimeInMillis = expiration.getTime();
+                return (int) (expirationTimeInMillis / 1000);
+            } else {
+                throw new ArchiveException(ErrorCode.VALUE_ERROR, "로그인 오류. 관리자에게 문의해 주세요.");
+            }
+        }
     }
 
     /**

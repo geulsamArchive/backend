@@ -126,7 +126,7 @@ public class BookService {
     @Transactional
     public void delete(String field, String search) {
         Book book = bookRepository.findById(UUID.fromString(search)).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없음")
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없습니다")
         );
 
         deleteManager.deleteFile(book.getId(), "book");
@@ -141,7 +141,7 @@ public class BookService {
     @Transactional
     public void update(String search, UpdateReq updateReq) {
         Book book = bookRepository.findById(UUID.fromString(search)).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없음")
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "해당 id의 book 없습니다")
         );
 
         String bookUrl = book.getUrl();
@@ -156,11 +156,17 @@ public class BookService {
 
             for(geulsam.archive.domain.bookContent.dto.req.UpdateReq bookContentsUpdateReq : bookContentUpdateReqs){
                 // todo: content.findById 리팩토링
+
+                Content content = null;
+                if(!(bookContentsUpdateReq.getContentId() == null || bookContentsUpdateReq.getContentId().equals(""))){
+                    content = contentRepository.findById(UUID.fromString(bookContentsUpdateReq.getContentId()))
+                            .orElseThrow(
+                                    () -> new ArchiveException(ErrorCode.VALUE_ERROR, bookContentsUpdateReq.getContentId() + " 에 해당하는 작품 없음")
+                            );
+                }
+
                 if(bookContentsUpdateReq.getUuid() == null){
                     // bookContent 생성
-                    Content content = contentRepository.findById(UUID.fromString(bookContentsUpdateReq.getContentId())).orElseThrow(
-                            () -> new ArchiveException(ErrorCode.VALUE_ERROR, bookContentsUpdateReq.getContentId() + " 에 해당하는 작품 없음")
-                    );
                     BookContent bookContent = new BookContent(bookContentsUpdateReq, book, content);
                     bookContentRepository.save(bookContent);
                 }else if(bookContentsUpdateReq.getName() == null || bookContentsUpdateReq.getTitle() == null || bookContentsUpdateReq.getPage() == null) {
@@ -171,8 +177,6 @@ public class BookService {
                     BookContent bookContent = bookContentRepository.findById(UUID.fromString(bookContentsUpdateReq.getUuid())).orElseThrow(
                             () -> new ArchiveException(ErrorCode.VALUE_ERROR, bookContentsUpdateReq.getUuid() + " 에 해당하는 목차 없음")
                     );
-                    Content content = contentRepository.findById(UUID.fromString(bookContentsUpdateReq.getContentId()))
-                            .orElse(null);
                     bookContent.updateByUpdateReq(bookContentsUpdateReq, content);
                 }
             }

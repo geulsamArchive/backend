@@ -37,6 +37,9 @@ public class BookIdRes {
     @Schema(example = "책 제목")
     private String title;
 
+    @Schema(example = "https://sadsaf")
+    private String bookCover;
+
     @Schema()
     private List<BookContentRes> bookContentResList;
 
@@ -52,6 +55,7 @@ public class BookIdRes {
         this.page = book.getPageNumber();
         this.url = book.getUrl();
         this.title =book.getTitle();
+        this.bookCover = book.getCoverUrl();
         this.bookContentResList = bookContentResList;
     }
 }

@@ -65,7 +65,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/user/checkPassword").authenticated()
                                 .requestMatchers(HttpMethod.PUT, "/user/password").hasAnyRole("NORMAL", "SUSPENDED")
                                 .requestMatchers(HttpMethod.GET, "/user").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/user/resetPassword").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/user/resetPassword").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/user/level").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/user/author").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/user/logout").permitAll()

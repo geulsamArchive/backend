@@ -2,6 +2,8 @@ package geulsam.archive.global.exception;
 
 import geulsam.archive.global.common.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,7 +17,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     /**
      * 유효성 관련 에러 처리 핸들러
      * @param ex: @VALUED 에서 발생한 에러
@@ -50,6 +52,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ArchiveException.class)
     public ResponseEntity<ErrorResponse> handler(ArchiveException e){
+        logExceptionDetails(e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(
@@ -69,6 +72,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException e) {
+        logExceptionDetails(e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(
@@ -79,5 +83,19 @@ public class GlobalExceptionHandler {
                                 .message(e.getMessage())
                                 .build()
                 );
+    }
+
+    // 에러 위치 로깅
+    private void logExceptionDetails(RuntimeException e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        if (stackTrace.length > 0) {
+            StackTraceElement firstElement = stackTrace[0];
+            logger.error("Exception occurred in {}.{} at line {}",
+                    firstElement.getClassName(),
+                    firstElement.getMethodName(),
+                    firstElement.getLineNumber()
+            );
+        }
+        logger.error("Full stack trace:", e);
     }
 }
