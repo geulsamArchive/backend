@@ -28,7 +28,6 @@ public class SignupReq {
     private String schoolNum;
 
     /**전화번호*/
-    @NotBlank
     @Schema(example = "000-0000-0000")
     private String phone;
 
@@ -49,7 +48,6 @@ public class SignupReq {
     @Schema(example = "[\"가나\",\"다라\",\"마바\"]")
     private List<String> keyword;
 
-    @NotNull
     @Schema(example = "2024-05-01")
     private LocalDate birthDay;
 }

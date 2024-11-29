@@ -159,7 +159,8 @@ public class User {
         this.email = updateReq.getEmail() == null ? this.email : updateReq.getEmail();
         this.phone = updateReq.getPhone() == null ? this.phone : updateReq.getPhone();
         this.joinedAt = updateReq.getJoinedAt() == 0 ? this.joinedAt : Year.of(updateReq.getJoinedAt());
-        this.keyword = updateReq.getKeyword() == null ? this.keyword : updateReq.getKeyword();
+        // List 형태를 콤마로 구분된 문자열로 변경
+        this.keyword = updateReq.getKeyword() == null ? this.keyword : String.join(",", updateReq.getKeyword());
         this.introduce = updateReq.getIntroduce() == null ? this.introduce : updateReq.getIntroduce();
         this.birthDay = updateReq.getBirthDay() == null ? this.birthDay : updateReq.getBirthDay();
     }

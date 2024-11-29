@@ -6,6 +6,7 @@ import geulsam.archive.domain.guestBook.repository.GuestBookRepository;
 import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
 import geulsam.archive.domain.user.dto.req.PasswordReq;
+import geulsam.archive.domain.user.dto.req.ResetPasswordReq;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
 import geulsam.archive.domain.user.dto.res.AuthorRes;
 import geulsam.archive.domain.user.dto.res.LoginRes;
@@ -106,12 +107,12 @@ public class UserService {
                 schoolNum,
                 Level.SUSPENDED,
                 LocalDateTime.now(),
-                email,
-                phone,
+                null,
+                null,
                 joinedAt,
                 introduce,
                 keyword,
-                birthDay
+                null
         );
         /*유저 저장*/
         userRepository.save(user);
@@ -238,14 +239,6 @@ public class UserService {
         }
     }
 
-    @Transactional
-    public void updatePasswordAdmin(PasswordReq passwordReq, int search) {
-        User user = userRepository.findById(search).orElseThrow(
-                () -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다.")
-        );
-        user.updatePassword(passwordEncoder.encode(passwordReq.getNewPassword()));
-    }
-
     @Transactional(readOnly = true)
     public void checkPassword(String password, Integer userId) {
         User user = userRepository.findById(userId)
@@ -292,18 +285,18 @@ public class UserService {
     }
 
     @Transactional
-    public void resetPassword(Integer userId){
-        User user = userRepository.findById(userId)
+    public void resetPassword(ResetPasswordReq resetPasswordReq){
+        User user = userRepository.findById(resetPasswordReq.getUserId())
                 .orElseThrow(() -> new ArchiveException(ErrorCode.VALUE_ERROR, "사용자가 존재하지 않습니다."));
 
-        String tempPassword = RandomStringUtils.randomAlphanumeric(12);
+        String tempPassword = RandomStringUtils.randomAlphanumeric(10) + RandomStringUtils.random(2, false, true);
 
         // 임시비밀번호로 메일 발송
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-            helper.setTo(user.getEmail());
+            helper.setTo(resetPasswordReq.getEmail());
             helper.setSubject("Guelsam에서 임시 비밀번호 발급 안내");
 
             String htmlMsg = "<h3>안녕하세요, " + user.getName() + " 회원님</h3>"

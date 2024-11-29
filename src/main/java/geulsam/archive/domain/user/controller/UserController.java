@@ -267,23 +267,13 @@ public class UserController {
      */
     @PutMapping("/password")
     public ResponseEntity<SuccessResponse<Void>> putPassword(
-            @RequestParam(defaultValue = "0") int search,
             @RequestBody PasswordReq passwordReq
             ){
+        // 권한 획득
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        /*유저 권한 컬렉션을 스트링으로 변환*/
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).toList();
-
-        // 역할이 ADMIN 이면 필드 사용
-        if(roles.get(0).contains(Level.ADMIN.toString())){
-            userService.updatePasswordAdmin(passwordReq, search);
-        } else {
-            // NORMAL 이면 user 인증 객체 사용
-            userService.updatePassword(passwordReq, userDetails.getUserId());
-        }
+        userService.updatePassword(passwordReq, userDetails.getUserId());
 
         return ResponseEntity.ok().body
                 (
@@ -348,14 +338,14 @@ public class UserController {
 
     /**
      * 유저 비밀번호 리셋
-     * @param id 리셋할 유저 아이디
+     * @param resetPasswordReq 유저 이메일과 아이디(INT)
      * @return
      */
-    @GetMapping("/resetPassword")
+    @PostMapping("/resetPassword")
     public ResponseEntity<SuccessResponse<Void>> resetPassword(
-            @RequestParam(defaultValue = "0") int id
+            @RequestBody ResetPasswordReq resetPasswordReq
     ){
-        userService.resetPassword(id);
+        userService.resetPassword(resetPasswordReq);
 
         return ResponseEntity.ok().body
                 (

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class UpdateReq {
     private String introduce;
 
     @Schema(description = "poster 가 DB 에 insert 된 날짜", example = "가나, 다라, 마바", type = "string")
-    private String keyword;
+    private List<String> keyword;
 
     @Schema(description = "user 핸드폰번호", example = "000-0000-0000", type = "string")
     private String phone;
