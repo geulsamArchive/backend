@@ -57,17 +57,13 @@ public class ContentController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            //비로그인 사용자인 경우
-            contentResList = contentService.getContentsByFiltersForANONYMOUS(genre, keyword, pageable);
-
-        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails){
+        if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails){
             User findUser = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new ArchiveException(
                     ErrorCode.VALUE_ERROR, "해당 User 없음"
             ));
 
             contentResList = switch (findUser.getLevel()) {
-                case SUSPENDED -> contentService.getContentsByFiltersForANONYMOUS(genre, keyword, pageable);
+                //case SUSPENDED -> contentService.getContentsByFiltersForANONYMOUS(genre, keyword, pageable);
                 case NORMAL, ADMIN -> contentService.getContentsByFilters(genre, keyword, pageable);
                 default -> throw new ArchiveException(ErrorCode.VALUE_ERROR, "지원하지 않는 타입: " + findUser.getLevel());
             };
@@ -119,9 +115,7 @@ public class ContentController {
         ContentInfoRes contentInfoRes;
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            contentInfoRes = contentService.getContentInfoForANONYMOUS(id);
-        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+        if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
             contentInfoRes = contentService.getContentInfo(id, userDetails.getUserId());
         } else {
             throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");
@@ -150,9 +144,7 @@ public class ContentController {
         Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            recentContentResList = contentService.getContentsForANONYMOUS(pageable);
-        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+        if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
             recentContentResList = contentService.getContents(pageable, userDetails.getUserId());
         } else {
             throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");
@@ -210,9 +202,7 @@ public class ContentController {
         Pageable pageable = PageRequest.of(page-1, 8, Sort.by("createdAt").descending());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            authorContentResList = contentService.getAuthorContentForANONYMOUS(pageable, authorId);
-        } else if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
+        if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
             authorContentResList = contentService.getAuthorContent(pageable, authorId, userDetails.getUserId());
         } else {
             throw new ArchiveException(ErrorCode.AUTHORITY_ERROR, "잘못된 인증 타입");

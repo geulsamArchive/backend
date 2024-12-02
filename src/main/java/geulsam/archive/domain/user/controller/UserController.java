@@ -51,16 +51,7 @@ public class UserController {
             )
     })
     public ResponseEntity<SuccessResponse<Void>> signup(@RequestBody @Valid SignupReq signupReq){
-        userService.signup(
-                signupReq.getName(),
-                signupReq.getSchoolNum(),
-                signupReq.getPhone(),
-                signupReq.getEmail(),
-                signupReq.getJoinedAt(),
-                signupReq.getIntroduce(),
-                String.join(", ", signupReq.getKeyword()), // List<String>을 쉼표로 구분된 단일 String 으로 변경
-                signupReq.getBirthDay()
-        );
+        userService.signup(signupReq);
 
         return ResponseEntity.ok().body(
                 SuccessResponse.<Void>builder()
