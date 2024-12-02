@@ -2,6 +2,7 @@ package geulsam.archive.domain.user.entity;
 
 import geulsam.archive.domain.comment.entity.Comment;
 import geulsam.archive.domain.content.entity.Content;
+import geulsam.archive.domain.user.dto.req.SignupReq;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -149,6 +150,20 @@ public class User {
         this.introduce = introduce;
         this.keyword = keyword;
         this.birthDay = birthDay;
+    }
+
+    public User(SignupReq signupReq, Level level){
+        this.name = signupReq.getName();
+        this.schoolNum = signupReq.getSchoolNum();
+        this.level = level;
+        this.password = getPassword();
+        this.createdAt = LocalDateTime.now();
+        this.email = null;
+        this.phone = null;
+        this.joinedAt = signupReq.getJoinedAt();
+        this.introduce = signupReq.getIntroduce();
+        this.keyword = String.join(", ", signupReq.getKeyword());
+        this.birthDay = null;
     }
 
     //이 밑에 앞으로 필요한 비즈니스 로직 작성

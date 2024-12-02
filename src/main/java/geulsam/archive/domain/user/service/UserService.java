@@ -7,6 +7,7 @@ import geulsam.archive.domain.refreshtoken.entity.RefreshToken;
 import geulsam.archive.domain.refreshtoken.repository.RefreshTokenRepository;
 import geulsam.archive.domain.user.dto.req.PasswordReq;
 import geulsam.archive.domain.user.dto.req.ResetPasswordReq;
+import geulsam.archive.domain.user.dto.req.SignupReq;
 import geulsam.archive.domain.user.dto.req.UpdateReq;
 import geulsam.archive.domain.user.dto.res.AuthorRes;
 import geulsam.archive.domain.user.dto.res.LoginRes;
@@ -57,63 +58,48 @@ public class UserService {
 
     /**
      * 유저 저장 트랜잭션
-     * @param name(이름) : String
-     * @param schoolNum(학번) : String
-     * @param phone(전화번호) : String
      */
     @Transactional
-    public void signup(String name, String schoolNum, String phone, String email, Year joinedAt, String introduce, String keyword, LocalDate birthDay) {
+    public void signup(SignupReq signupReq) {
 
         /*존재하는 사용자이면 exception return*/
-        if(userRepository.findBySchoolNum(schoolNum).isPresent()){
+        if(userRepository.findBySchoolNum(signupReq.getSchoolNum()).isPresent()){
 //            throw new RuntimeException("이미 존재하는 사용자입니다.");
             throw new ArchiveException(ErrorCode.VALUE_ERROR, "이미 존재하는 사용자입니다.");
         }
 
-        //임시비밀번호 생성
-        String tempPassword = RandomStringUtils.randomAlphanumeric(10) + RandomStringUtils.random(2, false, true);
-
-        // 임시비밀번호로 메일 발송
-        try {
-
-            Map<String, Object> templateModel = new HashMap<>();
-            templateModel.put("name", name);
-            templateModel.put("schoolNum", schoolNum);
-            templateModel.put("year", joinedAt);
-            templateModel.put("password", tempPassword);
-
-            Context context = new Context();
-            context.setVariables(templateModel);
-                String htmlContent = templateEngine.process("passwordMail", context);
-
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(email);  // 수신자 이메일 주소
-            helper.setSubject("글샘문학회 회원가입을 축하드립니다");
-            helper.setText(htmlContent, true);  // HTML 형식으로 이메일 전송
-
-
-            javaMailSender.send(message);
-        } catch (Exception e) {
-            throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
-        }
+//        //임시비밀번호 생성
+//        String tempPassword = RandomStringUtils.randomAlphanumeric(10) + RandomStringUtils.random(2, false, true);
+//
+//        // 임시비밀번호로 메일 발송
+//        try {
+//
+//            Map<String, Object> templateModel = new HashMap<>();
+//            templateModel.put("name", name);
+//            templateModel.put("schoolNum", schoolNum);
+//            templateModel.put("year", joinedAt);
+//            templateModel.put("password", tempPassword);
+//
+//            Context context = new Context();
+//            context.setVariables(templateModel);
+//                String htmlContent = templateEngine.process("passwordMail", context);
+//
+//            MimeMessage message = javaMailSender.createMimeMessage();
+//            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+//
+//            helper.setTo(email);  // 수신자 이메일 주소
+//            helper.setSubject("글샘문학회 회원가입을 축하드립니다");
+//            helper.setText(htmlContent, true);  // HTML 형식으로 이메일 전송
+//
+//
+//            javaMailSender.send(message);
+//        } catch (Exception e) {
+//            throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
+//        }
 
         /*user 생성자로 신규 유저 생성
         * password 는 학번을 사용하되, 암호화하여 저장한다.*/
-        User user = new User(
-                name,
-                passwordEncoder.encode(tempPassword),
-                schoolNum,
-                Level.SUSPENDED,
-                LocalDateTime.now(),
-                null,
-                null,
-                joinedAt,
-                introduce,
-                keyword,
-                null
-        );
+        User user = new User(signupReq, Level.SUSPENDED);
         /*유저 저장*/
         userRepository.save(user);
     }
