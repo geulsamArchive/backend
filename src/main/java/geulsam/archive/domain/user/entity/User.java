@@ -156,7 +156,7 @@ public class User {
         this.name = signupReq.getName();
         this.schoolNum = signupReq.getSchoolNum();
         this.level = level;
-        this.password = getPassword();
+        this.password = signupReq.getPassword();
         this.createdAt = LocalDateTime.now();
         this.email = null;
         this.phone = null;
