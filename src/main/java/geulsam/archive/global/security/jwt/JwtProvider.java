@@ -1,5 +1,6 @@
 package geulsam.archive.global.security.jwt;
 
+import geulsam.archive.domain.user.entity.Level;
 import geulsam.archive.domain.user.entity.User;
 import geulsam.archive.domain.user.repository.UserRepository;
 import geulsam.archive.global.exception.ArchiveException;
@@ -47,10 +48,15 @@ public class JwtProvider {
     public String createAccessToken(Integer userID){
         Date now = new Date();
 
+        User user = userRepository.findById(userID).orElseThrow(
+                () -> new ArchiveException(ErrorCode.VALUE_ERROR, userID + " 유저 없음")
+        );
+
         return Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + Duration.ofMinutes(10).toMillis()))
-                .setSubject(userID.toString())
+                .setSubject(user.getId().toString())
+                .claim("level", user.getLevel().toString())
                 .signWith(key)
                 .compact();
     }
@@ -81,20 +87,33 @@ public class JwtProvider {
     }
 
     /**
+     * 토큰을 받아서 토큰의 level 출력
+     * @param token
+     * @return
+     */
+    public Level getLevel(String token) {
+        Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+
+        String levelStr = claimsJws.getBody().get("level", String.class);
+
+        return Level.valueOf(levelStr);
+    }
+
+    /**
      * 토큰을 받아서 인증 객체를 생성
      * @param token
      * @return
      */
     public Authentication getAuthentication(String token){
-        String id = this.getID(token);
-
+        String userId = this.getID(token);
+        System.out.println(userId);
+        Level level = this.getLevel(token);
+//
 //        Optional<User> userOptional = userRepository.findById(Integer.valueOf(id));
-
-        User user = userRepository.findById(Integer.valueOf(id)).orElseThrow(() -> new RuntimeException("유저가 존재하지 않음"));
-
+//        User user = userRepository.findById(Integer.valueOf(id)).orElseThrow(() -> new RuntimeException("유저가 존재하지 않음"));
 //        User user = userOptional.get();
 
-        UserDetailsImpl userDetails = new UserDetailsImpl(user.getId(), user.getPassword(), user.getLevel());
+        UserDetailsImpl userDetails = new UserDetailsImpl(Integer.valueOf(userId), null, level);
 
         return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
     }

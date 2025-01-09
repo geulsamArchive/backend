@@ -97,8 +97,7 @@ public class UserService {
 //            throw new ArchiveException(ErrorCode.VALUE_ERROR, "이메일을 발송하는 데 실패했습니다. 메일 주소를 확인해 주세요.");
 //        }
 
-        /*user 생성자로 신규 유저 생성
-        * password 는 학번을 사용하되, 암호화하여 저장한다.*/
+        /*user 생성자로 신규 유저 생성*/
         User user = new User(signupReq, Level.SUSPENDED);
         /*유저 저장*/
         userRepository.save(user);
