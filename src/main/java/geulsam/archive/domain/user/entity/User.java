@@ -152,11 +152,11 @@ public class User {
         this.birthDay = birthDay;
     }
 
-    public User(SignupReq signupReq, Level level){
+    public User(SignupReq signupReq, Level level, String password){
         this.name = signupReq.getName();
         this.schoolNum = signupReq.getSchoolNum();
         this.level = level;
-        this.password = signupReq.getPassword();
+        this.password = password;
         this.createdAt = LocalDateTime.now();
         this.email = null;
         this.phone = null;
